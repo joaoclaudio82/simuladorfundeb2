@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador FUNDEB v2</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link href="/static/css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <h4><i class="fas fa-graduation-cap"></i> FUNDEB</h4>
+    <span class="sidebar-subtitle">Simulador de Fatores de Ponderação v2</span>
+  </div>
+  <ul class="sidebar-nav">
+    <li class="active" data-tab="inicio">
+      <i class="fas fa-home"></i> <span>Página Principal</span>
+    </li>
+    <li data-tab="simulacao">
+      <i class="fas fa-calculator"></i> <span>Simulação Principal</span>
+    </li>
+    <li data-tab="pesos">
+      <i class="fas fa-balance-scale"></i> <span>Ponderações</span>
+    </li>
+    <li data-tab="vaar">
+      <i class="fas fa-trophy"></i> <span>Simulação VAAR</span>
+    </li>
+    <li data-tab="municipio">
+      <i class="fas fa-map-marker-alt"></i> <span>Simulação Municipal</span>
+    </li>
+    <li data-tab="regional">
+      <i class="fas fa-map"></i> <span>Análise Regional</span>
+    </li>
+    <li data-tab="documentacao">
+      <i class="fas fa-book"></i> <span>Documentação</span>
+    </li>
+  </ul>
+  <div class="sidebar-footer">
+    <small><i class="fas fa-gavel"></i> Lei n. 14.113/2020</small><br>
+    <small>Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho</small>
+  </div>
+</nav>
+
+<!-- Backdrop mobile (para fechar sidebar ao clicar fora) -->
+<div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+<!-- Main Content -->
+<main id="main-content" class="main-content">
+  <div class="topbar">
+    <button id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+    <h5><i class="fas fa-graduation-cap"></i> Simulador de Fatores de Ponderação do FUNDEB</h5>
+  </div>
+
+  <!-- ====== TAB: Pagina Principal ====== -->
+  <div id="tab-inicio" class="tab-content active">
+    <div class="pagina-inicio">
+      <section class="inicio-hero">
+        <h1><i class="fas fa-graduation-cap"></i> O que é o FUNDEB?</h1>
+        <p>O Fundo de Manutenção e Desenvolvimento da Educação Básica (FUNDEB) é um importante mecanismo de financiamento da educação pública no Brasil, regulamentado pela <strong>Lei n. 14.113/2020</strong>.</p>
+      </section>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card card-input">
+            <div class="card-header"><i class="fas fa-bullseye"></i> Objetivos</div>
+            <div class="card-body">
+              <ul class="lista-inicio">
+                <li>Garantir financiamento adequado à educação básica</li>
+                <li>Reduzir desigualdades educacionais</li>
+                <li>Promover equidade entre estados e municípios</li>
+                <li>Melhorar a qualidade do ensino público</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card card-input">
+            <div class="card-header"><i class="fas fa-list-check"></i> Caracteristicas</div>
+            <div class="card-body">
+              <ul class="lista-inicio">
+                <li>27 fundos (um por estado + DF)</li>
+                <li>Distribuição baseada em matrículas</li>
+                <li>Complementação federal de 23%</li>
+                <li>Ponderações por etapa e modalidade</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="inicio-section">
+        <h2><i class="fas fa-pie-chart"></i> Composição do FUNDEB</h2>
+        <h3>Fontes de Recursos</h3>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="card card-input">
+              <div class="card-header card-header-77"><i class="fas fa-landmark"></i> Contribuição Estados/Municípios (77%)</div>
+              <div class="card-body">
+                <p><strong>20% da arrecadação de:</strong></p>
+                <ul class="lista-inicio">
+                  <li>FPM (Fundo Part. Municípios)</li>
+                  <li>FPE (Fundo Part. Estados)</li>
+                  <li>ITR (Imposto Territorial Rural)</li>
+                  <li>IPI-exp (IPI Exportação)</li>
+                  <li>ITCMD (Transmissão Causa Mortis)</li>
+                  <li>IPVA (Imposto Propriedade Veicular)</li>
+                  <li>ICMS (Circulacao Mercadorias)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card card-input">
+              <div class="card-header card-header-23"><i class="fas fa-university"></i> Complementação da União (23%)</div>
+              <div class="card-body">
+                <ul class="lista-inicio">
+                  <li><strong>VAAF</strong> (Valor Anual por Aluno do Fundeb) — 10%</li>
+                  <li><strong>VAAT</strong> (Valor Anual por Aluno Total) — 10,5%</li>
+                  <li><strong>VAAR</strong> (Valor por Aluno-Resultado) — 2,5%</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="inicio-section">
+        <h2><i class="fas fa-cubes"></i> Modalidades de Complementação da União</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card card-input card-modalidade">
+              <div class="card-header" style="background:var(--sage-green);color:#fff"><i class="fas fa-chart-line"></i> VAAF — 10%</div>
+              <div class="card-body">
+                <p><strong>Valor Anual por Aluno do Fundeb</strong></p>
+                <p><strong>Objetivo:</strong> Garantir valor mínimo nacional por aluno em cada estado</p>
+                <p><strong>Como Funciona:</strong> Complementa quando VAAF do estado &lt; VAAF-MIN nacional</p>
+                <p><strong>Distribuição:</strong> Por coeficiente baseado em matrículas ponderadas</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-input card-modalidade">
+              <div class="card-header" style="background:var(--deep-cocoa);color:#fff"><i class="fas fa-balance-scale"></i> VAAT — 10,5%</div>
+              <div class="card-body">
+                <p><strong>Valor Anual por Aluno Total</strong></p>
+                <p><strong>Objetivo:</strong> Reduzir desigualdades entre entes federados</p>
+                <p><strong>Como Funciona:</strong> Considera toda receita vinculada à educação do ente</p>
+                <p><strong>Distribuição:</strong> Diretamente aos entes com VAAT &lt; VAAT-MIN</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-input card-modalidade">
+              <div class="card-header" style="background:var(--dusty-mauve);color:#fff"><i class="fas fa-trophy"></i> VAAR — 2,5%</div>
+              <div class="card-body">
+                <p><strong>Valor por Aluno-Resultado</strong></p>
+                <p><strong>Objetivo:</strong> Premiar melhoria da aprendizagem e gestão</p>
+                <p><strong>Como Funciona:</strong> Baseado em indicadores do SAEB e condicionalidades</p>
+                <p><strong>Distribuição:</strong> Por coeficientes de melhoria educacional</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="inicio-section">
+        <h2><i class="fas fa-calendar-alt"></i> Implementação Progressiva (2021-2026)</h2>
+        <p>A complementação da União está sendo implementada gradualmente, partindo de 12% em 2021 até atingir 23% a partir de 2026:</p>
+        <div class="table-responsive">
+          <table class="table table-bordered table-inicio">
+            <thead>
+              <tr><th>Ano</th><th>VAAF</th><th>VAAT</th><th>VAAR</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>2021</td><td>10,00%</td><td>2,00%</td><td>0,00%</td><td>12,00%</td></tr>
+              <tr><td>2022</td><td>10,00%</td><td>5,00%</td><td>0,00%</td><td>15,00%</td></tr>
+              <tr><td>2023</td><td>10,00%</td><td>6,25%</td><td>0,75%</td><td>17,00%</td></tr>
+              <tr class="table-warning"><td>2024 ATUAL</td><td>10,00%</td><td>7,50%</td><td>1,50%</td><td>19,00%</td></tr>
+              <tr><td>2025</td><td>10,00%</td><td>9,00%</td><td>2,00%</td><td>21,00%</td></tr>
+              <tr><td>2026+</td><td>10,00%</td><td>10,50%</td><td>2,50%</td><td>23,00%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="inicio-section">
+        <h2><i class="fas fa-calculator"></i> Metodologia de Cálculo das Matrículas</h2>
+        <h3>Processo de Apuração</h3>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input text-center">
+              <div class="card-body">
+                <span class="num-passo">1</span>
+                <h6>Censo Escolar</h6>
+                <p class="small mb-0">Matrículas presenciais efetivas apuradas pelo INEP</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input text-center">
+              <div class="card-body">
+                <span class="num-passo">2</span>
+                <h6>Filtragem</h6>
+                <p class="small mb-0">Metodologia definida pelas Secretarias do MEC</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input text-center">
+              <div class="card-body">
+                <span class="num-passo">3</span>
+                <h6>Ponderação</h6>
+                <p class="small mb-0">Aplicação de fatores por etapa, modalidade e jornada</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input text-center">
+              <div class="card-body">
+                <span class="num-passo">4</span>
+                <h6>Socioeconômico</h6>
+                <p class="small mb-0">Aplicação do ponderador de nível socioeconômico</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3 class="mt-4">Fatores de Ponderação</h3>
+        <p>As matrículas recebem pesos diferentes baseados em:</p>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input">
+              <div class="card-header small"><i class="fas fa-layer-group"></i> Etapas</div>
+              <div class="card-body small">
+                <ul class="lista-inicio mb-0">
+                  <li>Educação Infantil</li>
+                  <li>Ensino Fundamental</li>
+                  <li>Ensino Médio</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input">
+              <div class="card-header small"><i class="fas fa-users"></i> Modalidades</div>
+              <div class="card-body small">
+                <ul class="lista-inicio mb-0">
+                  <li>Educação Especial</li>
+                  <li>Educação Indígena</li>
+                  <li>Educação do Campo</li>
+                  <li>EJA</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input">
+              <div class="card-header small"><i class="fas fa-clock"></i> Jornada</div>
+              <div class="card-body small">
+                <ul class="lista-inicio mb-0">
+                  <li>Parcial</li>
+                  <li>Integral</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card card-input">
+              <div class="card-header small"><i class="fas fa-building"></i> Estabelecimento</div>
+              <div class="card-body small">
+                <ul class="lista-inicio mb-0">
+                  <li>Urbano</li>
+                  <li>Rural</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-4">
+        <a href="#" data-tab="simulacao" class="btn btn-primary btn-lg btn-inicio-simular">
+          <i class="fas fa-calculator"></i> Ir para Simulação Principal
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Simulacao Principal ====== -->
+  <div id="tab-simulacao" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-cog"></i> Parâmetros da Simulação</div>
+          <div class="card-body">
+            <h6 class="section-title"><i class="fas fa-plus-circle"></i> Complementação da União</h6>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAF (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaaf" value="24153287047" step="1000000">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAT (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaat" value="18114965285" step="1000000">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAR (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaar" value="0" step="1000000">
+            </div>
+            <h6 class="section-title mt-4"><i class="fas fa-balance-scale"></i> Fatores de Ponderação</h6>
+            <div class="mb-3">
+              <label class="form-label">Fator NSE maximo: <strong id="lbl-nse">1.10</strong></label>
+              <input type="range" class="form-range" id="inp-nse" min="1" max="4" step="0.05" value="1.1">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fator Recursos Vinculados maximo: <strong id="lbl-nf">1.00</strong></label>
+              <input type="range" class="form-range" id="inp-nf" min="1" max="4" step="0.05" value="1">
+            </div>
+            <button id="btn-simular" class="btn btn-primary btn-lg w-100 mt-3">
+              <i class="fas fa-calculator"></i> Simular
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="loading-simulacao" class="text-center py-5 d-none">
+          <div class="spinner-border" role="status"></div>
+          <p class="mt-2" style="color:var(--deep-cocoa)">Executando simulação...</p>
+        </div>
+        <div id="resultados-simulacao">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="info-box info-box-orange"><div class="info-box-icon"><i class="fas fa-chart-line"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Mínimo Simulado</span><span class="info-box-value" id="ib-vaat-sim">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-purple"><div class="info-box-icon"><i class="fas fa-chart-line"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Mínimo Atual</span><span class="info-box-value" id="ib-vaat-atual">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-purple"><div class="info-box-icon"><i class="fas fa-percentage"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Diferença</span><span class="info-box-value" id="ib-vaat-dif">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-chart-bar"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Mínimo Simulado</span><span class="info-box-value" id="ib-vaaf-sim">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-chart-bar"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Mínimo Atual</span><span class="info-box-value" id="ib-vaaf-atual">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-percentage"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Diferença</span><span class="info-box-value" id="ib-vaaf-dif">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-blue"><div class="info-box-icon"><i class="fas fa-building"></i></div><div class="info-box-content"><span class="info-box-label">Complementação Municípios</span><span class="info-box-value" id="ib-compl-mun">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-cyan"><div class="info-box-icon"><i class="fas fa-landmark"></i></div><div class="info-box-content"><span class="info-box-label">Complementação Estados</span><span class="info-box-value" id="ib-compl-est">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-cyan"><div class="info-box-icon"><i class="fas fa-users"></i></div><div class="info-box-content"><span class="info-box-label">% Entes Complementados</span><span class="info-box-value" id="ib-perc-compl">&mdash;</span></div></div></div>
+          </div>
+          <div id="validacao-card" class="card mb-4 validacao-card d-none">
+            <div class="card-header validacao-header">
+              <i class="fas fa-check-circle validacao-icon"></i>
+              <span>Validação Interna (RF-10)</span>
+              <span id="validacao-status" class="validacao-status"></span>
+            </div>
+            <div class="card-body">
+              <div id="validacao-erros" class="validacao-lista validacao-erros"></div>
+              <div id="validacao-avisos" class="validacao-lista validacao-avisos"></div>
+              <div id="validacao-checagens" class="validacao-lista validacao-checagens"></div>
+            </div>
+          </div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaaf-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaat-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-chart-bar"></i> Entes com resultado positivo e negativo — VAAF</div><div class="card-body table-responsive"><table id="tbl-vp-vaaf" class="table table-sm table-striped"></table></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-chart-bar"></i> Entes com resultado positivo e negativo — VAAT</div><div class="card-body table-responsive"><table id="tbl-vp-vaat" class="table table-sm table-striped"></table></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-database"></i> Medidas Resumo</div><div class="card-body table-responsive"><table id="tbl-resumo" class="table table-sm table-striped"></table></div></div>
+          <h4 style="color:var(--deep-cocoa);margin:28px 0 16px;font-weight:700"><i class="fas fa-cube" style="color:var(--mocha-mousse)"></i> Análises 3D</h4>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-cubo-ufs"></div></div></div>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-barras-compl"></div></div></div>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-superficie-diff"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-diff-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-compl-modalidade"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-compl-destino"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Pesos ====== -->
+  <div id="tab-pesos" class="tab-content">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card"><div class="card-header"><i class="fas fa-balance-scale"></i> Fatores por Etapa — VAAF</div><div class="card-body" id="pesos-vaaf-container"></div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card"><div class="card-header"><i class="fas fa-balance-scale"></i> Fatores por Etapa — VAAT</div><div class="card-body" id="pesos-vaat-container"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Simulacao VAAR ====== -->
+  <div id="tab-vaar" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-trophy"></i> Parametros VAAR</div>
+          <div class="card-body">
+            <p style="color:#6b6050;font-size:.85rem">A Complementação-VAAR (Valor Aluno Ano Resultado) destina-se a entes que apresentaram melhorias em indicadores de atendimento e de aprendizagem.</p>
+            <div class="mb-3"><label class="form-label">Montante total VAAR (R$)</label><input type="number" class="form-control" id="inp-vaar-montante" value="5400000000" step="100000000"></div>
+            <div class="mb-3"><label class="form-label">Montante VAAF (R$)</label><input type="number" class="form-control" id="inp-vaar-vaaf" value="24153287047" step="1000000"></div>
+            <div class="mb-3"><label class="form-label">Montante VAAT (R$)</label><input type="number" class="form-control" id="inp-vaar-vaat" value="18114965285" step="1000000"></div>
+            <button id="btn-simular-vaar" class="btn btn-primary btn-lg w-100 mt-3"><i class="fas fa-trophy"></i> Simular VAAR</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="loading-vaar" class="text-center py-5 d-none"><div class="spinner-border" role="status"></div><p class="mt-2" style="color:var(--deep-cocoa)">Calculando VAAR...</p></div>
+        <div id="resultados-vaar">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="info-box info-box-orange"><div class="info-box-icon"><i class="fas fa-trophy"></i></div><div class="info-box-content"><span class="info-box-label">Total VAAR</span><span class="info-box-value" id="ib-vaar-total">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-blue"><div class="info-box-icon"><i class="fas fa-building"></i></div><div class="info-box-content"><span class="info-box-label">VAAR Municípios</span><span class="info-box-value" id="ib-vaar-mun">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-cyan"><div class="info-box-icon"><i class="fas fa-landmark"></i></div><div class="info-box-content"><span class="info-box-label">VAAR Estados</span><span class="info-box-value" id="ib-vaar-est">&mdash;</span></div></div></div>
+          </div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaar-uf"></div></div></div>
+          <h4 style="color:var(--deep-cocoa);margin:28px 0 16px;font-weight:700"><i class="fas fa-cube" style="color:var(--mocha-mousse)"></i> Análises 3D — VAAR</h4>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-vaar-dist"></div></div></div>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-vaar-top"></div></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-trophy"></i> Distribuicao VAAR por Ente</div><div class="card-body table-responsive"><table id="tbl-vaar" class="table table-sm table-striped"></table></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaar-impacto"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Simulação Municipal ====== -->
+  <div id="tab-municipio" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-map-marker-alt"></i> Seleção do Município</div>
+          <div class="card-body">
+            <div class="mb-3"><label class="form-label">Estado</label><select class="form-select" id="sel-mun-uf"></select></div>
+            <div class="mb-3"><label class="form-label">Município</label><select class="form-select" id="sel-mun-cidade"></select></div>
+            <hr style="border-color:var(--warm-sand)">
+            <h6 class="section-title"><i class="fas fa-plus-circle"></i> Parametros Gerais</h6>
+            <div class="mb-2"><label class="form-label small">Complementação VAAF (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaaf" value="24153287047"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAT (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaat" value="18114965285"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAR (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaar" value="5400000000"></div>
+            <button id="btn-simular-mun" class="btn btn-primary btn-lg w-100 mt-3" disabled><i class="fas fa-calculator"></i> Simular</button>
+          </div>
+        </div>
+        <div class="card card-input mt-3">
+          <div class="card-header"><i class="fas fa-edit"></i> Ajustar Matrículas</div>
+          <div class="card-body" id="matriculas-container"><p style="color:#6b6050;font-size:.85rem">Selecione um município para visualizar e ajustar as matrículas.</p></div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="loading-municipio" class="text-center py-5 d-none"><div class="spinner-border" role="status"></div><p class="mt-2" style="color:var(--deep-cocoa)">Simulando impacto municipal…</p></div>
+        <div id="resultados-municipio">
+          <div class="alert alert-info"><i class="fas fa-info-circle"></i> Selecione um estado e município, ajuste as matrículas se desejar, e clique em <strong>Simular</strong> para ver o impacto nos valores de VAAF, VAAT e VAAR.</div>
+          <div class="card mb-4" id="mun-explicacao-card" style="display:none">
+            <div class="card-header bg-dark text-white"><i class="fas fa-lightbulb"></i> Análise e Explicação dos Resultados</div>
+            <div class="card-body" id="mun-explicacao"></div>
+          </div>
+          <div class="row g-3 mb-4" id="mun-comparacao" style="display:none">
+            <div class="col-md-6"><div class="card"><div class="card-header bg-secondary text-white"><i class="fas fa-database"></i> Cenario Original</div><div class="card-body" id="mun-original"></div></div></div>
+            <div class="col-md-6"><div class="card"><div class="card-header bg-primary text-white"><i class="fas fa-edit"></i> Cenario Ajustado</div><div class="card-body" id="mun-ajustado"></div></div></div>
+          </div>
+          <div class="card mb-4" id="mun-chart-card" style="display:none"><div class="card-body"><div id="chart-mun-comparacao"></div></div></div>
+          <div id="mun-3d-section" style="display:none">
+            <h4 style="color:var(--deep-cocoa);margin:28px 0 16px;font-weight:700"><i class="fas fa-cube" style="color:var(--mocha-mousse)"></i> Análises 3D — Municipal</h4>
+            <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-mun-comparacao"></div></div></div>
+            <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-mun-estado"></div></div></div>
+          </div>
+          <div class="card mb-4" id="mun-impacto-card" style="display:none"><div class="card-header"><i class="fas fa-users"></i> Impacto nos entes do estado</div><div class="card-body table-responsive"><table id="tbl-mun-impacto" class="table table-sm table-striped"></table></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Analise Regional ====== -->
+  <div id="tab-regional" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <div class="card card-input"><div class="card-header"><i class="fas fa-map"></i> Filtro Regional</div><div class="card-body"><div class="mb-3"><label class="form-label">Selecione a UF</label><select class="form-select" id="sel-regional-uf"></select></div></div></div>
+      </div>
+      <div class="col-lg-9"><div id="resultados-regional"><p style="color:#6b6050">Execute uma simulação na aba principal para visualizar a análise regional.</p></div></div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: Documentacao ====== -->
+  <div id="tab-documentacao" class="tab-content">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body doc-content">
+            <h2><i class="fas fa-graduation-cap" style="color:var(--mocha-mousse)"></i> Simulador de Fatores de Ponderação do FUNDEB</h2>
+            <p>O Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação (Fundeb) é o principal mecanismo de financiamento da educação básica no Brasil, fundamentado no Art. 212-A da Constituição Federal e regulamentado pela Lei n. 14.113, de 25 de dezembro de 2020.</p>
+            <h3><i class="fas fa-chart-line"></i> Complementação-VAAF</h3>
+            <p>A complementação-VAAF (Valor Aluno Ano Fundeb) equaliza os fundos estaduais considerando o valor aluno/ano. O fundo estadual com menor valor aluno/ano é complementado até atingir o valor do segundo fundo estadual com menor valor aluno/ano. Esse processo é repetido sucessivamente até esgotar os recursos disponíveis.</p>
+            <h3><i class="fas fa-balance-scale"></i> Complementação-VAAT</h3>
+            <p>A complementação-VAAT (Valor Aluno Ano Total) equaliza os fundos dos entes federativos em âmbito nacional, levando em consideração o valor aluno/ano total, incluindo outros recursos vinculados à educação.</p>
+            <h3><i class="fas fa-trophy"></i> Complementação-VAAR</h3>
+            <p>A complementação-VAAR (Valor Aluno Ano Resultado) destina-se a entes que apresentaram melhorias em indicadores de atendimento e de aprendizagem com redução das desigualdades. <strong>Esta versão do simulador inclui a simulação da VAAR.</strong></p>
+            <h3><i class="fas fa-map-marker-alt"></i> Simulação Municipal</h3>
+            <p>Esta versão permite simular o impacto de alterações no número de matrículas de um município específico sobre os valores de VAAF, VAAT e VAAR. Ao alterar as matrículas, todo o cálculo de equalização é refeito, mostrando como a mudança em um único município pode afetar a distribuição de recursos.</p>
+            <h3><i class="fas fa-database"></i> Fontes e Dados</h3>
+            <ul>
+              <li>Dados de alunos: <a href="https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica">Portaria interministerial n. 1, de 23/02/2024</a></li>
+              <li>Receitas do Fundeb: <a href="https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2024-1">Portal FNDE</a></li>
+              <li>Pesos: <a href="https://www.gov.br/mec/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-intergovernamental-fundeb/Resoluo4_30102023.pdf">Resolução MEC n. 04/2023</a></li>
+            </ul>
+            <h3><i class="fas fa-info-circle"></i> Créditos</h3>
+            <p>Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/explicacao.js"></script>
+<script src="/static/js/charts3d.js"></script>
+</body>
+</html>
