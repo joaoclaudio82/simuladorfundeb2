@@ -2,9 +2,7 @@
 
 Simulador de Fatores de Ponderação do FUNDEB — Versão Python com frontend e backend separados.
 
-## Novidades em relação à versão original (R/Shiny)
-
-- **Simulação VAAR**: Nova aba para simular a distribuição da complementação VAAR
+- **Simulação VAAR**:  aba para simular a distribuição da complementação VAAR
 - **Simulação Municipal**: Permite ajustar matrículas de um município e ver o impacto em VAAF, VAAT e VAAR
 - **Interface moderna**: Dashboard com sidebar, Bootstrap 5 e Plotly.js
 - **API REST**: Backend FastAPI com endpoints para integração
@@ -87,4 +85,3 @@ Inclui testes para:
 ## Créditos
 
 Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho.
-Motor de simulação baseado no pacote R [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb2).
