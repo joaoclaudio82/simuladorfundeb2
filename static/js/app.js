@@ -308,14 +308,13 @@ function getMatriculasAjustadas() {
 }
 
 // =========================================================================
-// Sliders de NSE/NF — atualização de labels
+// Slider de NF — atualização de label
 // =========================================================================
 function initSliders() {
-  $('#inp-nse').addEventListener('input', () => {
-    $('#lbl-nse').textContent = parseFloat($('#inp-nse').value).toFixed(2);
-  });
-  $('#inp-nf').addEventListener('input', () => {
-    $('#lbl-nf').textContent = parseFloat($('#inp-nf').value).toFixed(2);
+  const inpNf = $('#inp-nf');
+  if (!inpNf) return;
+  inpNf.addEventListener('input', () => {
+    $('#lbl-nf').textContent = parseFloat(inpNf.value).toFixed(2);
   });
 }
 
@@ -331,8 +330,6 @@ async function executarSimulacao() {
     complementacao_vaaf: parseFloat($('#inp-comp-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-comp-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-comp-vaar').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -572,8 +569,6 @@ async function executarSimulacaoVAAR() {
     complementacao_vaaf: parseFloat($('#inp-vaar-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-vaar-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-vaar-montante').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1.1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -677,8 +672,6 @@ async function executarSimulacaoMunicipal() {
     complementacao_vaaf: parseFloat($('#inp-mun-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-mun-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-mun-vaar').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1.1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -718,8 +711,17 @@ function renderResultadosMunicipio(data) {
     const items = [
       ['Matrículas VAAF', fmt.numero(d.matriculas_vaaf)],
       ['Matrículas VAAT', fmt.numero(d.matriculas_vaat)],
+      ['Matrículas ponderadas VAAF do Fundo', fmt.numero(d.fundo_estadual?.matriculas_pond_vaaf)],
+      ['Matrículas ponderadas VAAT do Fundo', fmt.numero(d.fundo_estadual?.matriculas_pond_vaat)],
+      [`Fundo ${d.fundo_estadual?.uf || d.uf}`, fmt.moeda(d.fundo_estadual?.receitas_vaaf)],
+      ['Receitas VAAT do Fundo', fmt.moeda(d.fundo_estadual?.receitas_vaat)],
       ['Recursos VAAF', fmt.moeda(d.recursos_vaaf)],
       ['Recursos VAAT', fmt.moeda(d.recursos_vaat)],
+      ['VAAF-MIN', fmt.numero(d.vaaf_minimo)],
+      ['VAAT-MIN', fmt.numero(d.vaat_minimo)],
+      ['VAAF (antes da complementação)', fmt.numero(d.vaaf)],
+      ['VAAT (antes da complementação)', fmt.numero(d.vaat)],
+      ['Coeficiente (matrículas ente / fundo)', fmt.numero(d.coeficiente)],
       ['VAAF Final', fmt.numero(d.vaaf_final)],
       ['VAAT Final', fmt.numero(d.vaat_final)],
       ['Complemento VAAF', fmt.moeda(d.complemento_vaaf)],

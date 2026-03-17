@@ -37,7 +37,13 @@ simulador-fundeb-v2/
 ├── simulador.py       # Motor de simulação (lógica de cálculo)
 ├── validacao.py       # Validação interna (RF-10) e comparação com dados oficiais (CA-05)
 ├── requirements.txt   # Dependências Python
-├── data/              # Dados .rda (pesos, matrículas, cenário atual)
+├── data/              # Dados híbridos (xlsx + rda)
+│   ├── dados_unificados.xlsx   # Base principal de matrículas/receitas
+│   ├── pesos.rda               # Pesos por etapa (VAAF/VAAT)
+│   ├── complementar.rda        # NF, inabilitados VAAT, peso VAAR (fallback técnico)
+│   ├── matriculas.rda          # Fallback para etapas ausentes no xlsx
+│   ├── cenario_atual*.rda      # Cenários de comparação
+│   └── PonderadorNSE 2024.pdf  # NSE oficial por ente (extraído por IBGE)
 ├── tests/
 │   └── test_requisitos.py  # Testes unitários RF, RN e CA
 ├── static/
@@ -59,6 +65,14 @@ Cada simulação retorna um objeto `validacao` com:
 - **checagens**: lista das verificações realizadas (soma recursos = total estadual, VAAF = recursos/matrículas, participações = 100%, etc.)
 
 Para comparar com dados oficiais do FUNDEB (CA-05), use a função `comparar_com_oficial()` em `validacao.py` passando um DataFrame com os dados publicados.
+
+## Política de fontes de dados
+
+- **Base principal**: `data/dados_unificados.xlsx`.
+- **NSE oficial**: `PonderadorNSE 2024.pdf` (carregado por IBGE).
+- **Complementos técnicos**: `complementar.rda` para `nf`, `inabilitados_vaat` e `peso_vaar`.
+- **Pesos por etapa**: `pesos.rda`.
+- **Fallback de etapas não presentes no xlsx**: `matriculas.rda`.
 
 ## Testes
 

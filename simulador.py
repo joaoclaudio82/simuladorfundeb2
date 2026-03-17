@@ -163,9 +163,9 @@ def simula_fundeb(
     # 1 - Pondera matrículas por etapa
     df_matriculas = pondera_matriculas_etapa(dados_matriculas, dados_peso)
 
-    # 2 - Reescala NSE e NF
+    # 2 - Aplica ponderadores sociofiscais
     compl = dados_complementar.copy()
-    compl["nse"] = reescala_vetor(compl["nse"].values, maximo=max_nse, minimo=min_nse)
+    # NSE: usar valor anual oficial por ente (sem reescalonamento)
     compl["nf"] = reescala_vetor(compl["nf"].values, maximo=max_nf, minimo=min_nf)
 
     # 3 - Ponderação sociofiscal

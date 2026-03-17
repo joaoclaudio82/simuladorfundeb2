@@ -1,7 +1,9 @@
 fastapi
 uvicorn[standard]
 pandas
+openpyxl
 numpy
 pyreadr
+pypdf
 pydantic
 pytest
