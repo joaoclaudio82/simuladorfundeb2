@@ -42,9 +42,9 @@ function renderExplicacao(orig, ajust) {
     var temAum = alteracoes.some(function(x) { return x.diff > 0; });
     var temRed = alteracoes.some(function(x) { return x.diff < 0; });
     html += '<div class="explicacao-mecanismo"><strong>Como funciona:</strong> As matrículas brutas de cada modalidade são multiplicadas pelos <strong>pesos VAAF e VAAT</strong>. ';
-    if (temAum && !temRed) html += 'O <strong>aumento</strong> resultou em mais alunos ponderados, aumentando a participação do município na distribuição de recursos.';
-    else if (!temAum && temRed) html += 'A <strong>redução</strong> resultou em menos alunos ponderados, diminuindo a participação do município.';
-    else html += 'As alterações combinadas modificaram o total de alunos ponderados do município.';
+    if (temAum && !temRed) html += 'O <strong>aumento</strong> resultou em mais alunos ponderados, aumentando a participação do ente federado na distribuição de recursos.';
+    else if (!temAum && temRed) html += 'A <strong>redução</strong> resultou em menos alunos ponderados, diminuindo a participação do ente federado.';
+    else html += 'As alterações combinadas modificaram o total de alunos ponderados do ente federado.';
     html += ' O fator socioeconômico (NSE) e o fator de recursos vinculados (NF) também são aplicados.</div>';
   }
   html += '</div>';
@@ -61,10 +61,10 @@ function renderExplicacao(orig, ajust) {
   html += _resultRow('Complementação VAAF', orig.complemento_vaaf, ajust.complemento_vaaf, difCVaaf, pctCVaaf, true);
 html += '<div class="explicacao-mecanismo"><strong>Mecanismo VAAF:</strong> A complementação VAAF equaliza os <strong>fundos estaduais</strong> (27 fundos, um por UF). ';
     if (Math.abs(pctMatVaaf) > 0.01) {
-    if (difMatVaaf > 0) html += 'Com o aumento de matrículas, o município representa uma <strong>fatia maior</strong> do fundo estadual de ' + orig.uf + '. Mais recursos VAAF, embora o valor por aluno possa ' + (difVaafFin >= 0 ? 'manter-se estável.' : 'cair levemente.');
-    else html += 'Com a redução, o município representa uma <strong>fatia menor</strong> do fundo estadual de ' + orig.uf + '. Menos recursos VAAF totais, embora o valor por aluno possa aumentar.';
+    if (difMatVaaf > 0) html += 'Com o aumento de matrículas, o ente federado representa uma <strong>fatia maior</strong> do fundo estadual de ' + orig.uf + '. Mais recursos VAAF, embora o valor por aluno possa ' + (difVaafFin >= 0 ? 'manter-se estável.' : 'cair levemente.');
+    else html += 'Com a redução, o ente federado representa uma <strong>fatia menor</strong> do fundo estadual de ' + orig.uf + '. Menos recursos VAAF totais, embora o valor por aluno possa aumentar.';
   } else html += 'Sem alteração significativa nas matrículas, o VAAF permanece praticamente inalterado.';
-  html += ' Os demais municípios do estado são afetados inversamente.</div></div>';
+  html += ' Os demais entes do estado são afetados inversamente.</div></div>';
 
   var difVaatFin = ajust.vaat_final - orig.vaat_final;
   var pctVaatFin = orig.vaat_final ? (difVaatFin / orig.vaat_final * 100) : 0;
@@ -82,7 +82,7 @@ html += '<div class="explicacao-mecanismo"><strong>Mecanismo VAAT:</strong> A co
       html += 'Com mais matrículas, o VAAT pré-complementação ';
       html += (ajust.vaat_pre || 0) < (orig.vaat_pre || 0) ? '<strong>diminui</strong> (mais alunos dividindo mesmos recursos). ' : 'permanece estável. ';
       html += 'O aumento pode resultar em <strong>mais recursos da União</strong>.';
-    } else html += 'Com menos matrículas, o VAAT pré-complementação tende a <strong>aumentar</strong>, mas o município pode receber <strong>menos recursos totais</strong>.';
+    } else html += 'Com menos matrículas, o VAAT pré-complementação tende a <strong>aumentar</strong>, mas o ente federado pode receber <strong>menos recursos totais</strong>.';
   } else html += 'Sem alteração significativa, o VAAT permanece praticamente inalterado.';
   html += '</div></div>';
 
@@ -128,8 +128,8 @@ function _resumoNarrativo(orig, ajust, alteracoes) {
   texto += 'Como resultado, os recursos totais do FUNDEB passaram de ' + fmt.moeda(orig.recursos_fundeb) + ' para <span class="' + destaque + '">' + fmt.moeda(ajust.recursos_fundeb) + '</span> (<span class="' + destaque + '">' + (pctFundeb >= 0 ? '+' : '') + pctFundeb.toFixed(2) + '%</span>). ';
   var difMV = ajust.matriculas_vaaf - orig.matriculas_vaaf;
   if (Math.abs(difMV) > 0.5) {
-    if (difMV > 0) texto += 'O aumento nas matrículas ponderadas fez o município ter <strong>participação maior</strong> no fundo estadual (VAAF) e na equalização nacional (VAAT). ';
-    else texto += 'A redução nas matrículas diminuiu a <strong>participação do município</strong> no fundo estadual e equalização nacional. ';
+    if (difMV > 0) texto += 'O aumento nas matrículas ponderadas fez o ente federado ter <strong>participação maior</strong> no fundo estadual (VAAF) e na equalização nacional (VAAT). ';
+    else texto += 'A redução nas matrículas diminuiu a <strong>participação do ente federado</strong> no fundo estadual e equalização nacional. ';
   }
   var difVF = ajust.vaat_final - orig.vaat_final;
   if (Math.abs(difVF) > 0.5) {
