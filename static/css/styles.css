@@ -29,6 +29,18 @@
   --topbar-height: 64px;
 }
 
+.sidebar-nav .sidebar-section-label {
+  padding: 12px 20px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warm-sand);
+  pointer-events: none;
+  cursor: default;
+  list-style: none;
+}
+
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -117,6 +129,26 @@ body {
   color: var(--warm-sand);
 }
 .sidebar-nav li i { width: 20px; text-align: center; font-size: .95rem; }
+.sidebar-nav li a {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.sidebar-user {
+  border-top: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.75);
+  font-size: .78rem;
+}
+.sidebar-logout {
+  color: rgba(255,255,255,.55);
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+.sidebar-logout:hover { color: var(--warm-sand); }
 
 .sidebar-footer {
   padding: 18px 24px;
@@ -175,6 +207,42 @@ body {
   animation: fadeIn .5s ease;
 }
 .tab-content.active { display: block; }
+
+/* Ponderações multi-ano (accordion por família) */
+.pesos-accordion-body { font-size: .88rem; }
+.peso-segmento-row {
+  border-bottom: 1px solid rgba(160,149,107,.2);
+}
+.peso-segmento-row:last-child { border-bottom: none; }
+.peso-segmento-nome {
+  display: block;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--charcoal, #2d2922);
+}
+.peso-input { max-width: 8rem; }
+@media (min-width: 768px) {
+  .peso-input { max-width: none; }
+}
+
+.matriculas-mun-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+}
+.matriculas-mun-scroll .matricula-item label {
+  display: block;
+  font-size: .78rem;
+  color: var(--charcoal, #2d2922);
+  margin-bottom: 2px;
+}
+.matricula-item-zero {
+  background: rgba(160, 149, 107, 0.08);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.matricula-item-zero input {
+  border-style: dashed;
+}
 
 /* =========================================================
    CARDS

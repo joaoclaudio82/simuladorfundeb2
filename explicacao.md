@@ -85,6 +85,19 @@ O sistema opera com uma politica hibrida para manter consistencia dos resultados
 - **Planilha unificada para checagens e campos extras:** `data/dados_unificados.xlsx`
 - **NSE oficial por ente (IBGE):** `PonderadorNSE 2024.pdf`
 
+### Exercicios 2025 e 2026 (`20252026/`)
+
+| Exercicio | Status | Fontes |
+|-----------|--------|--------|
+| **2024** | Operacional (abas originais) | `data/*.rda`, PDF NSE 2024 |
+| **2026** | Operacional | Matriculas + FPs, NSE/DREC xlsx, receita total, memoria VAAT; Portaria MEC/MF n 6/2026 |
+| **2025** | Consulta apenas | Matriculas e pesos da planilha; simulacao bloqueada ate receitas oficiais |
+
+- **325 segmentos** no motor (slug por segmento na aba FPs).
+- **DREC** aplicado somente no VAAF: `matriculas_vaaf *= nse * drec` (sem reescalonamento).
+- **VAAT:** `matriculas_vaat *= nse`.
+- Cache normalizado em `data/2026/` e `data/2025/` (parquet).
+
 ### Regras importantes de dados
 
 - Chave canonica de merge em planilha: `Codigo IBGE_x`.

@@ -1,19 +1,28 @@
 /**
  * Modulo de explicacao dos resultados municipais
+ * opts: { containerId, explicacaoCardId, munData, etapasNomes, getAjustadas, ponderadorLabel }
  */
-function renderExplicacao(orig, ajust) {
-  var container = document.querySelector('#mun-explicacao');
-  var munData = state.municipioMatriculas;
-  if (!munData) return;
+function renderExplicacao(orig, ajust, opts) {
+  opts = opts || {};
+  var containerId = opts.containerId || 'mun-explicacao';
+  var cardId = opts.explicacaoCardId || 'mun-explicacao-card';
+  var container = document.getElementById(containerId);
+  var munData = opts.munData != null ? opts.munData : state.municipioMatriculas;
+  var etapasNomes = opts.etapasNomes != null ? opts.etapasNomes : state.etapas;
+  var getAjustadas = opts.getAjustadas || getMatriculasAjustadas;
+  var ponderadorLabel = opts.ponderadorLabel || 'NF';
+  if (!container || !munData) return;
+  var card = document.getElementById(cardId);
+  if (card) card.style.display = '';
   var html = '';
   var alteracoes = [];
-  var ajustados = getMatriculasAjustadas();
+  var ajustados = getAjustadas();
   for (var etapa in ajustados) {
     var novoValor = ajustados[etapa];
     var originalValor = (munData.matriculas && munData.matriculas[etapa]) ? munData.matriculas[etapa] : 0;
     var diffA = novoValor - originalValor;
     if (Math.abs(diffA) > 0.5) {
-      var nomeEtapa = (state.etapas && state.etapas[etapa]) ? state.etapas[etapa] : etapa.replace(/_/g, ' ');
+      var nomeEtapa = (etapasNomes && etapasNomes[etapa]) ? etapasNomes[etapa] : etapa.replace(/_/g, ' ');
       var pctAlt = originalValor > 0 ? (diffA / originalValor * 100) : (novoValor > 0 ? 100 : 0);
       alteracoes.push({ etapa: etapa, nome: nomeEtapa, original: originalValor, novo: novoValor, diff: diffA, pct: pctAlt });
     }
@@ -45,7 +54,7 @@ function renderExplicacao(orig, ajust) {
     if (temAum && !temRed) html += 'O <strong>aumento</strong> resultou em mais alunos ponderados, aumentando a participação do ente federado na distribuição de recursos.';
     else if (!temAum && temRed) html += 'A <strong>redução</strong> resultou em menos alunos ponderados, diminuindo a participação do ente federado.';
     else html += 'As alterações combinadas modificaram o total de alunos ponderados do ente federado.';
-    html += ' O fator socioeconômico (NSE) e o fator de recursos vinculados (NF) também são aplicados.</div>';
+    html += ' O fator socioeconômico (NSE) e o ponderador de recursos (' + ponderadorLabel + ') também são aplicados.</div>';
   }
   html += '</div>';
 

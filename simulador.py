@@ -3,6 +3,8 @@ Motor de Simulação do FUNDEB - Versão Python
 Reimplementação do pacote R simulador.fundeb
 """
 
+from typing import Literal
+
 import numpy as np
 import pandas as pd
 
@@ -27,11 +29,31 @@ def reescala_vetor(var: np.ndarray, maximo: float = 1.05, minimo: float = 0.95) 
 def pondera_matriculas_etapa(dados_matriculas: pd.DataFrame, dados_peso: pd.DataFrame) -> pd.DataFrame:
     """Pondera matrículas pelos pesos de cada etapa/modalidade (multiplicação matricial)."""
     df = dados_matriculas.sort_values("ibge").reset_index(drop=True)
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated(keep="first")]
     etapas = dados_peso["etapa"].tolist()
-    matriz = df[etapas].values.astype(float)
+    peso_vaaf = dados_peso["peso_vaaf"].values.astype(float)
+    peso_vaat = dados_peso["peso_vaat"].values.astype(float)
+    if len(etapas) != len(peso_vaaf):
+        raise ValueError(
+            f"Pesos ({len(peso_vaaf)}) e etapas ({len(etapas)}) desalinhados."
+        )
+    cols = []
+    for etapa in etapas:
+        if etapa not in df.columns:
+            raise KeyError(f"Coluna de matrículas ausente para etapa: {etapa}")
+        serie = df[etapa]
+        if isinstance(serie, pd.DataFrame):
+            serie = serie.iloc[:, 0]
+        cols.append(serie.values.astype(float))
+    matriz = np.column_stack(cols)
+    if matriz.shape[1] != len(peso_vaaf):
+        raise ValueError(
+            f"Matrículas ({matriz.shape[1]} colunas) e pesos ({len(peso_vaaf)}) desalinhados."
+        )
 
-    matriculas_vaaf = matriz @ dados_peso["peso_vaaf"].values.astype(float)
-    matriculas_vaat = matriz @ dados_peso["peso_vaat"].values.astype(float)
+    matriculas_vaaf = matriz @ peso_vaaf
+    matriculas_vaat = matriz @ peso_vaat
 
     return pd.DataFrame({
         "ibge": df["ibge"].values,
@@ -40,10 +62,18 @@ def pondera_matriculas_etapa(dados_matriculas: pd.DataFrame, dados_peso: pd.Data
     })
 
 
-def pondera_matriculas_sociofiscal(dados_matriculas: pd.DataFrame, dados_complementar: pd.DataFrame) -> pd.DataFrame:
-    """Aplica os fatores socioeconômico (NSE) e fiscal (NF) às matrículas ponderadas."""
+def pondera_matriculas_sociofiscal(
+    dados_matriculas: pd.DataFrame,
+    dados_complementar: pd.DataFrame,
+    modo_ponderador: Literal["nf", "drec"] = "nf",
+) -> pd.DataFrame:
+    """Aplica NSE e NF (2024) ou NSE e DREC no VAAF (2025+)."""
     df = dados_matriculas.merge(dados_complementar, on="ibge")
-    df["matriculas_vaaf"] = df["matriculas_vaaf"] * df["nse"] * df["nf"]
+    if modo_ponderador == "drec":
+        fator = df["drec"] if "drec" in df.columns else df["nf"]
+        df["matriculas_vaaf"] = df["matriculas_vaaf"] * df["nse"] * fator
+    else:
+        df["matriculas_vaaf"] = df["matriculas_vaaf"] * df["nse"] * df["nf"]
     df["matriculas_vaat"] = df["matriculas_vaat"] * df["nse"]
     return df
 
@@ -151,6 +181,7 @@ def simula_fundeb(
     min_nse: float = 0.95,
     max_nf: float = 1.05,
     min_nf: float = 0.95,
+    modo_ponderador: Literal["nf", "drec"] = "nf",
 ) -> pd.DataFrame:
     """
     Função principal de simulação do FUNDEB.
@@ -165,11 +196,11 @@ def simula_fundeb(
 
     # 2 - Aplica ponderadores sociofiscais
     compl = dados_complementar.copy()
-    # NSE: usar valor anual oficial por ente (sem reescalonamento)
-    compl["nf"] = reescala_vetor(compl["nf"].values, maximo=max_nf, minimo=min_nf)
+    if modo_ponderador == "nf":
+        compl["nf"] = reescala_vetor(compl["nf"].values, maximo=max_nf, minimo=min_nf)
 
     # 3 - Ponderação sociofiscal
-    df_entes = pondera_matriculas_sociofiscal(df_matriculas, compl)
+    df_entes = pondera_matriculas_sociofiscal(df_matriculas, compl, modo_ponderador=modo_ponderador)
 
     # 4 - Fundos estaduais
     df_estados = gera_fundo_estadual(df_entes)
@@ -208,11 +239,26 @@ def simula_fundeb(
     )
     df_entes["recursos_fundeb"] = df_entes["recursos_vaaf"] + df_entes["complemento_uniao"]
 
-    colunas = [
+    colunas_base = [
         "ibge", "uf", "nome", "matriculas_vaaf", "matriculas_vaat",
         "recursos_vaaf", "recursos_vaat", "nse", "nf", "inabilitados_vaat",
         "peso_vaar", "recursos_vaaf_final", "vaaf_final", "vaat_pre",
         "recursos_vaat_final", "vaat_final", "complemento_vaaf",
         "complemento_vaat", "complemento_vaar", "complemento_uniao", "recursos_fundeb",
     ]
-    return df_entes[colunas].round(2)
+    colunas = colunas_base.copy()
+    if modo_ponderador == "drec" and "drec" in df_entes.columns:
+        if "drec" not in colunas:
+            colunas.insert(colunas.index("nf") + 1, "drec")
+    if "uf" not in df_entes.columns and "uf" in dados_complementar.columns:
+        df_entes = df_entes.merge(dados_complementar[["ibge", "uf"]], on="ibge", how="left")
+    result = df_entes[[c for c in colunas if c in df_entes.columns]].round(2)
+    mask_vaaf = result["matriculas_vaaf"] > 0
+    result.loc[mask_vaaf, "vaaf_final"] = (
+        result.loc[mask_vaaf, "recursos_vaaf_final"] / result.loc[mask_vaaf, "matriculas_vaaf"]
+    ).round(2)
+    mask_vaat = result["matriculas_vaat"] > 0
+    result.loc[mask_vaat, "vaat_final"] = (
+        result.loc[mask_vaat, "recursos_vaat_final"] / result.loc[mask_vaat, "matriculas_vaat"]
+    ).round(2)
+    return result

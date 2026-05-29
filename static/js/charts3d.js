@@ -283,7 +283,8 @@ function render3D_SuperficieDiferenca(data) {
 // SIMULACAO VAAR — 3D
 // =========================================================================
 
-function render3D_VAAR_Distribuicao(dados) {
+function render3D_VAAR_Distribuicao(dados, plotId) {
+  plotId = plotId || 'chart3d-vaar-dist';
   if (!dados || dados.length === 0) return;
 
   var porUf = {};
@@ -326,11 +327,12 @@ function render3D_VAAR_Distribuicao(dados) {
   layout.scene.camera = { eye: { x: 1.5, y: 1.8, z: 1.0 } };
   layout.height = CHART3D_HEIGHT;
 
-  Plotly.newPlot('chart3d-vaar-dist', [trace], layout, { responsive: true });
+  Plotly.newPlot(plotId, [trace], layout, { responsive: true });
   setTimeout(injectFullscreenButtons, 100);
 }
 
-function render3D_VAAR_TopEntes(dados) {
+function render3D_VAAR_TopEntes(dados, plotId) {
+  plotId = plotId || 'chart3d-vaar-top';
   if (!dados || dados.length === 0) return;
 
   var sorted = dados.slice().sort(function(a, b) { return (b.complemento_uniao || 0) - (a.complemento_uniao || 0); });
@@ -364,7 +366,7 @@ function render3D_VAAR_TopEntes(dados) {
   layout.scene.camera = { eye: { x: 1.4, y: 1.6, z: 1.2 } };
   layout.height = CHART3D_HEIGHT;
 
-  Plotly.newPlot('chart3d-vaar-top', [trace], layout, { responsive: true });
+  Plotly.newPlot(plotId, [trace], layout, { responsive: true });
   setTimeout(injectFullscreenButtons, 100);
 }
 
@@ -372,7 +374,8 @@ function render3D_VAAR_TopEntes(dados) {
 // SIMULACAO MUNICIPAL — 3D
 // =========================================================================
 
-function render3D_Municipal(orig, ajust) {
+function render3D_Municipal(orig, ajust, plotId) {
+  plotId = plotId || 'chart3d-mun-comparacao';
   if (!orig || !ajust) return;
 
   var metricas = ['VAAF Final', 'VAAT Final', 'Comp VAAF', 'Comp VAAT', 'Comp VAAR', 'FUNDEB'];
@@ -450,11 +453,12 @@ function render3D_Municipal(orig, ajust) {
   layout.showlegend = true;
   layout.legend = { x: 0.78, y: 0.95, bgcolor: 'rgba(26,26,46,0.9)', bordercolor: '#2a3a5c', borderwidth: 1, font: { size: 12, color: '#e0e0e0' } };
 
-  Plotly.newPlot('chart3d-mun-comparacao', allTraces, layout, { responsive: true });
+  Plotly.newPlot(plotId, allTraces, layout, { responsive: true });
   setTimeout(injectFullscreenButtons, 100);
 }
 
-function render3D_MunicipalEstado(estadoOrig, estadoAjust, ibgeMunicipio) {
+function render3D_MunicipalEstado(estadoOrig, estadoAjust, ibgeMunicipio, plotId) {
+  plotId = plotId || 'chart3d-mun-estado';
   if (!estadoOrig || !estadoAjust || estadoOrig.length === 0) return;
 
   var origMap = {};
@@ -508,6 +512,6 @@ function render3D_MunicipalEstado(estadoOrig, estadoAjust, ibgeMunicipio) {
   layout.scene.camera = { eye: { x: 1.6, y: 1.6, z: 1.2 } };
   layout.height = CHART3D_HEIGHT;
 
-  Plotly.newPlot('chart3d-mun-estado', [traceOutros, traceMun], layout, { responsive: true });
+  Plotly.newPlot(plotId, [traceOutros, traceMun], layout, { responsive: true });
   setTimeout(injectFullscreenButtons, 100);
 }
