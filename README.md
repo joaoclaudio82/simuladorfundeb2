@@ -1,5 +1,5 @@
 # Simulador FUNDEB v2
-
+![CI](https://github.com/joaoclaudio82/simuladorfundeb2/actions/workflows/ci.yml/badge.svg)
 Simulador de Fatores de Ponderação do FUNDEB — Versão Python com frontend e backend separados.
 
 - **Simulação VAAR**:  aba para simular a distribuição da complementação VAAR
