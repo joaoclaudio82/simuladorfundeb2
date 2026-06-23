@@ -1,8 +1,11 @@
 """Testes do dataset e simulação FUNDEB 2026."""
 
+import os
+
+import pandas as pd
 import pytest
 
-from dados.fundeb_dataset import carregar_dataset, COMPLEMENTACAO_2026
+from dados.fundeb_dataset import RAW_DIR, carregar_dataset, COMPLEMENTACAO_2026
 from simulador import simula_fundeb
 from validacao import validar_interno
 
@@ -46,6 +49,24 @@ def test_rf10_vaaf_consistente_2026(ds2026):
     assert (diff > 0.1).sum() == 0
 
 
+def test_receita_fundo_estadual_bate_com_anexo_ods_2026(ds2026):
+    """Totais por UF de recursos_vaaf devem coincidir com TOTAL GERAL do Anexo I STN."""
+    ods_path = os.path.join(RAW_DIR, "Receitas Fundos 2026.ods")
+    if not os.path.isfile(ods_path):
+        pytest.skip("Arquivo Receitas Fundos 2026.ods não encontrado")
+
+    ods = pd.read_excel(ods_path, sheet_name="Reest-26_1q", header=5)
+    ods = ods.rename(columns={"UF": "uf", "TOTAL GERAL (20%)": "total_geral_ods"})
+    ods = ods[ods["uf"].notna() & (ods["uf"] != "UF")].copy()
+    ods["total_geral_ods"] = pd.to_numeric(ods["total_geral_ods"], errors="coerce")
+
+    sim_por_uf = ds2026.complementar.groupby("uf")["recursos_vaaf"].sum().reset_index()
+    cmp = ods.merge(sim_por_uf, on="uf", how="inner")
+    cmp["diff"] = (cmp["total_geral_ods"] - cmp["recursos_vaaf"]).abs()
+    assert len(cmp) == 27
+    assert cmp["diff"].max() < 1.0, cmp[cmp["diff"] >= 1.0][["uf", "total_geral_ods", "recursos_vaaf", "diff"]]
+
+
 def test_validacao_interna_2026(ds2026):
     mat = ds2026.matriculas.drop(columns=["uf", "nome"], errors="ignore")
     sim = simula_fundeb(
@@ -63,6 +84,11 @@ def test_validacao_interna_2026(ds2026):
 
 
 def test_dataset_2025_bloqueado(ds2026):
+    from dados.fundeb_dataset import dados_auxiliares_completos
+
     ds = carregar_dataset(2025)
-    assert ds.simulacao_habilitada is False
-    assert ds.mensagem_bloqueio
+    if dados_auxiliares_completos(2025):
+        assert ds.simulacao_habilitada is True
+    else:
+        assert ds.simulacao_habilitada is False
+        assert ds.mensagem_bloqueio

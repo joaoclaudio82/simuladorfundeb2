@@ -256,12 +256,14 @@ function injectNavAndTabs() {
   navMultiAnoInjected = true;
 
   const items = [
-    { y: 2026, label: 'Simulação 2026', tab: 'simulacao-2026', icon: 'fa-calculator', ok: true },
-    { y: 2026, label: 'Ponderações 2026', tab: 'pesos-2026', icon: 'fa-balance-scale', ok: true },
-    { y: 2026, label: 'VAAR 2026', tab: 'vaar-2026', icon: 'fa-trophy', ok: true },
-    { y: 2026, label: 'Município 2026', tab: 'municipio-2026', icon: 'fa-map-marker-alt', ok: true },
-    { y: 2025, label: 'Consulta 2025', tab: 'simulacao-2025', icon: 'fa-calendar', ok: false },
-    { y: 2025, label: 'Ponderações 2025', tab: 'pesos-2025', icon: 'fa-balance-scale', ok: false },
+    { y: 2026, label: 'Simulação 2026', tab: 'simulacao-2026', icon: 'fa-calculator' },
+    { y: 2026, label: 'Ponderações 2026', tab: 'pesos-2026', icon: 'fa-balance-scale' },
+    { y: 2026, label: 'VAAR 2026', tab: 'vaar-2026', icon: 'fa-trophy' },
+    { y: 2026, label: 'Município 2026', tab: 'municipio-2026', icon: 'fa-map-marker-alt' },
+    { y: 2025, label: 'Simulação 2025', tab: 'simulacao-2025', icon: 'fa-calculator', navId: 'nav-simulacao-2025' },
+    { y: 2025, label: 'Ponderações 2025', tab: 'pesos-2025', icon: 'fa-balance-scale' },
+    { y: 2025, label: 'VAAR 2025', tab: 'vaar-2025', icon: 'fa-trophy' },
+    { y: 2025, label: 'Município 2025', tab: 'municipio-2025', icon: 'fa-map-marker-alt' },
   ];
 
   const anchor =
@@ -289,6 +291,7 @@ function injectNavAndTabs() {
   items.filter((it) => it.y === 2025).forEach((it) => {
     const li = document.createElement('li');
     li.dataset.tab = it.tab;
+    if (it.navId) li.id = it.navId;
     li.innerHTML = `<i class="fas ${it.icon}"></i> <span>${it.label}</span>`;
     frag.appendChild(li);
   });
@@ -296,13 +299,21 @@ function injectNavAndTabs() {
   if (anchor) nav.insertBefore(frag, anchor);
   else nav.appendChild(frag);
 
-  const banner2025 = 'Receitas e ponderadores oficiais de 2025 ainda não disponíveis. Matrículas carregadas apenas para consulta.';
+  if (!document.getElementById('multi-ano-status')) {
+    main.insertAdjacentHTML(
+      'afterbegin',
+      '<div id="multi-ano-status" class="alert alert-info mx-3 mt-2 py-2 small">Preparando exercícios 2025 e 2026…</div>',
+    );
+  }
+
   main.insertAdjacentHTML('beforeend', buildSimulacaoTab(2026, true, ''));
   main.insertAdjacentHTML('beforeend', buildPesosTab(2026, true, ''));
   main.insertAdjacentHTML('beforeend', buildVaarTab(2026, true, ''));
   main.insertAdjacentHTML('beforeend', buildMunicipioTab(2026, true, ''));
-  main.insertAdjacentHTML('beforeend', buildSimulacaoTab(2025, false, banner2025));
-  main.insertAdjacentHTML('beforeend', buildPesosTab(2025, false, banner2025));
+  main.insertAdjacentHTML('beforeend', buildSimulacaoTab(2025, true, ''));
+  main.insertAdjacentHTML('beforeend', buildPesosTab(2025, true, ''));
+  main.insertAdjacentHTML('beforeend', buildVaarTab(2025, true, ''));
+  main.insertAdjacentHTML('beforeend', buildMunicipioTab(2025, true, ''));
 }
 
 async function initYear(ano) {
@@ -339,6 +350,41 @@ async function initYear(ano) {
 
   renderPesosAccordion(ano);
   populateMunSelectors(ano);
+  aplicarEstadoAno(ano);
+}
+
+function setTabHabilitado(ano, habilitado, mensagemBloqueio) {
+  const tabIds = [`simulacao-${ano}`, `pesos-${ano}`, `vaar-${ano}`, `municipio-${ano}`];
+  tabIds.forEach((tabId) => {
+    const tab = document.getElementById(`tab-${tabId}`);
+    if (!tab) return;
+    tab.querySelectorAll('[id^="btn-simular-"], [id^="inp-"], [id^="sel-"]').forEach((el) => {
+      if (habilitado) el.removeAttribute('disabled');
+      else el.setAttribute('disabled', 'disabled');
+    });
+    const oldBanner = tab.querySelector('.alert-warning');
+    if (habilitado) {
+      oldBanner?.remove();
+    } else if (mensagemBloqueio && !oldBanner) {
+      tab.insertAdjacentHTML('afterbegin', `<div class="alert alert-warning">${mensagemBloqueio}</div>`);
+    }
+  });
+}
+
+function aplicarEstadoAno(ano) {
+  const meta = yearState[ano].meta;
+  if (!meta) return;
+  const habilitado = meta.simulacao_habilitada !== false;
+  setTabHabilitado(ano, habilitado, meta.mensagem_bloqueio);
+
+  const navSim = document.getElementById(`nav-simulacao-${ano}`);
+  if (navSim) {
+    const label = habilitado ? `Simulação ${ano}` : `Consulta ${ano}`;
+    const span = navSim.querySelector('span');
+    if (span) span.textContent = label;
+  }
+
+  renderPesosAccordion(ano);
 }
 
 function pesoInputId(ano, tipo, etapa) {
@@ -786,9 +832,11 @@ async function executarMunAno(ano) {
 }
 
 function wireEvents() {
-  document.getElementById('btn-simular-2026')?.addEventListener('click', () => executarSimulacaoAno(2026));
-  document.getElementById('btn-simular-vaar-2026')?.addEventListener('click', () => executarVaarAno(2026));
-  document.getElementById('btn-simular-mun-2026')?.addEventListener('click', () => executarMunAno(2026));
+  [2025, 2026].forEach((ano) => {
+    document.getElementById(`btn-simular-${ano}`)?.addEventListener('click', () => executarSimulacaoAno(ano));
+    document.getElementById(`btn-simular-vaar-${ano}`)?.addEventListener('click', () => executarVaarAno(ano));
+    document.getElementById(`btn-simular-mun-${ano}`)?.addEventListener('click', () => executarMunAno(ano));
+  });
 }
 
 function initMultiAno() {
@@ -796,18 +844,30 @@ function initMultiAno() {
   wireEvents();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initMultiAno, { once: true });
-} else {
-  initMultiAno();
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
+async function bootMultiAnoData() {
+  const status = document.getElementById('multi-ano-status');
   try {
+    if (status) status.textContent = 'Carregando dados FUNDEB 2026 e 2025…';
     if (typeof guardAuth === 'function') await guardAuth();
     await initYear(2026);
     await initYear(2025);
+    if (status) status.remove();
   } catch (e) {
     console.error('Init multi-ano:', e);
+    if (status) {
+      status.className = 'alert alert-danger mx-3 mt-2';
+      status.textContent = `Falha ao carregar 2025/2026: ${e.message}. Recarregue a página.`;
+    }
   }
-});
+}
+
+function whenDomReady(fn) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fn, { once: true });
+  } else {
+    fn();
+  }
+}
+
+whenDomReady(initMultiAno);
+whenDomReady(bootMultiAnoData);

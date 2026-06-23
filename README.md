@@ -6,7 +6,7 @@ Simulador de Fatores de Ponderação do FUNDEB — Versão Python com frontend e
 
 - **Simulação VAAR**: Nova aba para simular a distribuição da complementação VAAR
 - **Simulação Municipal**: Permite ajustar matrículas de um município e ver o impacto em VAAF, VAAT e VAAR
-- **Exercícios 2025 e 2026**: Abas dedicadas com dados da pasta `20252026/` (2026 operacional; 2025 consulta de matrículas até receitas oficiais)
+- **Exercícios 2025 e 2026**: Abas dedicadas com dados da pasta `20252026/` (ambos operacionais; fontes 2025 em [checklist-dados-2025.md](checklist-dados-2025.md))
 - **DREC (2025+)**: Ponderador de Disponibilidade de Recursos aplicado no VAAF (substitui NF reescalado)
 - **325 segmentos de matrícula**: Detalhamento urbano/campo/indígena/quilombola/especial/bilíngue
 - **Interface moderna**: Dashboard com sidebar, Bootstrap 5 e Plotly.js

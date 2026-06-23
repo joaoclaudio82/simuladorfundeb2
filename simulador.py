@@ -3,6 +3,8 @@ Motor de Simulação do FUNDEB - Versão Python
 Reimplementação do pacote R simulador.fundeb
 """
 
+from __future__ import annotations
+
 from typing import Literal
 
 import numpy as np

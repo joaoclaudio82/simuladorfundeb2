@@ -13,7 +13,6 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-import pyreadr
 from pypdf import PdfReader
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -27,8 +26,39 @@ COMPLEMENTACAO_2026 = {
     "vaar": 15_062_463_478.24,
 }
 
+# Estimativa Cartilha FUNDEB 2025 (Portaria nº 14/2024); revisar com a portaria da planilha baixada
+COMPLEMENTACAO_2025 = {
+    "vaaf": 26_900_000_000.00,
+    "vaat": 24_200_000_000.00,
+    "vaar": 5_400_000_000.00,
+}
+
+# Arquivos brutos por exercício em 20252026/ (ver checklist-dados-2025.md)
+RAW_ARQUIVOS: dict[int, dict[str, str]] = {
+    2025: {
+        "receita": "1-receita-total-do-fundeb-por-ente-federado-2025.xlsx",
+        "nse": "ponderador-de-nivel-socioeconomico-2025.xlsx",
+        "nse_pdf": "PonderadorNSEFundeb2025.pdf",
+        "drec": "ponderador-de-disponibilidade-de-recursos-2025.xlsx",
+        "drec_pdf": "PonderadorDRecFundeb2025.pdf",
+        "vaat": "Receita STN 2023 VAAT 2025 para publicação.xlsx",
+    },
+    2026: {
+        "receita": "1-receita-total-do-fundeb-por-ente-federado.xlsx",
+        "nse": "ponderador-de-nivel-socioeconomico.xlsx",
+        "drec": "ponderador-de-disponibilidade-de-recursos.xlsx",
+        "vaat": "MemriadeClculoVAAT2026 (2).xlsx",
+    },
+}
+
+MENSAGEM_BLOQUEIO_2025 = (
+    "Receitas e ponderadores oficiais de 2025 ainda não disponíveis. "
+    "Matrículas carregadas apenas para consulta. "
+    "Veja checklist-dados-2025.md."
+)
+
 # Incrementar ao alterar ETL (invalida dataset.pkl em data/{ano}/)
-DATASET_CACHE_VERSION = 2
+DATASET_CACHE_VERSION = 5
 
 ESTADOS_REGIOES = {
     "Norte": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
@@ -145,40 +175,101 @@ def _ler_matriculas_fp(ano: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     return mat, fps[["nome", "etapa", "peso_vaaf", "peso_vaat"]]
 
 
-def _ler_nse() -> pd.DataFrame:
-    caminho = os.path.join(RAW_DIR, "ponderador-de-nivel-socioeconomico.xlsx")
-    df = pd.read_excel(caminho, header=9)
-    df = df.rename(columns={
-        df.columns[0]: "uf",
-        df.columns[1]: "nome",
-        df.columns[2]: "ibge",
-        df.columns[3]: "nse",
-    })
-    df["ibge"] = df["ibge"].apply(normalizar_ibge)
-    df = df[df["ibge"].notna()].copy()
-    df["ibge"] = df["ibge"].astype(int)
-    df["nse"] = pd.to_numeric(df["nse"], errors="coerce").fillna(1.0)
-    return df[["ibge", "nse"]]
+def _path_raw(ano: int, chave: str) -> str:
+    nome = RAW_ARQUIVOS[ano][chave]
+    return os.path.join(RAW_DIR, nome)
 
 
-def _ler_drec() -> pd.DataFrame:
-    caminho = os.path.join(RAW_DIR, "ponderador-de-disponibilidade-de-recursos.xlsx")
-    df = pd.read_excel(caminho, header=8)
-    df = df.rename(columns={
-        df.columns[0]: "uf",
-        df.columns[1]: "nome",
-        df.columns[2]: "ibge",
-        df.columns[3]: "drec",
-    })
-    df["ibge"] = df["ibge"].apply(normalizar_ibge)
-    df = df[df["ibge"].notna()].copy()
-    df["ibge"] = df["ibge"].astype(int)
-    df["drec"] = pd.to_numeric(df["drec"], errors="coerce").fillna(1.0)
-    return df[["ibge", "drec"]]
+def _arquivo_raw_existe(ano: int, chave: str) -> bool:
+    if ano not in RAW_ARQUIVOS or chave not in RAW_ARQUIVOS[ano]:
+        return False
+    path = _path_raw(ano, chave)
+    if not os.path.isfile(path):
+        return False
+    # Ignora placeholders de download falho (ex.: HTML 404 salvo como .xlsx)
+    if path.endswith(".xlsx") and os.path.getsize(path) < 1024:
+        return False
+    return True
 
 
-def _ler_receita_total() -> pd.DataFrame:
-    caminho = os.path.join(RAW_DIR, "1-receita-total-do-fundeb-por-ente-federado.xlsx")
+def dados_auxiliares_completos(ano: int) -> bool:
+    """True se receita, NSE, DREC e VAAT estão disponíveis (xlsx e/ou pdf)."""
+    if ano not in RAW_ARQUIVOS:
+        return False
+    tem_receita = _arquivo_raw_existe(ano, "receita")
+    tem_nse = _arquivo_raw_existe(ano, "nse") or _arquivo_raw_existe(ano, "nse_pdf")
+    tem_drec = _arquivo_raw_existe(ano, "drec") or _arquivo_raw_existe(ano, "drec_pdf")
+    tem_vaat = _arquivo_raw_existe(ano, "vaat")
+    return tem_receita and tem_nse and tem_drec and tem_vaat
+
+
+def _extrair_ponderador_pdf(caminho: str, coluna: str) -> pd.DataFrame:
+    reader = PdfReader(caminho)
+    padrao = re.compile(r"^[A-Z]{2}\s+.+?\s+(\d{1,7})\s+(\d+,\d+)$")
+    dados = []
+    for pagina in reader.pages:
+        texto = pagina.extract_text() or ""
+        for linha in texto.splitlines():
+            linha = re.sub(r"\s+", " ", linha).strip()
+            match = padrao.match(linha)
+            if not match:
+                continue
+            ibge = int(match.group(1))
+            valor = float(match.group(2).replace(",", "."))
+            dados.append((ibge, valor))
+
+    df = pd.DataFrame(dados, columns=["ibge", coluna]).drop_duplicates(subset=["ibge"], keep="last")
+    if df.empty:
+        raise RuntimeError(f"Não foi possível extrair {coluna} de {os.path.basename(caminho)}")
+    return df
+
+
+def _ler_nse(ano: int = 2026) -> pd.DataFrame:
+    if _arquivo_raw_existe(ano, "nse"):
+        caminho = _path_raw(ano, "nse")
+        df = pd.read_excel(caminho, header=9)
+        df = df.rename(columns={
+            df.columns[0]: "uf",
+            df.columns[1]: "nome",
+            df.columns[2]: "ibge",
+            df.columns[3]: "nse",
+        })
+        df["ibge"] = df["ibge"].apply(normalizar_ibge)
+        df = df[df["ibge"].notna()].copy()
+        df["ibge"] = df["ibge"].astype(int)
+        df["nse"] = pd.to_numeric(df["nse"], errors="coerce").fillna(1.0)
+        return df[["ibge", "nse"]]
+
+    if _arquivo_raw_existe(ano, "nse_pdf"):
+        return _extrair_ponderador_pdf(_path_raw(ano, "nse_pdf"), "nse")
+
+    raise FileNotFoundError(f"NSE não encontrado para {ano}")
+
+
+def _ler_drec(ano: int = 2026) -> pd.DataFrame:
+    if _arquivo_raw_existe(ano, "drec"):
+        caminho = _path_raw(ano, "drec")
+        df = pd.read_excel(caminho, header=8)
+        df = df.rename(columns={
+            df.columns[0]: "uf",
+            df.columns[1]: "nome",
+            df.columns[2]: "ibge",
+            df.columns[3]: "drec",
+        })
+        df["ibge"] = df["ibge"].apply(normalizar_ibge)
+        df = df[df["ibge"].notna()].copy()
+        df["ibge"] = df["ibge"].astype(int)
+        df["drec"] = pd.to_numeric(df["drec"], errors="coerce").fillna(1.0)
+        return df[["ibge", "drec"]]
+
+    if _arquivo_raw_existe(ano, "drec_pdf"):
+        return _extrair_ponderador_pdf(_path_raw(ano, "drec_pdf"), "drec")
+
+    raise FileNotFoundError(f"DREC não encontrado para {ano}")
+
+
+def _ler_receita_total(ano: int = 2026) -> pd.DataFrame:
+    caminho = _path_raw(ano, "receita")
     df = pd.read_excel(caminho, header=9)
     cols = list(df.columns)
     df = df.rename(columns={
@@ -203,30 +294,76 @@ def _ler_receita_total() -> pd.DataFrame:
     return df
 
 
-def _ler_vaat_receitas() -> pd.DataFrame:
-    caminho = os.path.join(RAW_DIR, "MemriadeClculoVAAT2026 (2).xlsx")
-    df = pd.read_excel(caminho, header=6)
-    df = df.iloc[1:].copy()
-    col_ibge = [c for c in df.columns if "IBGE" in str(c)][0]
-    col_rec = [c for c in df.columns if "Corre" in str(c) and "Monet" in str(c)][0]
-    col_fundeb_vaaf = [c for c in df.columns if "Fundeb" in str(c) and "VAAF" in str(c)][0]
-    col_mat_vaat = [c for c in df.columns if "Matr" in str(c) and "VAAT" in str(c)][0]
+def _ler_vaat_stn(caminho: str) -> pd.DataFrame:
+    """Planilha STN VAAT (ex.: Receita STN 2023 VAAT 2025 para publicação.xlsx)."""
+    xl = pd.ExcelFile(caminho)
+    sheet = "COM CORREÇÃO" if "COM CORREÇÃO" in xl.sheet_names else xl.sheet_names[0]
+    df = pd.read_excel(caminho, sheet_name=sheet, header=0)
+    col_ibge = [c for c in df.columns if "IBGE" in str(c).upper()][0]
+    col_total = [c for c in df.columns if str(c).strip().lower() == "total"][0]
+    col_fundeb = [c for c in df.columns if "Fundeb" in str(c) and "VAAF" in str(c)][0]
 
-    out = pd.DataFrame()
-    out["ibge"] = df[col_ibge].apply(normalizar_ibge)
-    out = out[out["ibge"].notna()].copy()
-    out["ibge"] = out["ibge"].astype(int)
-    out["recursos_vaat"] = pd.to_numeric(df[col_rec], errors="coerce").fillna(0)
-    out["recursos_vaaf_fundeb"] = pd.to_numeric(df[col_fundeb_vaaf], errors="coerce").fillna(0)
-    out["matriculas_vaat_ref"] = pd.to_numeric(df[col_mat_vaat], errors="coerce").fillna(0)
+    ibge = df[col_ibge].apply(normalizar_ibge)
+    mask = ibge.notna()
+    return pd.DataFrame({
+        "ibge": ibge[mask].astype(int).values,
+        "recursos_vaat": pd.to_numeric(df.loc[mask, col_total], errors="coerce").fillna(0).values,
+        "recursos_vaaf_fundeb": pd.to_numeric(df.loc[mask, col_fundeb], errors="coerce").fillna(0).values,
+        "matriculas_vaat_ref": 0.0,
+    })
+
+
+def _matriculas_vaat_ref(mat: pd.DataFrame, pesos: pd.DataFrame) -> pd.Series:
+    etapas = pesos["etapa"].tolist()
+    peso_vaat = pesos.set_index("etapa")["peso_vaat"]
+    cols = [c for c in etapas if c in mat.columns]
+    m = mat.set_index("ibge")[cols].fillna(0)
+    return (m * peso_vaat.reindex(cols).fillna(0)).sum(axis=1)
+
+
+def _ler_vaat_receitas(ano: int = 2026, mat: pd.DataFrame | None = None, pesos: pd.DataFrame | None = None) -> pd.DataFrame:
+    caminho = _path_raw(ano, "vaat")
+    nome = os.path.basename(caminho).lower()
+    if "stn" in nome or "vaat 2025" in nome:
+        out = _ler_vaat_stn(caminho)
+    else:
+        df = pd.read_excel(caminho, header=6)
+        df = df.iloc[1:].copy()
+        col_ibge = [c for c in df.columns if "IBGE" in str(c)][0]
+        col_rec = [c for c in df.columns if "Corre" in str(c) and "Monet" in str(c)][0]
+        col_fundeb_vaaf = [c for c in df.columns if "Fundeb" in str(c) and "VAAF" in str(c)][0]
+        col_mat_vaat = [c for c in df.columns if "Matr" in str(c) and "VAAT" in str(c)][0]
+
+        out = pd.DataFrame()
+        out["ibge"] = df[col_ibge].apply(normalizar_ibge)
+        out = out[out["ibge"].notna()].copy()
+        out["ibge"] = out["ibge"].astype(int)
+        out["recursos_vaat"] = pd.to_numeric(df[col_rec], errors="coerce").fillna(0).values
+        out["recursos_vaaf_fundeb"] = pd.to_numeric(df[col_fundeb_vaaf], errors="coerce").fillna(0).values
+        out["matriculas_vaat_ref"] = pd.to_numeric(df[col_mat_vaat], errors="coerce").fillna(0).values
+
+    if out["matriculas_vaat_ref"].sum() <= 0 and mat is not None and pesos is not None:
+        refs = _matriculas_vaat_ref(mat, pesos)
+        out = out.drop(columns=["matriculas_vaat_ref"])
+        out = out.merge(refs.rename("matriculas_vaat_ref"), on="ibge", how="left")
+        out["matriculas_vaat_ref"] = out["matriculas_vaat_ref"].fillna(0)
     return out
 
 
-def _montar_complementar_2026(mat: pd.DataFrame, pesos: pd.DataFrame) -> pd.DataFrame:
-    nse = _ler_nse()
-    drec = _ler_drec()
-    receita = _ler_receita_total()
-    vaat = _ler_vaat_receitas()
+def _complementacao_de_receita(receita: pd.DataFrame) -> dict[str, float]:
+    """Deriva totais VAAF/VAAT/VAAR da planilha de receita quando disponível."""
+    return {
+        "vaaf": float(receita["comp_vaaf_oficial"].sum()),
+        "vaat": float(receita["comp_vaat_oficial"].sum()),
+        "vaar": float(receita["comp_vaar_oficial"].sum()),
+    }
+
+
+def _montar_complementar(mat: pd.DataFrame, ano: int, pesos: pd.DataFrame | None = None) -> pd.DataFrame:
+    nse = _ler_nse(ano)
+    drec = _ler_drec(ano)
+    receita = _ler_receita_total(ano)
+    vaat = _ler_vaat_receitas(ano, mat=mat, pesos=pesos)
 
     base = mat[["ibge", "uf", "nome"]].drop_duplicates("ibge")
     base["ibge"] = base["ibge"].astype(int)
@@ -242,7 +379,9 @@ def _montar_complementar_2026(mat: pd.DataFrame, pesos: pd.DataFrame) -> pd.Data
     compl["drec"] = compl["drec"].fillna(1.0)
     compl["nf"] = compl["drec"]
 
-    compl["recursos_vaaf"] = compl["recursos_vaaf_fundeb"].fillna(compl["recursos_contribuicao"]).fillna(0)
+    # Receita do fundo (Anexo I / Portaria): recursos_contribuicao. A coluna da memória VAAT
+    # (recursos_vaaf_fundeb) é base VAAT e não substitui a contribuição oficial ao fundo.
+    compl["recursos_vaaf"] = compl["recursos_contribuicao"].fillna(compl["recursos_vaaf_fundeb"]).fillna(0)
     compl["recursos_vaat"] = compl["recursos_vaat"].fillna(0)
 
     total_vaar = float(compl["comp_vaar_oficial"].sum())
@@ -265,6 +404,7 @@ def _gerar_cenario_referencia(
     compl: pd.DataFrame,
     pesos: pd.DataFrame,
     modo: Literal["nf", "drec"],
+    complementacao: dict[str, float],
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     from simulador import simula_fundeb
 
@@ -273,9 +413,9 @@ def _gerar_cenario_referencia(
         dados_matriculas=mat_sim,
         dados_complementar=compl,
         dados_peso=pesos,
-        complementacao_vaaf=COMPLEMENTACAO_2026["vaaf"],
-        complementacao_vaat=COMPLEMENTACAO_2026["vaat"],
-        complementacao_vaar=COMPLEMENTACAO_2026["vaar"],
+        complementacao_vaaf=complementacao["vaaf"],
+        complementacao_vaat=complementacao["vaat"],
+        complementacao_vaar=complementacao.get("vaar", 0),
         max_nse=1.0,
         min_nse=1.0,
         max_nf=1.0,
@@ -374,8 +514,12 @@ def construir_dataset_2026(usar_cache: bool = True) -> FundebDataset:
             return cached
 
     mat, pesos = _ler_matriculas_fp(2026)
-    compl = _montar_complementar_2026(mat, pesos)
-    cenario, agregada, ufs = _gerar_cenario_referencia(mat, compl, pesos, "drec")
+    compl = _montar_complementar(mat, 2026, pesos)
+    receita = _ler_receita_total(2026)
+    defaults = _complementacao_de_receita(receita)
+    if defaults["vaaf"] <= 0:
+        defaults = COMPLEMENTACAO_2026.copy()
+    cenario, agregada, ufs = _gerar_cenario_referencia(mat, compl, pesos, "drec", defaults)
     nomes, familias = _etapas_nomes_familias(pesos)
 
     ds = FundebDataset(
@@ -390,7 +534,7 @@ def construir_dataset_2026(usar_cache: bool = True) -> FundebDataset:
         familias=familias,
         modo_ponderador="drec",
         simulacao_habilitada=True,
-        defaults_complementacao=COMPLEMENTACAO_2026.copy(),
+        defaults_complementacao=defaults,
     )
     try:
         _salvar_cache(2026, ds)
@@ -399,16 +543,8 @@ def construir_dataset_2026(usar_cache: bool = True) -> FundebDataset:
     return ds
 
 
-def construir_dataset_2025(usar_cache: bool = True) -> FundebDataset:
-    if usar_cache:
-        cached = _carregar_cache(2025)
-        if cached is not None:
-            return cached
-
-    mat, pesos = _ler_matriculas_fp(2025)
-    nomes, familias = _etapas_nomes_familias(pesos)
-
-    compl = pd.DataFrame({
+def _complementar_placeholder(mat: pd.DataFrame) -> pd.DataFrame:
+    return pd.DataFrame({
         "ibge": mat["ibge"],
         "uf": mat["uf"],
         "nome": mat["nome"],
@@ -421,30 +557,59 @@ def construir_dataset_2025(usar_cache: bool = True) -> FundebDataset:
         "inabilitados_vaat": False,
     })
 
-    cenario_vazio = compl.copy()
+
+def _cenario_vazio(compl: pd.DataFrame) -> pd.DataFrame:
+    cenario = compl.copy()
     for col in [
         "matriculas_vaaf", "matriculas_vaat", "recursos_vaaf_final", "vaaf_final",
         "vaat_pre", "recursos_vaat_final", "vaat_final", "complemento_vaaf",
         "complemento_vaat", "complemento_vaar", "complemento_uniao", "recursos_fundeb",
     ]:
-        cenario_vazio[col] = 0.0
+        cenario[col] = 0.0
+    return cenario
+
+
+def construir_dataset_2025(usar_cache: bool = True) -> FundebDataset:
+    if usar_cache:
+        cached = _carregar_cache(2025)
+        if cached is not None:
+            return cached
+
+    mat, pesos = _ler_matriculas_fp(2025)
+    nomes, familias = _etapas_nomes_familias(pesos)
+
+    if dados_auxiliares_completos(2025):
+        compl = _montar_complementar(mat, 2025, pesos)
+        receita = _ler_receita_total(2025)
+        defaults = _complementacao_de_receita(receita)
+        if defaults["vaaf"] <= 0:
+            defaults = COMPLEMENTACAO_2025.copy()
+        cenario, agregada, ufs = _gerar_cenario_referencia(mat, compl, pesos, "drec", defaults)
+        simulacao_habilitada = True
+        mensagem_bloqueio = None
+    else:
+        compl = _complementar_placeholder(mat)
+        cenario = _cenario_vazio(compl)
+        agregada = pd.DataFrame(columns=["uf", "complemento_uniao"])
+        ufs = pd.DataFrame(columns=["uf", "vaaf_final", "vaat_final"])
+        defaults = COMPLEMENTACAO_2025.copy()
+        simulacao_habilitada = False
+        mensagem_bloqueio = MENSAGEM_BLOQUEIO_2025
 
     ds = FundebDataset(
         ano=2025,
         matriculas=mat,
         pesos=pesos,
         complementar=compl,
-        cenario_atual=cenario_vazio,
-        cenario_atual_agregada=pd.DataFrame(columns=["uf", "complemento_uniao"]),
-        cenario_ufs_atual=pd.DataFrame(columns=["uf", "vaaf_final", "vaat_final"]),
+        cenario_atual=cenario,
+        cenario_atual_agregada=agregada,
+        cenario_ufs_atual=ufs,
         etapas_nomes=nomes,
         familias=familias,
         modo_ponderador="drec",
-        simulacao_habilitada=False,
-        mensagem_bloqueio=(
-            "Receitas e ponderadores oficiais de 2025 ainda não disponíveis. "
-            "Matrículas carregadas apenas para consulta."
-        ),
+        simulacao_habilitada=simulacao_habilitada,
+        mensagem_bloqueio=mensagem_bloqueio,
+        defaults_complementacao=defaults,
     )
     try:
         _salvar_cache(2025, ds)
@@ -456,37 +621,25 @@ def construir_dataset_2025(usar_cache: bool = True) -> FundebDataset:
 def carregar_nse_pdf(nome_pdf: str) -> pd.DataFrame:
     caminho_data = os.path.join(DATA_DIR, nome_pdf)
     caminho_raiz = os.path.join(ROOT_DIR, nome_pdf)
+    caminho_raw = os.path.join(RAW_DIR, nome_pdf)
     if os.path.exists(caminho_data):
         caminho = caminho_data
+    elif os.path.exists(caminho_raw):
+        caminho = caminho_raw
     elif os.path.exists(caminho_raiz):
         caminho = caminho_raiz
     else:
         raise FileNotFoundError(f"Arquivo de NSE não encontrado: {nome_pdf}")
 
-    reader = PdfReader(caminho)
-    padrao = re.compile(r"^[A-Z]{2}\s+.+?\s+(\d{1,7})\s+(\d+,\d+)$")
-    dados = []
-    for pagina in reader.pages:
-        texto = pagina.extract_text() or ""
-        for linha in texto.splitlines():
-            linha = re.sub(r"\s+", " ", linha).strip()
-            match = padrao.match(linha)
-            if not match:
-                continue
-            ibge = int(match.group(1))
-            nse = float(match.group(2).replace(",", "."))
-            dados.append((ibge, nse))
-
-    nse_df = pd.DataFrame(dados, columns=["ibge", "nse_pdf"]).drop_duplicates(subset=["ibge"], keep="last")
-    if nse_df.empty:
-        raise RuntimeError("Não foi possível extrair NSE do PDF oficial.")
-    return nse_df
+    return _extrair_ponderador_pdf(caminho, "nse_pdf")
 
 
 def carregar_dataset_2024() -> FundebDataset:
     """Carrega dataset legado 2024 (.rda + PDF)."""
 
     def carregar_rda(nome: str) -> pd.DataFrame:
+        import pyreadr
+
         caminho = os.path.join(DATA_DIR, nome)
         resultado = pyreadr.read_r(caminho)
         return list(resultado.values())[0]

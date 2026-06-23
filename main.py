@@ -3,6 +3,8 @@ API Backend - Simulador FUNDEB v2
 FastAPI + endpoints para simulação e consulta de dados
 """
 
+from __future__ import annotations
+
 import os
 import math
 import re
@@ -11,7 +13,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-import pyreadr
 from pypdf import PdfReader
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +33,8 @@ ARQ_PONDERADOR_NSE = "PonderadorNSE 2024.pdf"
 
 
 def carregar_rda(nome: str) -> pd.DataFrame:
+    import pyreadr
+
     caminho = os.path.join(DATA_DIR, nome)
     resultado = pyreadr.read_r(caminho)
     return list(resultado.values())[0]
