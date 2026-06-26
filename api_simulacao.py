@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from auth.deps import get_current_user
 from auth.models import UserRecord
-from dados.fundeb_dataset import ESTADOS_REGIOES, FundebDataset, carregar_dataset
+from dados.fundeb_dataset import ESTADOS_REGIOES, FundebDataset, carregar_dataset, listar_entes_por_uf
 from simulador import simula_fundeb
 from validacao import validar_interno
 
@@ -295,7 +295,7 @@ def registrar_rotas_ano(app, ano: int, prefix: str | None = None):
     @app.get(f"{prefix}/municipios")
     def listar_municipios(uf: str, _user: UserRecord = Depends(get_current_user)):
         ds = _ds(ano)
-        df = ds.complementar[ds.complementar["uf"] == uf][["ibge", "nome", "uf"]].sort_values("nome")
+        df = listar_entes_por_uf(ds.complementar, uf)
         return sanitize_for_json(df.to_dict(orient="records"))
 
     @app.get(f"{prefix}/pesos")

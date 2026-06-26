@@ -6,6 +6,7 @@ from dados.fundeb_dataset import (
     RAW_ARQUIVOS,
     carregar_dataset,
     dados_auxiliares_completos,
+    listar_entes_por_uf,
 )
 
 
@@ -36,3 +37,13 @@ def test_dataset_2025_modo_conforme_arquivos():
         assert ds.mensagem_bloqueio == MENSAGEM_BLOQUEIO_2025
         assert ds.complementar["recursos_vaaf"].sum() == 0
         assert ds.defaults_complementacao == COMPLEMENTACAO_2025
+
+
+def test_entes_estaduais_em_complementar_2025():
+    ds = carregar_dataset(2025)
+    estados = ds.complementar[ds.complementar["ibge"] < 100]
+    assert len(estados) == 27
+    assert set(estados["uf"]) == set(ds.complementar["uf"].unique())
+    ac = listar_entes_por_uf(ds.complementar, "AC")
+    assert ac.iloc[0]["ibge"] == 12
+    assert ac.iloc[0]["nome"] == "Acre"

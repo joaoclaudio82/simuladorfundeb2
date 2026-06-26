@@ -58,7 +58,37 @@ MENSAGEM_BLOQUEIO_2025 = (
 )
 
 # Incrementar ao alterar ETL (invalida dataset.pkl em data/{ano}/)
-DATASET_CACHE_VERSION = 5
+DATASET_CACHE_VERSION = 6
+
+NOMES_ESTADOS = {
+    "AC": "Acre",
+    "AL": "Alagoas",
+    "AM": "Amazonas",
+    "AP": "Amapá",
+    "BA": "Bahia",
+    "CE": "Ceará",
+    "DF": "Distrito Federal",
+    "ES": "Espírito Santo",
+    "GO": "Goiás",
+    "MA": "Maranhão",
+    "MG": "Minas Gerais",
+    "MS": "Mato Grosso do Sul",
+    "MT": "Mato Grosso",
+    "PA": "Pará",
+    "PB": "Paraíba",
+    "PE": "Pernambuco",
+    "PI": "Piauí",
+    "PR": "Paraná",
+    "RJ": "Rio de Janeiro",
+    "RN": "Rio Grande do Norte",
+    "RO": "Rondônia",
+    "RR": "Roraima",
+    "RS": "Rio Grande do Sul",
+    "SC": "Santa Catarina",
+    "SE": "Sergipe",
+    "SP": "São Paulo",
+    "TO": "Tocantins",
+}
 
 ESTADOS_REGIOES = {
     "Norte": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
@@ -91,6 +121,22 @@ def normalizar_ibge(valor) -> int | None:
     if v < 100:
         return v
     return v
+
+
+def _normalizar_nomes_entes_estaduais(df: pd.DataFrame) -> pd.DataFrame:
+    """Alinha rótulo dos entes estaduais (ibge < 100) ao padrão de 2024."""
+    mask = df["ibge"] < 100
+    if mask.any():
+        df = df.copy()
+        df.loc[mask, "nome"] = df.loc[mask, "uf"].map(NOMES_ESTADOS).fillna(df.loc[mask, "nome"])
+    return df
+
+
+def listar_entes_por_uf(complementar: pd.DataFrame, uf: str) -> pd.DataFrame:
+    """Lista entes da UF: governo estadual primeiro, depois municípios por nome."""
+    df = complementar[complementar["uf"] == uf][["ibge", "nome", "uf"]].copy()
+    df["_prio"] = np.where(df["ibge"] < 100, 0, 1)
+    return df.sort_values(["_prio", "nome"]).drop(columns=["_prio"])
 
 
 def familia_segmento(nome: str) -> str:
@@ -172,6 +218,7 @@ def _ler_matriculas_fp(ano: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     mat["ibge"] = mat["ibge"].astype(int)
     for c in etapa_cols:
         mat[c] = mat[c].fillna(0)
+    mat = _normalizar_nomes_entes_estaduais(mat)
     return mat, fps[["nome", "etapa", "peso_vaaf", "peso_vaat"]]
 
 

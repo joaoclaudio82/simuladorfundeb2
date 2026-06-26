@@ -309,7 +309,7 @@ def carregar_campos_tecnicos_xlsx(nome_xlsx: str) -> pd.DataFrame:
 
 from auth.database import init_db, seed_admin_if_empty
 from auth.routes import router as auth_router
-from dados.fundeb_dataset import ESTADOS_REGIOES, carregar_dataset
+from dados.fundeb_dataset import ESTADOS_REGIOES, carregar_dataset, listar_entes_por_uf
 from auth.deps import get_current_user
 from auth.models import UserRecord
 from api_simulacao import (
@@ -368,7 +368,7 @@ def listar_estados(_user: UserRecord = Depends(get_current_user)):
 
 @app.get("/api/municipios")
 def listar_municipios(uf: str, _user: UserRecord = Depends(get_current_user)):
-    df = complementar[complementar["uf"] == uf][["ibge", "nome", "uf"]].sort_values("nome")
+    df = listar_entes_por_uf(complementar, uf)
     return sanitize_for_json(df.to_dict(orient="records"))
 
 

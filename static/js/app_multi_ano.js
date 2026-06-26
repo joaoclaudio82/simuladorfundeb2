@@ -500,7 +500,7 @@ function populateMunSelectors(ano) {
     selMun.innerHTML = '<option value="">Carregando...</option>';
     const mun = await apiAno(ano, `/municipios?uf=${uf}`);
     selMun.innerHTML = '<option value="">Selecione...</option>';
-    mun.filter((m) => m.ibge > 100).forEach((m) => {
+    mun.forEach((m) => {
       const opt = document.createElement('option');
       opt.value = m.ibge;
       opt.textContent = `${m.nome} (${m.ibge})`;

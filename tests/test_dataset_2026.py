@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import pytest
 
-from dados.fundeb_dataset import RAW_DIR, carregar_dataset, COMPLEMENTACAO_2026
+from dados.fundeb_dataset import RAW_DIR, carregar_dataset, COMPLEMENTACAO_2026, listar_entes_por_uf
 from simulador import simula_fundeb
 from validacao import validar_interno
 
@@ -92,3 +92,11 @@ def test_dataset_2025_bloqueado(ds2026):
     else:
         assert ds.simulacao_habilitada is False
         assert ds.mensagem_bloqueio
+
+
+def test_entes_estaduais_em_complementar_2026(ds2026):
+    estados = ds2026.complementar[ds2026.complementar["ibge"] < 100]
+    assert len(estados) == 27
+    ac = listar_entes_por_uf(ds2026.complementar, "AC")
+    assert ac.iloc[0]["ibge"] == 12
+    assert ac.iloc[0]["nome"] == "Acre"
