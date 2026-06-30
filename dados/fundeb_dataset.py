@@ -44,6 +44,7 @@ RAW_ARQUIVOS: dict[int, dict[str, str]] = {
         "vaat": "Receita STN 2023 VAAT 2025 para publicação.xlsx",
     },
     2026: {
+        "matriculas": "Matrículas Fundeb 2026.xlsx",
         "receita": "1-receita-total-do-fundeb-por-ente-federado.xlsx",
         "nse": "ponderador-de-nivel-socioeconomico.xlsx",
         "drec": "ponderador-de-disponibilidade-de-recursos.xlsx",
@@ -58,7 +59,7 @@ MENSAGEM_BLOQUEIO_2025 = (
 )
 
 # Incrementar ao alterar ETL (invalida dataset.pkl em data/{ano}/)
-DATASET_CACHE_VERSION = 6
+DATASET_CACHE_VERSION = 7
 
 NOMES_ESTADOS = {
     "AC": "Acre",
@@ -173,8 +174,17 @@ class FundebDataset:
         return self.pesos["etapa"].tolist()
 
 
+def _caminho_matriculas(ano: int) -> str:
+    """Planilha de matrículas/FPs por exercício (fallback: unificada 2025+2026)."""
+    if ano in RAW_ARQUIVOS and "matriculas" in RAW_ARQUIVOS[ano]:
+        path = _path_raw(ano, "matriculas")
+        if os.path.isfile(path):
+            return path
+    return os.path.join(RAW_DIR, "Matrículas Fundeb 2025 e 2026.xlsx")
+
+
 def _ler_matriculas_fp(ano: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    caminho = os.path.join(RAW_DIR, "Matrículas Fundeb 2025 e 2026.xlsx")
+    caminho = _caminho_matriculas(ano)
     det = pd.read_excel(caminho, sheet_name="Detalhadas", header=2)
     fps = pd.read_excel(caminho, sheet_name="FPs")
 
@@ -183,7 +193,8 @@ def _ler_matriculas_fp(ano: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     col_nome = "Ente Federado"
     col_ibge = "Cód IBGE"
 
-    det = det[det[col_ano] == ano].copy().reset_index(drop=True)
+    if col_ano in det.columns and det[col_ano].nunique() > 1:
+        det = det[det[col_ano] == ano].copy().reset_index(drop=True)
     det[col_ibge] = det[col_ibge].apply(normalizar_ibge)
     det = det[det[col_ibge].notna()].copy()
     det[col_ibge] = det[col_ibge].astype(int)

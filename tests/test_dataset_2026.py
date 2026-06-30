@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import pytest
 
-from dados.fundeb_dataset import RAW_DIR, carregar_dataset, COMPLEMENTACAO_2026, listar_entes_por_uf
+from dados.fundeb_dataset import RAW_DIR, carregar_dataset, COMPLEMENTACAO_2026, listar_entes_por_uf, _caminho_matriculas
 from simulador import simula_fundeb
 from validacao import validar_interno
 
@@ -92,6 +92,12 @@ def test_dataset_2025_bloqueado(ds2026):
     else:
         assert ds.simulacao_habilitada is False
         assert ds.mensagem_bloqueio
+
+
+def test_matriculas_2026_arquivo_dedicado():
+    path = _caminho_matriculas(2026)
+    assert path.endswith("Matrículas Fundeb 2026.xlsx")
+    assert os.path.isfile(path)
 
 
 def test_entes_estaduais_em_complementar_2026(ds2026):
