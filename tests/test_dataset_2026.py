@@ -100,6 +100,30 @@ def test_matriculas_2026_arquivo_dedicado():
     assert os.path.isfile(path)
 
 
+def test_inabilitados_vaat_lista_oficial_2026(ds2026):
+    """Inabilitados devem vir da lista oficial FNDE (25 entes, incluindo MG)."""
+    inab = ds2026.complementar[ds2026.complementar["inabilitados_vaat"] == True]
+    assert len(inab) == 25, f"esperados 25 inabilitados, obtidos {len(inab)}"
+    assert 31 in inab["ibge"].values  # Minas Gerais (ente estadual)
+
+
+def test_inabilitados_nao_recebem_complemento_vaat_2026(ds2026):
+    mat = ds2026.matriculas.drop(columns=["uf", "nome"], errors="ignore")
+    sim = simula_fundeb(
+        mat,
+        ds2026.complementar,
+        ds2026.pesos,
+        COMPLEMENTACAO_2026["vaaf"],
+        COMPLEMENTACAO_2026["vaat"],
+        0,
+        1.0, 1.0, 1.0, 1.0,
+        modo_ponderador="drec",
+    )
+    inab = sim[sim["inabilitados_vaat"] == True]
+    assert len(inab) == 25
+    assert (inab["complemento_vaat"].abs() < 0.01).all()
+
+
 def test_entes_estaduais_em_complementar_2026(ds2026):
     estados = ds2026.complementar[ds2026.complementar["ibge"] < 100]
     assert len(estados) == 27

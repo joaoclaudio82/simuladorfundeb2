@@ -797,28 +797,30 @@ function renderResultadosMunicipio(data, opts) {
   });
 
   // Card original
+  const fmtCoef = (v) => (v == null || isNaN(v)) ? '-' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 8, maximumFractionDigits: 8 });
   const renderCard = (container, d) => {
+    const ufFundo = d.fundo_estadual?.uf || d.uf;
     const items = [
-      ['Matrículas VAAF', fmt.numero(d.matriculas_vaaf)],
-      ['Matrículas VAAT', fmt.numero(d.matriculas_vaat)],
+      ['Matrículas VAAF', fmt.numero(d.matriculas_brutas)],
+      ['Matrículas ponderadas VAAF', fmt.numero(d.matriculas_vaaf)],
+      ['Matrículas ponderadas VAAT', fmt.numero(d.matriculas_vaat)],
       ['Matrículas ponderadas VAAF do Fundo', fmt.numero(d.fundo_estadual?.matriculas_pond_vaaf)],
-      ['Matrículas ponderadas VAAT do Fundo', fmt.numero(d.fundo_estadual?.matriculas_pond_vaat)],
-      [`Fundo ${d.fundo_estadual?.uf || d.uf}`, fmt.moeda(d.fundo_estadual?.receitas_vaaf)],
-      ['Receitas VAAT do Fundo', fmt.moeda(d.fundo_estadual?.receitas_vaat)],
-      ['Recursos VAAF', fmt.moeda(d.recursos_vaaf)],
-      ['Recursos VAAT', fmt.moeda(d.recursos_vaat)],
+      [`Receitas VAAF Fundo ${ufFundo}`, fmt.moeda(d.fundo_estadual?.receitas_vaaf)],
+      [`Complemento VAAF Fundo ${ufFundo}`, fmt.moeda(d.fundo_estadual?.complemento_vaaf_fundo)],
+      ['Receita da contribuição de estados e municípios ao Fundeb', fmt.moeda(d.recursos_vaaf)],
+      ['Receitas VAAT', fmt.moeda(d.recursos_vaat)],
       ['VAAF-MIN', fmt.numero(d.vaaf_minimo)],
       ['VAAT-MIN', fmt.numero(d.vaat_minimo)],
       ['VAAF (antes da complementação)', fmt.numero(d.vaaf)],
       ['VAAT (antes da complementação)', fmt.numero(d.vaat)],
-      ['Coeficiente (matrículas ente / fundo)', fmt.numero(d.coeficiente)],
+      ['Coeficiente (matrículas ente / fundo)', fmtCoef(d.coeficiente)],
       ['VAAF Final', fmt.numero(d.vaaf_final)],
       ['VAAT Final', fmt.numero(d.vaat_final)],
       ['Complemento VAAF', fmt.moeda(d.complemento_vaaf)],
       ['Complemento VAAT', fmt.moeda(d.complemento_vaat)],
       ['Complemento VAAR', fmt.moeda(d.complemento_vaar)],
       ['Total Complementação', fmt.moeda(d.complemento_uniao)],
-      ['Recursos FUNDEB', fmt.moeda(d.recursos_fundeb)],
+      ['Receita Total do Fundeb', fmt.moeda(d.recursos_fundeb)],
     ];
     $(container).innerHTML = items.map(([label, value]) =>
       `<div class="comparison-row"><span class="comparison-label">${label}</span><span class="comparison-value">${value}</span></div>`

@@ -460,8 +460,8 @@ def simular_municipio(req: SimulacaoMunicipioRequest, user: UserRecord = Depends
                     mat.loc[idx, etapa] = valor
         sim_original = executar_simulacao(req, _DS2024, matriculas, user=user)
         sim_ajustada = executar_simulacao(req, _DS2024, mat, user=user)
-        mun_original = extrair_detalhes_municipio(sim_original, req.ibge)
-        mun_ajustado = extrair_detalhes_municipio(sim_ajustada, req.ibge)
+        mun_original = extrair_detalhes_municipio(sim_original, req.ibge, matriculas)
+        mun_ajustado = extrair_detalhes_municipio(sim_ajustada, req.ibge, mat)
         uf = mun_original["uf"]
         return sanitize_for_json({
             "municipio_original": mun_original,

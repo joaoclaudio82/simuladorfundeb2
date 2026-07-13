@@ -49,6 +49,7 @@ RAW_ARQUIVOS: dict[int, dict[str, str]] = {
         "nse": "ponderador-de-nivel-socioeconomico.xlsx",
         "drec": "ponderador-de-disponibilidade-de-recursos.xlsx",
         "vaat": "MemriadeClculoVAAT2026 (2).xlsx",
+        "inabilitados": "ListadosenteshabilitadoseinabilitadosaoVAAT2026Posicaofinalcomajustededecisaojudicial.xlsm",
     },
 }
 
@@ -59,7 +60,7 @@ MENSAGEM_BLOQUEIO_2025 = (
 )
 
 # Incrementar ao alterar ETL (invalida dataset.pkl em data/{ano}/)
-DATASET_CACHE_VERSION = 7
+DATASET_CACHE_VERSION = 8
 
 NOMES_ESTADOS = {
     "AC": "Acre",
@@ -408,6 +409,20 @@ def _ler_vaat_receitas(ano: int = 2026, mat: pd.DataFrame | None = None, pesos: 
     return out
 
 
+def _ler_inabilitados_vaat(ano: int) -> set[int] | None:
+    """Lista oficial FNDE de entes inabilitados ao VAAT (None se indisponível)."""
+    if not _arquivo_raw_existe(ano, "inabilitados"):
+        return None
+    df = pd.read_excel(_path_raw(ano, "inabilitados"), sheet_name=0, header=None, skiprows=9)
+    df = df.iloc[:, :4]
+    df.columns = ["uf", "nome", "ibge", "verificacao"]
+    df["ibge"] = df["ibge"].apply(normalizar_ibge)
+    df = df[df["ibge"].notna()].copy()
+    df["ibge"] = df["ibge"].astype(int)
+    habilitado = df["verificacao"].astype(str).str.contains("Habilitado", case=False, na=False)
+    return set(df.loc[~habilitado, "ibge"].tolist())
+
+
 def _complementacao_de_receita(receita: pd.DataFrame) -> dict[str, float]:
     """Deriva totais VAAF/VAAT/VAAR da planilha de receita quando disponível."""
     return {
@@ -448,7 +463,11 @@ def _montar_complementar(mat: pd.DataFrame, ano: int, pesos: pd.DataFrame | None
     else:
         compl["peso_vaar"] = 0.0
 
-    compl["inabilitados_vaat"] = compl["matriculas_vaat_ref"].fillna(0) <= 0
+    inabilitados_oficial = _ler_inabilitados_vaat(ano)
+    if inabilitados_oficial is not None:
+        compl["inabilitados_vaat"] = compl["ibge"].isin(inabilitados_oficial)
+    else:
+        compl["inabilitados_vaat"] = compl["matriculas_vaat_ref"].fillna(0) <= 0
 
     cols = [
         "ibge", "uf", "nome", "recursos_vaaf", "recursos_vaat",

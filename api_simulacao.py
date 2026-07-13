@@ -172,7 +172,7 @@ def calcular_vaat_minimo(sim: pd.DataFrame) -> float:
     return float(hab["vaat_final"].min())
 
 
-def extrair_detalhes_municipio(sim: pd.DataFrame, ibge: int) -> dict:
+def extrair_detalhes_municipio(sim: pd.DataFrame, ibge: int, mat: pd.DataFrame | None = None) -> dict:
     linha = sim[sim["ibge"] == ibge]
     if len(linha) == 0:
         raise HTTPException(404, "Município não encontrado")
@@ -188,12 +188,21 @@ def extrair_detalhes_municipio(sim: pd.DataFrame, ibge: int) -> dict:
         float(mun["matriculas_vaaf"] / matriculas_estado_vaaf)
         if matriculas_estado_vaaf > 0 else 0.0
     )
+    mun["matriculas_brutas"] = 0.0
+    if mat is not None:
+        row_mat = mat[mat["ibge"] == ibge]
+        if len(row_mat) > 0:
+            etapa_cols = [c for c in mat.columns if c not in ("ibge", "uf", "nome")]
+            mun["matriculas_brutas"] = float(
+                pd.to_numeric(row_mat.iloc[0][etapa_cols], errors="coerce").fillna(0).sum()
+            )
     mun["fundo_estadual"] = {
         "uf": uf,
         "matriculas_pond_vaaf": matriculas_estado_vaaf,
         "matriculas_pond_vaat": float(estado["matriculas_vaat"].sum()) if len(estado) > 0 else 0.0,
         "receitas_vaaf": float(estado["recursos_vaaf"].sum()) if len(estado) > 0 else 0.0,
         "receitas_vaat": float(estado["recursos_vaat"].sum()) if len(estado) > 0 else 0.0,
+        "complemento_vaaf_fundo": float(estado["complemento_vaaf"].sum()) if len(estado) > 0 else 0.0,
     }
     return mun
 
@@ -389,8 +398,8 @@ def registrar_rotas_ano(app, ano: int, prefix: str | None = None):
                         mat.loc[idx, etapa] = valor
             sim_original = executar_simulacao(req, ds, ds.matriculas, user=user)
             sim_ajustada = executar_simulacao(req, ds, mat, user=user)
-            mun_original = extrair_detalhes_municipio(sim_original, req.ibge)
-            mun_ajustado = extrair_detalhes_municipio(sim_ajustada, req.ibge)
+            mun_original = extrair_detalhes_municipio(sim_original, req.ibge, ds.matriculas)
+            mun_ajustado = extrair_detalhes_municipio(sim_ajustada, req.ibge, mat)
             uf = mun_original["uf"]
             return sanitize_for_json({
                 "municipio_original": mun_original,
