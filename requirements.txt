@@ -1,7 +1,14 @@
 fastapi
 uvicorn[standard]
 pandas
+openpyxl
 numpy
 pyreadr
+pypdf
 pydantic
 pytest
+odfpy
+pyarrow
+bcrypt
+python-jose[cryptography]
+httpx
