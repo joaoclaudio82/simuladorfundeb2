@@ -1,225 +1,263 @@
-# Manual completo — Simulador FUNDEB v2
+# Manual do Simulador FUNDEB v2
 
-**Versão:** maio/2026  
-**Público:** gestores educacionais, analistas, professores, técnicos e desenvolvedores — inclusive quem nunca ouviu falar em FUNDEB  
+**Versão do documento:** agosto/2026 (branch `maio2026`)
+**Público:** gestores educacionais, analistas, professores, técnicos e desenvolvedores — inclusive quem nunca ouviu falar em FUNDEB
 **Autor:** IFCE — prof. João Cláudio Nunes Carvalho
 
 ---
 
 ## Como ler este manual
 
-Este documento foi escrito para ser lido **do começo ao fim por qualquer pessoa**, mesmo sem conhecimento técnico ou de finanças públicas. A ideia é que, ao terminar, você entenda:
+O manual está dividido em três partes. Você não precisa ler tudo:
 
-- **O que** o sistema faz e por que ele existe (seções 1 e 2);
-- **Como usar** cada tela, passo a passo (seções 3 a 8);
-- **Como o sistema funciona por dentro** — para quem quiser ir mais fundo (seções 9 a 14).
+| Parte | Seções | Para quem |
+|-------|--------|-----------|
+| **I — Entender** | 1 e 2 | Todo mundo. Explica o que é o sistema e o que é o FUNDEB, sem jargão. |
+| **II — Usar** | 3 a 8 | Quem vai operar o simulador no dia a dia. |
+| **III — Manter** | 9 a 18 | Quem mantém, integra, audita ou atualiza os dados do sistema. |
 
-Se você é **gestor, professor ou analista** e quer apenas *usar* o simulador, leia as seções **1 a 8** — elas bastam. As seções **9 em diante** são para quem precisa manter, integrar ou auditar o sistema.
-
-> 💡 **Dica de leitura:** sempre que aparecer uma sigla (VAAF, NSE, DREC…), não se assuste. A **seção 2** explica cada uma delas em linguagem do dia a dia, e há um **glossário** no fim (seção 16) para consulta rápida.
+Se aparecer uma sigla desconhecida (VAAF, VAAT, NSE, DREC…), a **seção 2** explica cada uma em linguagem do dia a dia e o **glossário** da seção 17 serve para consulta rápida.
 
 ---
 
-## Índice
+## Sumário
 
-1. [Introdução — o que é e para que serve](#1-introdução--o-que-é-e-para-que-serve)
-2. [Conceitos essenciais do FUNDEB (em linguagem simples)](#2-conceitos-essenciais-do-fundeb-em-linguagem-simples)
+**Parte I — Entender**
+
+1. [Visão geral do sistema](#1-visão-geral-do-sistema)
+2. [O FUNDEB em linguagem simples](#2-o-fundeb-em-linguagem-simples)
+
+**Parte II — Usar**
+
 3. [Instalação e execução](#3-instalação-e-execução)
-4. [Autenticação e perfis de acesso](#4-autenticação-e-perfis-de-acesso)
-5. [Interface do usuário](#5-interface-do-usuário)
-6. [Funcionalidades por exercício (2024, 2025 e 2026)](#6-funcionalidades-por-exercício-2024-2025-e-2026)
-7. [Simulação municipal e entes estaduais](#7-simulação-municipal-e-entes-estaduais)
+4. [Login e perfis de acesso](#4-login-e-perfis-de-acesso)
+5. [As telas do sistema](#5-as-telas-do-sistema)
+6. [Os exercícios 2024, 2025 e 2026](#6-os-exercícios-2024-2025-e-2026)
+7. [Como ler os cards de cenário](#7-como-ler-os-cards-de-cenário)
 8. [Administração de usuários](#8-administração-de-usuários)
+
+**Parte III — Manter**
+
 9. [Arquitetura técnica](#9-arquitetura-técnica)
-10. [Fontes de dados](#10-fontes-de-dados)
-11. [Motor de simulação (algoritmo, passo a passo)](#11-motor-de-simulação-algoritmo-passo-a-passo)
-12. [Validação automática](#12-validação-automática)
+10. [Fontes de dados e cache](#10-fontes-de-dados-e-cache)
+11. [Motor de simulação, passo a passo](#11-motor-de-simulação-passo-a-passo)
+12. [Validação automática (RF-10)](#12-validação-automática-rf-10)
 13. [API REST](#13-api-rest)
 14. [Testes automatizados](#14-testes-automatizados)
-15. [Solução de problemas](#15-solução-de-problemas)
-16. [Glossário](#16-glossário)
-17. [Referências](#17-referências)
+15. [Operação e manutenção](#15-operação-e-manutenção)
+16. [Solução de problemas](#16-solução-de-problemas)
+17. [Glossário](#17-glossário)
+18. [Referências](#18-referências)
 
 ---
 
-## 1. Introdução — o que é e para que serve
+# Parte I — Entender
 
-### 1.1 O que é o sistema, em uma frase
+## 1. Visão geral do sistema
 
-O **Simulador de Fatores de Ponderação do FUNDEB v2** é um **programa de computador que funciona no navegador** e que **imita as contas oficiais de distribuição do dinheiro da educação básica** no Brasil. Ele permite fazer perguntas do tipo *"e se…?"* e ver a resposta em números e gráficos.
+### 1.1 O que é, em uma frase
 
-> **Uma analogia:** pense num simulador de voo. O piloto pode treinar decolagens e pousos sem colocar um avião de verdade no ar. Aqui é parecido: o gestor pode "brincar" com os parâmetros da distribuição de recursos — mudar valores, pesos e matrículas — e ver o resultado **sem mexer no dinheiro real**. É um laboratório seguro para testar ideias e entender consequências.
+O **Simulador de Fatores de Ponderação do FUNDEB v2** é um programa que roda no navegador e **reproduz as contas oficiais de distribuição do dinheiro da educação básica** no Brasil. Ele permite fazer perguntas do tipo *"e se…?"* e ver a resposta em números, tabelas e gráficos.
 
-O sistema reproduz a lógica prevista na **Lei nº 14.113/2020** (a lei que rege o FUNDEB) e no pacote de cálculo original escrito em linguagem R. A seção 2 explica o que é o FUNDEB; por enquanto, basta saber que é o fundo que financia escolas públicas de creche até o ensino médio.
+> **Analogia:** pense num simulador de voo. O piloto treina decolagens e pousos sem colocar um avião de verdade no ar. Aqui é igual: o gestor altera montantes, pesos e matrículas e vê o resultado **sem mexer no dinheiro real**. É um laboratório seguro para testar ideias antes de defendê-las.
 
-### 1.2 Por que ele existe (o problema que resolve)
+O motor reproduz a lógica da **Lei nº 14.113/2020** e do pacote de cálculo original escrito em R. A seção 2 explica o que é o FUNDEB; por ora, basta saber que é o fundo que financia as escolas públicas, da creche ao ensino médio.
 
-A distribuição do FUNDEB envolve **milhares de municípios, 27 unidades da federação, dezenas de tipos de matrícula e vários "pesos" diferentes**. Fazer essa conta "na mão", numa planilha, é lento e propenso a erros. Além disso, uma pequena mudança num município pode, por efeito dominó, afetar todos os outros do mesmo estado.
+### 1.2 O problema que ele resolve
 
-Este simulador resolve isso oferecendo:
+A distribuição do FUNDEB envolve **5.596 entes federados, 27 fundos estaduais, centenas de tipos de matrícula e vários pesos diferentes**. Fazer essa conta numa planilha é lento e arriscado — e há um agravante: por causa da equalização, **mexer em um município altera o resultado de todos os outros do mesmo estado**, em cascata.
 
-- **Rapidez:** a conta que levaria horas numa planilha roda em segundos;
-- **Segurança:** ninguém precisa arriscar cálculos manuais sobre dinheiro público real;
-- **Transparência:** o sistema mostra o passo a passo e ainda **confere a própria matemática** (a "validação automática", seção 12);
-- **Experimentação:** dá para testar políticas públicas antes de propô-las (por exemplo: "e se valorizássemos mais a creche integral?").
+O simulador entrega:
 
-### 1.3 O que você pode fazer
+- **Rapidez:** o que levaria horas numa planilha roda em segundos.
+- **Segurança:** nenhum cálculo manual sobre dinheiro público real.
+- **Transparência:** o sistema mostra o passo a passo e ainda **confere a própria matemática** (seção 12).
+- **Experimentação:** dá para testar políticas antes de propô-las ("e se valorizássemos mais a creche integral?").
+- **Comparabilidade:** os rótulos e as linhas dos resultados seguem a nomenclatura das publicações oficiais do FNDE (seção 7).
 
-| Funcionalidade | O que ela faz, em linguagem simples |
-|----------------|--------------------------------------|
-| **Simulação principal** | Recalcula o país inteiro com os valores que você escolher para a complementação federal (VAAF, VAAT, VAAR — explicados na seção 2). |
-| **Ponderações** | Mostra (e, para administradores, permite mudar) o "peso" de cada tipo de matrícula. |
-| **Simulação VAAR** | Foca especificamente na fatia que premia resultados educacionais. |
-| **Simulação municipal** | Muda as matrículas de **um** município ou governo estadual e mostra o efeito nele **e em todos os vizinhos do mesmo estado**. |
-| **Análise regional** | Mostra os resultados organizados por estado (UF). |
-| **Exercícios 2024, 2025 e 2026** | Abas separadas, cada uma com os dados oficiais daquele ano. |
-| **Validação automática** | Confere se as contas fecham (o chamado "RF-10"). |
-| **Gestão de usuários** | Controla quem entra no sistema (login por CPF) e o que cada um pode fazer. |
+### 1.3 O que dá para fazer
 
-### 1.4 Tecnologias (visão geral, sem jargão)
+| Funcionalidade | O que ela faz |
+|----------------|---------------|
+| **Simulação principal** | Recalcula o país inteiro com os montantes de complementação federal que você escolher (VAAF, VAAT e VAAR). |
+| **Ponderações** | Mostra — e, para administradores, permite alterar — o peso de cada tipo de matrícula. |
+| **Simulação VAAR** | Detalha a fatia que premia resultados educacionais. |
+| **Simulação municipal / estadual** | Altera as matrículas de **um** ente e mostra o efeito nele e em todos os demais do mesmo estado. |
+| **Análise regional** | Organiza os resultados por UF (disponível no exercício 2024). |
+| **Exercícios 2024, 2025 e 2026** | Abas separadas, cada uma com os dados oficiais do respectivo ano. |
+| **Validação automática** | Confere se as contas fecham (conjunto RF-10). |
+| **Gestão de usuários** | Controla quem entra (login por CPF) e o que cada perfil pode fazer. |
 
-Você **não precisa** entender esta tabela para usar o sistema — ela é para curiosos e técnicos. Em resumo: o "cérebro" que faz as contas é escrito em **Python**, os dados vêm de **planilhas Excel** e o que você vê na tela é uma **página web comum**.
+### 1.4 Panorama dos dados carregados
 
-| Camada (parte do sistema) | Tecnologia | Para que serve |
-|--------|------------|----------------|
-| Backend (servidor) | Python 3.10+, FastAPI, Uvicorn | Recebe os pedidos e faz as contas |
-| Motor de cálculo | `simulador.py` | O "coração" que reproduz a fórmula do FUNDEB |
-| Leitura de dados | Pandas, Excel (openpyxl), PDF (pypdf), arquivos R legados (`.rda`) | Lê as planilhas oficiais |
-| Autenticação (login) | SQLite, bcrypt, JWT | Guarda usuários e senhas com segurança |
-| Frontend (a tela) | HTML, Bootstrap 5, JavaScript, Plotly.js | O que aparece no navegador, incluindo os gráficos |
-| Testes | pytest | Programas que conferem se o sistema está correto |
+Números efetivamente carregados pelo sistema na versão atual:
 
-> O motor de cálculo é uma **reescrita em Python** do pacote original em R chamado [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb2). "Reescrita" significa que a mesma lógica foi traduzida de uma linguagem de programação para outra, mantendo os resultados idênticos.
+| Exercício | Entes federados | Tipos de matrícula | Ponderador fiscal | Simulação |
+|-----------|-----------------|--------------------|-------------------|-----------|
+| **2024** | 5.595 | 41 etapas | NF (ajustável) | Habilitada |
+| **2025** | 5.595 | 319 segmentos | DREC (oficial) | Habilitada |
+| **2026** | 5.596 | 319 segmentos | DREC (oficial) | Habilitada |
+
+Montantes de complementação usados como valor inicial das telas (somas das colunas oficiais das planilhas de receita):
+
+| Exercício | VAAF | VAAT | VAAR |
+|-----------|------|------|------|
+| **2025** | R$ 26,68 bi | R$ 24,51 bi | R$ 5,09 bi |
+| **2026** | R$ 30,12 bi | R$ 31,63 bi | R$ 7,53 bi |
+
+### 1.5 Tecnologias
+
+Você não precisa desta tabela para usar o sistema. Em resumo: o "cérebro" que faz as contas é **Python**, os dados vêm de **planilhas oficiais** e a tela é uma **página web comum**.
+
+| Camada | Tecnologia | Papel |
+|--------|------------|-------|
+| Backend | Python 3.10+, FastAPI, Uvicorn | Recebe os pedidos e coordena o cálculo |
+| Motor de cálculo | `simulador.py` | Reproduz a fórmula do FUNDEB |
+| Leitura de dados (ETL) | pandas, openpyxl, odfpy, pypdf, pyreadr | Lê XLSX, ODS, PDF e arquivos R (`.rda`) |
+| Autenticação | SQLite, bcrypt, JWT | Usuários e sessões |
+| Frontend | HTML, Bootstrap 5, JavaScript, Plotly.js | Telas, tabelas e gráficos 2D/3D |
+| Testes | pytest | Verificam automaticamente se o sistema continua correto |
+
+> O motor é uma **reescrita em Python** do pacote R [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb2): a mesma lógica traduzida para outra linguagem, mantendo os resultados.
 
 ---
 
-## 2. Conceitos essenciais do FUNDEB (em linguagem simples)
+## 2. O FUNDEB em linguagem simples
 
-Esta é a seção mais importante para quem é leigo. Leia com calma: depois dela, todo o resto do manual fica fácil. Vamos construir o entendimento **tijolo por tijolo**.
+Esta é a seção mais importante para quem é leigo. Depois dela, todo o resto do manual fica fácil.
 
 ### 2.1 O que é o FUNDEB
 
-**FUNDEB** significa *Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação*. É o principal mecanismo que **financia as escolas públicas** — de creches ao ensino médio — em todo o Brasil.
+**FUNDEB** é o *Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação*. É o principal mecanismo que **financia as escolas públicas** — de creches ao ensino médio — em todo o país.
 
-> **Analogia da "vaquinha":** imagine que cada estado organiza uma grande vaquinha (uma "caixinha coletiva"). Estados e municípios daquele território colocam dinheiro na caixinha; depois, esse dinheiro é dividido de volta entre eles conforme **quantos alunos cada um atende**. Quem tem mais alunos matriculados recebe uma fatia maior. O FUNDEB é essa vaquinha, com regras precisas de quanto entra e como se divide.
+> **Analogia da vaquinha:** cada estado organiza uma grande vaquinha. O governo estadual e os municípios daquele território colocam dinheiro na caixinha e, depois, esse dinheiro volta para eles conforme **quantos alunos cada um atende**. Quem atende mais alunos recebe uma fatia maior.
 
-Existe **um fundo para cada estado** (mais o Distrito Federal), ou seja, 27 fundos estaduais. Dentro de cada fundo, o dinheiro é repartido entre o governo do estado e seus municípios.
+Existe **um fundo por estado, mais o Distrito Federal** — 27 fundos. Dentro de cada fundo, o dinheiro é repartido entre o governo estadual e seus municípios.
 
-### 2.2 De onde vem o dinheiro do fundo
+### 2.2 De onde vem o dinheiro
 
-Cada fundo estadual é abastecido por duas fontes:
+Cada fundo estadual tem duas fontes:
 
-1. **Os próprios estados e municípios**, que destinam ao fundo cerca de **20% de alguns impostos** (como ICMS, IPVA, FPM, FPE). Isso é automático, definido em lei.
-2. **A União (governo federal)**, que acrescenta uma quantia extra chamada **complementação da União** — hoje até **23% do total** do fundo. É justamente essa complementação que o simulador permite ajustar.
+1. **Estados e municípios**, que destinam ao fundo cerca de **20% de determinados impostos** (ICMS, IPVA, FPM, FPE, ITR, IPI-exp, ITCMD). É automático, definido em lei.
+2. **A União**, que acrescenta a **complementação federal** — até 23% do total do fundo. É justamente esta parcela que o simulador permite ajustar.
 
-A complementação da União não é jogada "de qualquer jeito". Ela é dividida em **três fatias com objetivos diferentes**: VAAF, VAAT e VAAR. Vamos a elas.
+A complementação não é distribuída de qualquer jeito: ela se divide em **três fatias com objetivos diferentes**.
 
-### 2.3 As três fatias da complementação: VAAF, VAAT e VAAR
-
-Este é o conceito central. As três siglas parecem intimidadoras, mas cada uma responde a uma pergunta simples.
+### 2.3 As três fatias: VAAF, VAAT e VAAR
 
 #### VAAF — Valor Aluno Ano do Fundeb
 
-> **Pergunta que responde:** *"Quais estados têm o fundo mais fraco por aluno? Vamos reforçá-los primeiro."*
+> **Pergunta que responde:** *"Quais fundos estaduais são mais fracos por aluno? Vamos reforçá-los primeiro."*
 
-O VAAF olha para o **valor que cada fundo estadual tem por aluno**, considerando só aquela contribuição de ~20% dos impostos. Alguns estados são mais ricos e conseguem juntar mais dinheiro por aluno; outros, mais pobres, juntam menos. A fatia VAAF usa dinheiro da União para **elevar os estados mais pobres até um patamar mínimo comum**. É uma equalização **entre estados** (veja a analogia dos copos, na seção 2.5).
+O VAAF olha para o **valor por aluno de cada fundo estadual**, considerando apenas aquela contribuição de ~20% dos impostos. Estados mais ricos juntam mais por aluno; os mais pobres, menos. A União usa a fatia VAAF para **elevar os fundos mais pobres até um patamar comum**. É uma equalização **entre estados**.
 
 #### VAAT — Valor Aluno Ano Total
 
-> **Pergunta que responde:** *"Considerando TODAS as receitas de educação (não só os 20%), quais entes ainda ficam abaixo do mínimo? Vamos complementá-los, um a um."*
+> **Pergunta que responde:** *"Considerando todas as receitas de educação, quais entes ainda ficam abaixo do mínimo? Vamos complementá-los um a um."*
 
-O VAAT é mais abrangente. Ele soma **todas as receitas** que um município ou estado tem para a educação (não apenas a parcela do FUNDEB) e verifica o valor total por aluno. Aí a União complementa **cada ente individualmente** (município por município, estado por estado) que ainda estiver abaixo do mínimo nacional. É uma equalização **nacional e no nível de cada ente**, e não apenas entre estados.
+O VAAT é mais abrangente: soma **todas as receitas** que o ente tem para a educação (não só a parcela do FUNDEB) e verifica o valor total por aluno. A União complementa **cada ente individualmente** que ficar abaixo do mínimo nacional. É uma equalização **nacional, no nível de cada ente**.
 
 #### VAAR — Valor Aluno Ano Resultado
 
-> **Pergunta que responde:** *"Quais entes cumpriram condições de boa gestão e melhoraram os resultados de aprendizagem? Vamos premiá-los."*
+> **Pergunta que responde:** *"Quais entes cumpriram condições de boa gestão e melhoraram a aprendizagem? Vamos premiá-los."*
 
-O VAAR é a fatia do **mérito**. Não corrige desigualdade de arrecadação: recompensa quem atingiu **metas de qualidade e equidade** (por exemplo, melhora no aprendizado e redução de desigualdades internas). Funciona como um **bônus por desempenho**.
+O VAAR é a fatia do **mérito**. Não corrige desigualdade de arrecadação: recompensa quem atingiu metas de qualidade e equidade. Funciona como bônus por desempenho.
 
-**Resumo das três em uma tabela:**
-
-| Fatia | Foco | Compara… | Objetivo |
-|-------|------|----------|----------|
+| Fatia | Foco | Compara | Objetivo |
+|-------|------|---------|----------|
 | **VAAF** | Fundos estaduais | Estados entre si | Nivelar os fundos estaduais mais pobres |
-| **VAAT** | Cada ente | Todos os municípios e estados | Garantir um mínimo total por aluno a cada ente |
+| **VAAT** | Cada ente | Todos os municípios e estados | Garantir um mínimo total por aluno |
 | **VAAR** | Resultado | Desempenho educacional | Premiar quem melhora e cumpre condições |
 
 ### 2.4 Matrícula, matrícula ponderada e fatores de ponderação
 
-Aqui entra o motivo do nome do sistema — "**Fatores de Ponderação**".
+Aqui está a origem do nome do sistema.
 
-**Matrícula** é simplesmente um aluno matriculado. Mas nem toda matrícula "custa" o mesmo. Uma vaga em **creche em tempo integral** exige muito mais recursos (profissionais, alimentação, estrutura) do que uma vaga no **ensino médio parcial**, por exemplo. Seria injusto contar as duas como "1 aluno" cada.
+**Matrícula** é um aluno matriculado. Mas nem toda matrícula custa o mesmo: uma vaga de **creche em tempo integral** exige muito mais recursos do que uma de **ensino médio parcial**. Contar as duas como "1 aluno" seria injusto.
 
-Para corrigir isso, cada tipo de matrícula recebe um **fator de ponderação** (um "peso"). A conta fica assim:
+Por isso, cada tipo de matrícula recebe um **fator de ponderação** (um peso):
 
 ```
 matrícula ponderada = número de alunos × peso do tipo de matrícula
 ```
 
-**Exemplo numérico simples:** suponha que a creche integral tenha peso **1,30** e o ensino médio parcial tenha peso **1,00**.
+**Exemplo:** creche integral com peso 1,30 e ensino médio parcial com peso 1,00.
 
 - 100 alunos em creche integral → 100 × 1,30 = **130 matrículas ponderadas**
 - 100 alunos no ensino médio parcial → 100 × 1,00 = **100 matrículas ponderadas**
 
-Ou seja: embora ambos tenham 100 alunos "de cabeça", a creche "vale" mais na hora de dividir o dinheiro, porque custa mais para funcionar. **É a matrícula ponderada — e não a bruta — que entra nas fórmulas de rateio.**
+Os dois têm 100 alunos "de cabeça", mas a creche pesa mais no rateio porque custa mais para funcionar. **É a matrícula ponderada — não a bruta — que entra nas fórmulas de distribuição.**
 
-No sistema, esses pesos aparecem na tela **Ponderações**. Administradores podem alterá-los para simular políticas (por exemplo: "e se valorizássemos mais a educação do campo?").
+Esses pesos aparecem na tela **Ponderações** e podem ser alterados por administradores para simular políticas.
 
 ### 2.5 Os ponderadores de contexto: NSE, NF e DREC
 
-Além do peso do *tipo* de matrícula, o cálculo aplica outros dois ajustes que dependem **do ente** (do município/estado), não da etapa de ensino:
+Além do peso do *tipo* de matrícula, o cálculo aplica dois ajustes que dependem **do ente**, não da etapa de ensino:
 
-- **NSE — Nível Socioeconômico.** Dá um empurrão a favor de entes com população em situação socioeconômica mais vulnerável. A ideia: onde as famílias têm menos recursos, a escola pública precisa de mais apoio. Usado no VAAF e no VAAT.
+- **NSE — Nível Socioeconômico.** Favorece entes com população em situação mais vulnerável: onde as famílias têm menos recursos, a escola pública precisa de mais apoio. Entra no **VAAF e no VAAT**.
+- **NF / DREC — disponibilidade de recursos.** Ajusta pela **capacidade fiscal** do ente. No exercício **2024** chama-se **NF** e pode ser reescalonado dentro de um intervalo; a partir de **2025** foi substituído pelo ponderador oficial **DREC**, usado como valor fixo. Entra **apenas no VAAF**.
 
-- **NF / DREC — Disponibilidade de recursos.** Ajusta pela **capacidade fiscal** do ente (o quanto ele consegue arrecadar sozinho). No exercício **2024**, esse ponderador se chama **NF** e pode ser "reescalonado" (ajustado dentro de um intervalo). A partir de **2025**, ele foi substituído por um ponderador oficial chamado **DREC** (Disponibilidade de Recursos), usado como valor fixo. Ambos entram **apenas no VAAF**.
-
-> **Por que existem esses ajustes?** Porque tratar todos os entes como iguais ignoraria que uns são mais pobres e outros mais ricos. Os ponderadores fazem o dinheiro "pesar mais" onde a necessidade é maior.
+> **Por que existem?** Tratar todos os entes como iguais ignoraria que uns arrecadam muito e outros quase nada. Os ponderadores fazem o dinheiro "pesar mais" onde a necessidade é maior.
 
 ### 2.6 Equalização — a ideia dos copos d'água
 
-A palavra **equalização** aparece o tempo todo neste manual. Ela descreve **como** a complementação da União é distribuída, e é mais simples do que parece.
+**Equalização** descreve *como* a complementação da União é distribuída.
 
-> **Analogia dos copos d'água:** imagine vários copos com diferentes níveis de água — cada copo é um estado (no VAAF) ou um ente (no VAAT), e o nível de água é o "valor por aluno". Você tem uma jarra com uma quantidade **limitada** de água (a complementação da União). A regra é: **encha primeiro os copos mais vazios**, subindo o nível deles até chegar ao nível do próximo copo, e continue subindo todos juntos **até a jarra acabar**. Os copos que já estavam cheios não recebem nada; os mais vazios sobem até uma **linha comum**.
+> **Analogia dos copos:** imagine vários copos com níveis diferentes de água. Cada copo é um estado (no VAAF) ou um ente (no VAAT), e o nível de água é o valor por aluno. Você tem uma jarra com quantidade **limitada** (a complementação). A regra: **encha primeiro os copos mais vazios**, subindo-os até o nível do próximo, e siga subindo todos juntos **até a jarra acabar**. Os copos já cheios não recebem nada; os mais vazios chegam a uma **linha comum**.
 
-Traduzindo para o FUNDEB:
+Na prática:
 
-1. Ordena-se os entes do **menor** valor por aluno para o **maior**.
-2. Começa-se a "despejar" a complementação nos mais pobres, elevando-os.
-3. Isso continua até o dinheiro acabar. Quem estava acima da linha final não recebe complementação; quem estava abaixo é puxado para cima até um patamar comum.
+1. Ordenam-se os entes do **menor** valor por aluno para o **maior**.
+2. Despeja-se a complementação nos mais pobres, elevando-os.
+3. Continua até o dinheiro acabar. Quem estava acima da linha final não recebe complementação.
 
-É exatamente isso que a função `equaliza_fundo` faz no código ([simulador.py:93](simulador.py#L93)), como veremos na seção 11.
+É exatamente o que a função `equaliza_fundo` faz ([simulador.py:93](simulador.py#L93)), detalhada na seção 11.
 
-### 2.7 Cenário atual (dado de referência)
+### 2.7 Entes inabilitados ao VAAT
 
-O **cenário atual** é a "foto oficial" — os números que o governo efetivamente publicou para aquele ano. O simulador o usa como **régua de comparação**: quando você roda uma simulação, o sistema mostra o quanto o seu cenário hipotético **ganha ou perde** em relação ao oficial. Assim você não olha os números no vácuo — sempre há uma referência real ao lado.
+Nem todo ente tem direito à complementação VAAT. O FNDE publica, a cada exercício, a **lista oficial de entes habilitados e inabilitados** — a inabilitação decorre do descumprimento de condicionalidades legais (cadastros, prestação de contas, decisões judiciais etc.).
+
+No simulador, os inabilitados:
+
+- **não entram no ordenamento** da equalização VAAT (ou seja, não influenciam o cálculo do VAAT-MIN);
+- **recebem complementação VAAT igual a zero**;
+- continuam participando normalmente do **VAAF** e do **VAAR**.
+
+Para 2026, o sistema lê a lista oficial do arquivo `ListadosenteshabilitadoseinabilitadosaoVAAT2026...xlsm` ([dados/fundeb_dataset.py:412](dados/fundeb_dataset.py#L412)). Quando não existe lista oficial para o exercício, o sistema recorre a um critério de reserva: considera inabilitado quem não tem matrícula VAAT de referência.
+
+### 2.8 Cenário de referência
+
+O **cenário de referência** (chamado no código de "cenário atual") é a foto do exercício calculada com os parâmetros oficiais: pesos publicados, ponderadores sem reescalonamento e os montantes das planilhas de receita. O simulador o usa como **régua**: ao rodar uma simulação, o sistema mostra quanto o cenário hipotético ganha ou perde em relação a essa referência. Assim, nenhum número é olhado no vácuo.
 
 ---
 
+# Parte II — Usar
+
 ## 3. Instalação e execução
 
-> Esta seção é para quem vai **instalar** o sistema num computador. Se alguém já instalou para você e basta abrir o navegador, pule para a [seção 4](#4-autenticação-e-perfis-de-acesso).
+> Se alguém já instalou o sistema para você e basta abrir o navegador, pule para a [seção 4](#4-login-e-perfis-de-acesso).
 
-### 3.1 O que você precisa
+### 3.1 Pré-requisitos
 
-- **Python 3.10 ou superior** instalado (o Python é o programa que "roda" o sistema).
-- Um computador com **Windows, Linux ou macOS**.
-- Não precisa de internet para funcionar: o sistema roda **localmente**, na própria máquina (em `localhost`).
+- **Python 3.10 ou superior**.
+- Windows, Linux ou macOS.
+- Não é preciso internet para operar: o sistema roda localmente, em `localhost`.
 
-### 3.2 Instalação, passo a passo
+### 3.2 Instalação
 
-Os comandos abaixo são digitados no **terminal** (PowerShell, no Windows). Cada linha faz uma coisa; os comentários (`#`) explicam.
+Comandos digitados no terminal (PowerShell, no Windows):
 
 ```powershell
 cd simulador-fundeb-v2               # entra na pasta do projeto
-python -m venv .venv                 # cria um "ambiente isolado" para o projeto
-.\.venv\Scripts\Activate.ps1         # ativa esse ambiente (Windows)
-# source .venv/bin/activate          # (equivalente no Linux/macOS)
-pip install -r requirements.txt      # baixa e instala tudo que o sistema precisa
+python -m venv .venv                 # cria um ambiente isolado
+.\.venv\Scripts\Activate.ps1         # ativa o ambiente (Windows)
+# source .venv/bin/activate          # equivalente no Linux/macOS
+pip install -r requirements.txt      # instala as dependências
 ```
 
-> **O que é esse "ambiente isolado" (venv)?** É uma caixinha separada onde ficam as peças de que *este* projeto precisa, sem bagunçar o resto do computador. Pense numa gaveta exclusiva para as ferramentas deste sistema.
+> **O que é o "ambiente isolado" (venv)?** Uma gaveta separada com as ferramentas de *este* projeto, sem bagunçar o resto do computador.
 
-**Peças principais que serão instaladas:** `fastapi`, `uvicorn`, `pandas`, `openpyxl`, `numpy`, `pyreadr`, `pypdf`, `bcrypt`, `python-jose`, `pytest`, `httpx`.
+Dependências principais: `fastapi`, `uvicorn`, `pandas`, `numpy`, `openpyxl`, `odfpy`, `pyarrow`, `pyreadr`, `pypdf`, `pydantic`, `bcrypt`, `python-jose`, `pytest`, `httpx`.
 
 ### 3.3 Ligar o servidor
 
@@ -227,333 +265,333 @@ pip install -r requirements.txt      # baixa e instala tudo que o sistema precis
 python main.py
 ```
 
-Depois, abra o navegador em: **http://localhost:8000**
+Abra o navegador em **http://localhost:8000**.
 
-**Na primeira vez que você liga**, o sistema faz alguns preparativos automáticos:
+Na primeira execução o sistema:
 
-- Cria o banco de usuários (`data/usuarios.db`);
-- Se não houver nenhum usuário, cadastra um **administrador inicial** (veja a [seção 4](#4-autenticação-e-perfis-de-acesso));
-- Carrega as planilhas dos anos 2024, 2025 e 2026. **Essa primeira carga pode levar de 30 a 90 segundos** — é normal, tenha paciência;
-- Salva "atalhos" (caches) em `data/{ano}/dataset.pkl` para que as próximas vezes sejam bem mais rápidas.
+- cria o banco de usuários (`data/usuarios.db`);
+- cadastra um **administrador inicial**, se não houver nenhum usuário (seção 4.2);
+- carrega os dados de 2024 na inicialização e os de 2025/2026 sob demanda — **a primeira carga pode levar de 30 a 90 segundos**;
+- grava caches em `data/{ano}/dataset.pkl`, deixando as próximas execuções bem mais rápidas.
 
-### 3.4 Variáveis de ambiente (configuração opcional)
+### 3.4 Variáveis de ambiente
 
-"Variáveis de ambiente" são **ajustes que você pode definir antes de ligar o sistema**, sem mexer no código. Todas têm um valor padrão, então funcionam mesmo se você não configurar nada — mas em produção algumas devem ser mudadas por segurança.
+Ajustes que podem ser definidos **antes** de ligar o sistema, sem mexer no código. Todos têm valor padrão.
 
 | Variável | O que controla | Padrão |
 |----------|----------------|--------|
-| `FUNDEB_SECRET_KEY` | Chave secreta que assina o login (troque em produção!) | *(obrigatório em produção)* |
+| `FUNDEB_SECRET_KEY` | Chave que assina o token de login | `dev-fundeb-secret-altere-em-producao` |
 | `FUNDEB_ADMIN_CPF` | CPF do administrador criado no primeiro uso | `52998224725` |
 | `FUNDEB_ADMIN_SENHA` | Senha desse administrador | `admin123` |
-| `FUNDEB_USERS_DB` | Onde fica o arquivo de usuários | `data/usuarios.db` |
-| `FUNDEB_TOKEN_HOURS` | Por quantas horas o login continua válido | `12` |
-| `FUNDEB_RELOAD` | Recarrega o sistema sozinho a cada mudança (só para desenvolvimento) | desativado |
+| `FUNDEB_USERS_DB` | Caminho do banco de usuários | `data/usuarios.db` |
+| `FUNDEB_TOKEN_HOURS` | Validade da sessão, em horas | `12` |
+| `FUNDEB_RELOAD` | Recarrega o servidor a cada alteração (só desenvolvimento) | desativado |
 
-> ⚠️ **Segurança:** o CPF e a senha padrão do administrador são públicos (estão neste manual!). Em qualquer uso real, **troque a senha logo após o primeiro login** e defina uma `FUNDEB_SECRET_KEY` própria.
+> **Atenção à segurança:** a chave secreta e as credenciais padrão são públicas (estão neste manual). Em qualquer uso real, defina uma `FUNDEB_SECRET_KEY` própria e **troque a senha do administrador logo após o primeiro login**.
 
-### 3.5 Estrutura de pastas (o que é cada coisa)
+### 3.5 Estrutura de pastas
 
 ```
 simulador-fundeb-v2/
-├── main.py                 # Programa principal: liga o servidor e cuida do ano 2024
-├── api_simulacao.py        # Trata os anos 2025 e 2026
-├── simulador.py            # O "coração": faz as contas do FUNDEB
-├── validacao.py            # Confere se as contas fecham (RF-10)
-├── auth/                   # Tudo sobre login e usuários
+├── main.py                 # Servidor FastAPI, rotas de 2024 e páginas
+├── api_simulacao.py        # Rotas e handlers dos exercícios 2025 e 2026
+├── simulador.py            # Motor de cálculo do FUNDEB
+├── validacao.py            # Conferências automáticas (RF-10)
+├── auth/                   # Login, perfis e banco de usuários
 ├── dados/
-│   └── fundeb_dataset.py   # Lê e organiza as planilhas (o "ETL")
-├── data/                   # Dados de 2024 + atalhos (cache)
+│   └── fundeb_dataset.py   # ETL: lê e organiza as planilhas
+├── data/                   # Dados de 2024 (.rda) + caches por exercício
 ├── 20252026/               # Planilhas brutas de 2025 e 2026
-├── static/                 # A parte visual (páginas, estilos, gráficos)
-├── tests/                  # Programas que testam o sistema
-├── apresentacao/           # Material para apresentações
+├── static/                 # Frontend (HTML, CSS, JS)
+├── tests/                  # Testes automatizados
+├── apresentacao/           # Material e capturas de tela
 └── manual-do-sistema.md    # Este documento
 ```
 
-> **O que é "ETL"?** É a sigla para *Extract, Transform, Load* (Extrair, Transformar, Carregar). É o processo de **pegar os dados das planilhas, limpá-los e organizá-los** num formato que o sistema entenda. Toda vez que este manual falar em ETL, pense em "a parte que lê e prepara as planilhas".
+> **O que é "ETL"?** *Extract, Transform, Load* — o processo de **pegar os dados das planilhas, limpá-los e organizá-los** num formato que o sistema entenda.
 
 ---
 
-## 4. Autenticação e perfis de acesso
+## 4. Login e perfis de acesso
 
-### 4.1 Como entrar (login)
-
-O sistema é protegido por senha. Ninguém acessa as telas sem entrar antes. O processo é:
+### 4.1 Como entrar
 
 1. Abra `http://localhost:8000`.
-2. Se você ainda não entrou, o sistema **redireciona automaticamente** para a tela de login (`/login.html`).
-3. Digite seu **CPF** (11 dígitos, com ou sem pontos e traço) e a **senha**.
-4. O sistema confere os dados e, se estiverem certos, guarda um "crachá digital" no navegador (um cookie seguro chamado `fundeb_token`).
-5. Pronto: o simulador é liberado.
+2. Sem sessão ativa, o sistema redireciona para `/login.html`.
+3. Informe **CPF** (11 dígitos, com ou sem pontuação) e **senha**.
+4. Se estiver correto, o servidor grava um cookie seguro (`fundeb_token`, `HttpOnly`).
+5. O simulador é liberado.
 
-> **O que é esse "crachá digital" (token)?** É como uma pulseira de acesso de um evento: depois de entrar, você recebe uma pulseira que prova que já foi autorizado, e não precisa mostrar o documento de novo a cada porta. O crachá vale por algumas horas (12, por padrão) e depois expira, exigindo novo login.
+> **O que é esse cookie?** É como a pulseira de um evento: depois de entrar, você não precisa mostrar documento em cada porta. A pulseira vale 12 horas (por padrão) e depois expira, exigindo novo login.
 
-### 4.2 Primeiro acesso (ambiente de desenvolvimento)
+O CPF é validado pelos **dígitos verificadores** — um número inventado é recusado com erro 422 antes mesmo de consultar o banco.
 
-Na primeira vez, use as credenciais padrão do administrador:
+### 4.2 Primeiro acesso
 
 | Campo | Valor padrão |
 |-------|--------------|
 | CPF | `529.982.247-25` |
 | Senha | `admin123` |
 
-> ⚠️ **Importante:** troque a senha logo após o primeiro login, na tela **Usuários** (`/admin.html`). A senha padrão é conhecida por qualquer pessoa que leia este manual.
+> **Importante:** troque a senha logo após o primeiro login, na tela **Usuários** (`/admin.html`).
 
-### 4.3 Perfis: administrador × usuário comum
+### 4.3 Perfis: administrador e usuário comum
 
-Existem **dois tipos de usuário**, com permissões diferentes:
+| Ação | Administrador | Usuário comum |
+|------|:-------------:|:-------------:|
+| Ver o simulador e todas as abas | Sim | Sim |
+| Rodar simulações (VAAF/VAAT/VAAR/municipal) | Sim | Sim |
+| **Editar** os pesos de ponderação | Sim | Não (somente leitura) |
+| Enviar pesos personalizados pela API | Sim | Não (usa os oficiais) |
+| Cadastrar, editar e excluir usuários | Sim | Não |
+| Ver o menu **Usuários** | Sim | Menu oculto |
 
-| O que pode fazer | Administrador | Usuário comum |
-|------------------|:-------------:|:-------------:|
-| Ver o simulador e todas as abas | ✅ Sim | ✅ Sim |
-| Rodar simulações (VAAF/VAAT/VAAR/Municipal) | ✅ Sim | ✅ Sim |
-| **Editar** os pesos de ponderação | ✅ Sim | ❌ Não (só vê) |
-| Enviar pesos personalizados pela API | ✅ Sim | ❌ Não (usa os oficiais) |
-| Cadastrar, editar e excluir usuários | ✅ Sim | ❌ Não |
-| Ver o menu **Usuários** | ✅ Visível | ❌ Oculto |
+> **A restrição é real, não cosmética:** a recusa de pesos personalizados acontece **no servidor**, na função `preparar_pesos` ([api_simulacao.py:74](api_simulacao.py#L74)). Mesmo que alguém manipule a página no navegador ou chame a API diretamente, o servidor descarta os pesos e usa os oficiais.
 
-Em outras palavras: **todos podem simular e explorar**, mas **só o administrador muda os pesos e gerencia quem entra**.
+### 4.4 Sair
 
-> **Segurança de verdade, não só aparência:** a proibição de usar pesos personalizados é feita **no servidor** (na função `preparar_pesos`, em `api_simulacao.py`), não apenas escondendo botões na tela. Ou seja, mesmo que alguém tente burlar a página no navegador, o servidor recusa pesos não autorizados.
-
-### 4.4 Sair da sessão
-
-Clique em **Sair**, no rodapé do menu lateral. O crachá digital é apagado e a sessão é encerrada. Para voltar, é preciso fazer login de novo.
+Clique em **Sair**, no rodapé do menu lateral. O cookie é apagado e a sessão encerrada.
 
 ---
 
-## 5. Interface do usuário
+## 5. As telas do sistema
 
-### 5.1 O menu lateral
-
-Todas as telas são acessadas pelo **menu à esquerda**, organizado por ano:
+### 5.1 Menu lateral
 
 ```
 ┌─────────────────────────────────────┐
 │  FUNDEB — Simulador v2              │
 │  [nome do usuário / perfil]         │
 ├─────────────────────────────────────┤
-│  🏠 Página Principal                │
+│  Página Principal                   │
 ├─ FUNDEB 2024 ───────────────────────┤
-│  🧮 Simulação Principal             │
-│  ⚖️  Ponderações                    │
-│  🏆 Simulação VAAR                  │
-│  📍 Simulação Municipal             │
-│  🗺️  Análise Regional              │
+│  Simulação Principal                │
+│  Ponderações                        │
+│  Simulação VAAR                     │
+│  Simulação Municipal                │
+│  Análise Regional                   │
 ├─ FUNDEB 2026 ───────────────────────┤
-│  🧮 Simulação 2026                  │
-│  ⚖️  Ponderações 2026               │
-│  🏆 VAAR 2026                       │
-│  📍 Município 2026                  │
+│  Simulação 2026                     │
+│  Ponderações 2026                   │
+│  VAAR 2026                          │
+│  Município 2026                     │
 ├─ FUNDEB 2025 ───────────────────────┤
-│  📅 Consulta / Simulação 2025       │
-│  ⚖️  Ponderações 2025               │
+│  Simulação 2025                     │
+│  Ponderações 2025                   │
+│  VAAR 2025                          │
+│  Município 2025                     │
 ├─────────────────────────────────────┤
-│  📖 Documentação                    │
-│  👥 Usuários (só admin)             │
+│  Documentação                       │
+│  Usuários (somente admin)           │
 ├─────────────────────────────────────┤
-│  🚪 Sair                            │
+│  Sair                               │
 └─────────────────────────────────────┘
 ```
 
-As abas **2025** e **2026** aparecem automaticamente (são geradas pelo arquivo `app_multi_ano.js`). Em **celulares e tablets**, o menu fica escondido e abre com o botão ☰ (as "três listrinhas").
+As abas de 2025 e 2026 são geradas dinamicamente por `static/js/app_multi_ano.js`. O rótulo da aba de simulação de cada ano muda conforme a resposta de `GET /api/{ano}/meta`: fica **"Simulação {ano}"** quando os dados estão completos e **"Consulta {ano}"** quando falta algum arquivo oficial. Em celulares e tablets, o menu recolhe e abre pelo botão de três linhas.
 
 ### 5.2 Página Principal
 
-É a tela de boas-vindas. Ela **explica o FUNDEB** — como o fundo é composto, o que são VAAF/VAAT/VAAR, como a complementação federal cresceu de 2021 a 2026 e como as matrículas são contadas. **Não faz cálculos**; serve para situar o usuário. É, em essência, uma versão resumida da nossa [seção 2](#2-conceitos-essenciais-do-fundeb-em-linguagem-simples).
+Tela de boas-vindas. Explica a composição do fundo, o que são VAAF/VAAT/VAAR, a evolução da complementação federal e como as matrículas são contadas. **Não faz cálculos** — é uma versão resumida da seção 2 deste manual.
 
 ### 5.3 Simulação Principal
 
-Esta é a tela mais usada. Ela tem dois lados.
+A tela mais usada, dividida em dois lados.
 
-**Do lado esquerdo, você define os parâmetros:**
+**Parâmetros (lado esquerdo):**
 
-| Campo | O que você está escolhendo |
-|-------|----------------------------|
-| Montante VAAF (R$) | Quanto a União vai destinar à equalização **entre fundos estaduais** |
-| Montante VAAT (R$) | Quanto vai à equalização **nacional** (todos os entes) |
+| Campo | O que você define |
+|-------|-------------------|
+| Montante VAAF (R$) | Quanto a União destina à equalização **entre fundos estaduais** |
+| Montante VAAT (R$) | Quanto vai à equalização **nacional**, ente a ente |
 | Montante VAAR (R$) | Quanto vai ao prêmio **por resultado** |
-| NF máximo / mínimo | *(só 2024)* O intervalo de ajuste do ponderador NF no VAAF |
+| NF máximo / mínimo | *(apenas 2024)* Intervalo de reescalonamento do NF no VAAF |
 
-**Do lado direito, depois de clicar em "Simular", aparecem os resultados:**
+Nos exercícios 2025 e 2026 não há controle de NF: o DREC é oficial e fixo.
 
-- **Caixas-resumo** com os números-chave: menor VAAF/VAAT, comparação com o cenário oficial, quanto foi para municípios versus estados;
-- O **selo da validação automática** (RF-10): "OK" (contas fecham) ou "Falhou";
-- **Gráficos 2D** (feitos com a biblioteca Plotly): VAAF/VAAT por estado, diferenças, complementação por modalidade;
-- **Tabelas** de "maiores ganhadores" e "maiores perdedores" em relação ao cenário oficial;
-- **Gráficos 3D**: um "cubo" que cruza VAAF × VAAT × complementação, para uma visão espacial.
+**Resultados (lado direito), após clicar em Simular:**
+
+- **Caixas-resumo** com VAAF-MIN e VAAT-MIN simulados versus o cenário de referência, complementação destinada a municípios e a estados, e percentual de entes complementados;
+- **Selo da validação automática** (RF-10): "OK" ou "Falhou";
+- **Gráficos 2D** (Plotly): VAAF e VAAT médios por UF, diferença de complementação por UF, complementação por modalidade e por categoria administrativa;
+- **Tabelas** de resultados positivos e negativos por região, em relação ao cenário de referência;
+- **Gráficos 3D** cruzando VAAF, VAAT e complementação.
 
 ### 5.4 Ponderações
 
-Mostra a lista de **todos os tipos de matrícula**, agrupados por **família** (Creche, Pré-escola, Ensino Fundamental etc.), num formato de "sanfona" (acordeão) que você expande e recolhe.
-
-Cada tipo de matrícula tem dois pesos:
-
-- **Peso VAAF** — quanto essa matrícula pesa no cálculo do VAAF;
-- **Peso VAAT** — quanto pesa no cálculo do VAAT.
+Lista todos os tipos de matrícula agrupados por **família** (Creche, Pré-escola, Ensino Fundamental etc.) em formato de acordeão. Cada segmento tem dois campos: **peso VAAF** e **peso VAAT**.
 
 | Perfil | O que vê |
 |--------|----------|
-| Administrador | Campos **editáveis**: qualquer mudança passa a valer nas próximas simulações |
-| Usuário comum | Campos **bloqueados**, com um aviso de "somente leitura" |
+| Administrador | Campos editáveis; a alteração passa a valer nas próximas simulações da sessão |
+| Usuário comum | Campos bloqueados, com aviso de somente leitura |
 
 ### 5.5 Simulação VAAR
 
-Foca exclusivamente na fatia de **mérito** (VAAR). Mostra como esse prêmio se distribui por estado, a participação de cada um no total e tabelas detalhadas. Tecnicamente, usa a rota `POST /api/simular/completo` (ou a equivalente do ano).
+Detalha a fatia de mérito: distribuição por UF, participação do VAAR no total da complementação de cada estado e tabela dos 50 entes com maior valor. Usa a rota `POST /api/simular/completo` (ou a equivalente do exercício).
 
-### 5.6 Análise Regional *(2024)*
+### 5.6 Simulação Municipal e de entes estaduais
 
-Apresenta os resultados **organizados por estado (UF)**. Quando o app abre, ele já roda uma simulação com valores padrão, então há dados prontos para explorar. Basta escolher a UF para ver o resumo de recursos e complementação daquele estado.
+É a funcionalidade que melhor demonstra o efeito dominó do FUNDEB.
 
-> A Análise Regional dos anos 2025/2026 ainda **não** foi implementada.
+> **Pergunta que responde:** *"Se eu mudar as matrículas deste município (ou governo estadual), o que acontece com ele e com todos os outros entes do mesmo estado?"*
 
-### 5.7 Documentação (aba interna)
+**Passo a passo:**
 
-Um texto de apoio, dentro do próprio app, com links para portarias e para o site do FNDE. Complementa este manual.
+1. Escolha a **UF** (a lista vem agrupada por região).
+2. Escolha o **ente**: o governo estadual aparece primeiro (ex.: *Acre (12)*), depois os municípios em ordem alfabética.
+3. Veja e edite as **matrículas por segmento** no acordeão. Nas abas 2025/2026, o botão **"Mostrar segmentos sem matrícula"** exibe ou oculta os segmentos zerados.
+4. Se quiser, ajuste os **montantes** VAAF/VAAT/VAAR.
+5. Clique em **Simular**.
+
+**Como identificar estados e municípios pelo código IBGE:**
+
+| Código IBGE | Tipo | Exemplo |
+|-------------|------|---------|
+| Menor que 100 (2 dígitos) | Governo estadual | `12` = Acre |
+| 7 dígitos | Município | `1200054` = Assis Brasil/AC |
+
+Os 27 governos estaduais estão disponíveis em 2024, 2025 e 2026, com o nome padronizado (ex.: "Acre", e não "GOVERNO DO ESTADO DO ACRE").
+
+**Por que o sistema recalcula tudo:** alterar as matrículas de um ente muda a participação dele no fundo estadual, o que altera o rateio para todos os demais. Para medir esse efeito, o sistema roda a simulação **duas vezes** — original e ajustada — e compara.
+
+**O que aparece nos resultados:**
+
+| Painel | Conteúdo |
+|--------|----------|
+| **Cards** | Cenário original e cenário ajustado, linha a linha (detalhados na seção 7) |
+| **Explicação textual** | Narrativa em português do cálculo, gerada por `static/js/explicacao.js` |
+| **Tabela de impacto** | Efeito da mudança sobre os demais entes do mesmo estado |
+| **Gráficos** | Comparativos 2D e 3D |
+
+### 5.7 Análise Regional (2024)
+
+Organiza os resultados por UF: VAAF e VAAT médios, complementação total e por modalidade, recursos do FUNDEB no estado. Ao abrir o app, uma simulação com os parâmetros padrão já é executada, então há dados prontos para explorar.
+
+> A Análise Regional ainda não foi implementada para 2025 e 2026.
+
+### 5.8 Documentação (aba interna)
+
+Texto de apoio dentro do próprio app, com links para portarias e para o portal do FNDE. Complementa este manual.
 
 ---
 
-## 6. Funcionalidades por exercício (2024, 2025 e 2026)
+## 6. Os exercícios 2024, 2025 e 2026
 
-O sistema trabalha com **três anos** de dados, cada um numa aba própria. Os anos não são idênticos porque as regras e as fontes oficiais mudaram com o tempo.
+O sistema trabalha com três anos, cada um em suas próprias abas, porque as regras e as fontes oficiais mudaram ao longo do tempo.
 
 ### 6.1 O que muda de um ano para o outro
 
 | Aspecto | 2024 | 2025 | 2026 |
 |---------|------|------|------|
-| Tipos de matrícula | **41** etapas | **319** segmentos | **319** segmentos |
-| Ponderador fiscal do VAAF | **NF** (ajustável) | **DREC** (oficial) | **DREC** (oficial) |
+| Tipos de matrícula | 41 etapas | 319 segmentos | 319 segmentos |
+| Ponderador fiscal no VAAF | NF (reescalonável) | DREC (oficial, fixo) | DREC (oficial, fixo) |
 | Ponderador social (NSE) | Sim | Sim | Sim |
-| Simulação disponível? | Sempre | **Só se os dados estiverem completos** | Sim |
-| Valores padrão | Legado de 2024 | Portaria / receita STN | Portaria MEC/MF nº 6/2026 |
-| Endereços da API | `/api/...` | `/api/2025/...` | `/api/2026/...` |
+| Fonte dos dados | Arquivos `.rda` + PDF | Planilhas FNDE/STN | Planilhas FNDE |
+| Lista oficial de inabilitados ao VAAT | Do arquivo legado | Critério de reserva | Lista oficial FNDE |
+| Montantes padrão | Legado | Soma da planilha de receita | Soma da planilha de receita |
+| Prefixo da API | `/api/...` | `/api/2025/...` | `/api/2026/...` |
 
-> **Por que 41 "etapas" em 2024 e 319 "segmentos" em 2025/2026?** Porque a classificação das matrículas ficou mais detalhada. Onde antes havia uma categoria ampla, passou a haver várias subdivisões (por rede, localização, tempo integral/parcial etc.). Mais segmentos = mais precisão.
-
-**Atenção ao ano 2025 — simulação condicional:** a simulação de 2025 só liga se **todos** os arquivos auxiliares (receita, NSE, DREC e VAAT oficiais) estiverem presentes na pasta `20252026/`. Se faltar algum, a aba permite apenas **consultar** matrículas e pesos, e qualquer tentativa de simular retorna um erro "HTTP 503" (serviço indisponível). O documento `checklist-dados-2025.md` lista o que é preciso.
+> **Por que 41 etapas em 2024 e 319 segmentos depois?** Porque a classificação ficou mais detalhada: categorias amplas passaram a ser subdivididas por rede, localização, tempo integral/parcial e modalidade. Mais segmentos significam mais precisão no rateio.
 
 ### 6.2 As fórmulas de cada ano
 
-Não se assuste com as fórmulas — elas apenas resumem o que já explicamos na seção 2. A diferença entre os anos é só **qual ponderador fiscal** entra (NF ou DREC):
+A diferença é apenas **qual ponderador fiscal** entra no VAAF:
 
-**Ano 2024 (usa NF reescalonado):**
+**2024 (NF reescalonado):**
 ```
 matriculas_vaaf = (matrículas × pesos_vaaf) × NSE × NF
 matriculas_vaat = (matrículas × pesos_vaat) × NSE
 ```
 
-**Anos 2025 e 2026 (usam DREC):**
+**2025 e 2026 (DREC):**
 ```
 matriculas_vaaf = (matrículas × pesos_vaaf) × NSE × DREC
 matriculas_vaat = (matrículas × pesos_vaat) × NSE
 ```
 
-Lendo em português: *"a matrícula ponderada do VAAF é o número de alunos, multiplicado pelos pesos, ajustado pelo nível socioeconômico (NSE) e pela disponibilidade de recursos (NF ou DREC)"*. O VAAT é igual, mas **sem** o ponderador fiscal.
+Em português: a matrícula ponderada do VAAF é o número de alunos multiplicado pelos pesos e ajustado pelo nível socioeconômico e pela disponibilidade de recursos. O VAAT é igual, **sem** o ponderador fiscal.
 
-### 6.3 As abas de 2026
+### 6.3 Habilitação condicional da simulação
 
-São equivalentes às de 2024, com estas particularidades:
+Cada exercício só habilita a simulação se **todos** os arquivos auxiliares estiverem disponíveis — receita, NSE, DREC e memória de cálculo do VAAT. A verificação está em `dados_auxiliares_completos` ([dados/fundeb_dataset.py](dados/fundeb_dataset.py)) e o estado é publicado em `GET /api/{ano}/meta`.
 
-- Os valores padrão de complementação vêm da rota `GET /api/2026/meta`;
-- O DREC é mostrado como um **valor fixo** (não há o controle deslizante do NF);
-- A tela de Ponderações lista os **319 segmentos**;
-- A simulação municipal tem um botão **"Mostrar segmentos sem matrícula"**, para incluir ou ocultar tipos de matrícula com zero alunos.
+- **Dados completos:** aba habilitada, rótulo "Simulação {ano}".
+- **Falta algum arquivo:** aba em modo consulta (matrículas e pesos), rótulo "Consulta {ano}", banner de aviso e erro **HTTP 503** em qualquer tentativa de simular.
 
-### 6.4 As abas de 2025
-
-- **Consulta / Simulação 2025:** só habilita a simulação quando todos os arquivos auxiliares estão presentes (veja 6.1);
-- **Ponderações 2025:** somente leitura para o usuário comum;
-- As matrículas são filtradas de uma planilha unificada (as linhas onde a coluna `ANO = 2025`).
+Atualmente **2025 e 2026 estão habilitados**. O documento `checklist-dados-2025.md` descreve como obter e nomear cada arquivo caso seja necessário refazer a carga.
 
 ---
 
-## 7. Simulação municipal e entes estaduais
+## 7. Como ler os cards de cenário
 
-Esta é uma das funcionalidades mais interessantes — e a que melhor mostra o **efeito dominó** do FUNDEB.
+Na simulação municipal/estadual, dois cards mostram o mesmo conjunto de linhas: **Cenário original** (com as matrículas oficiais) e **Cenário ajustado** (com as suas alterações). Os rótulos seguem a nomenclatura das publicações oficiais do FNDE, para facilitar a conferência lado a lado.
 
-### 7.1 A pergunta que ela responde
+| Linha do card | O que representa | Origem do número |
+|---------------|------------------|------------------|
+| **Matrículas VAAF** | Matrículas informadas, **sem nenhuma ponderação** | Soma de todos os segmentos do ente |
+| **Matrículas ponderadas VAAF** | Matrículas após pesos, NSE e DREC/NF | `matriculas_vaaf` |
+| **Matrículas ponderadas VAAT** | Matrículas após pesos VAAT e NSE | `matriculas_vaat` |
+| **Matrículas ponderadas VAAF do Fundo** | Total ponderado de **todo o fundo estadual** | Soma da UF |
+| **Receitas VAAF Fundo [UF]** | Receita da contribuição de todo o fundo estadual | Soma da UF |
+| **Complemento VAAF Fundo [UF]** | Complementação VAAF recebida pelo fundo estadual inteiro | Soma da UF |
+| **Receita da contribuição de estados e municípios ao Fundeb** | A parcela de impostos que **este ente** aporta ao fundo | `recursos_vaaf` |
+| **Receitas VAAT** | Todas as receitas de educação do ente, base do VAAT | `recursos_vaat` |
+| **VAAF-MIN** | Menor VAAF final do país após a equalização | Mínimo nacional |
+| **VAAT-MIN** | Menor VAAT final entre os entes **habilitados** | Mínimo nacional (exclui inabilitados) |
+| **VAAF (antes da complementação)** | Valor por aluno só com a contribuição do fundo | `recursos_vaaf / matriculas_vaaf` |
+| **VAAT (antes da complementação)** | Valor por aluno com todas as receitas, antes da União | `vaat_pre` |
+| **Coeficiente (matrículas ente / fundo)** | Participação do ente no fundo estadual, com **8 casas decimais** | `matriculas_vaaf` do ente ÷ do fundo |
+| **VAAF Final** | Valor por aluno após a equalização VAAF | `vaaf_final` |
+| **VAAT Final** | Valor por aluno após a equalização VAAT | `vaat_final` |
+| **Complemento VAAF** | Quanto o ente recebeu da União pela fatia VAAF | `complemento_vaaf` |
+| **Complemento VAAT** | Quanto recebeu pela fatia VAAT (zero, se inabilitado) | `complemento_vaat` |
+| **Complemento VAAR** | Quanto recebeu pela fatia de resultado | `complemento_vaar` |
+| **Total Complementação** | Soma das três fatias | `complemento_uniao` |
+| **Receita Total do Fundeb** | Contribuição própria + toda a complementação da União | `recursos_fundeb` |
 
-> *"Se eu mudar as matrículas deste município (ou governo estadual), o que acontece com ele **e com todos os outros entes do mesmo estado**?"*
+> **Por que o coeficiente tem 8 casas decimais?** Porque a participação de um município pequeno em um fundo estadual grande é um número muito pequeno. Com poucas casas, valores distintos apareceriam arredondados de forma idêntica e a comparação com as planilhas oficiais ficaria impossível.
 
-### 7.2 Passo a passo na tela
-
-1. **Escolha a UF** (a lista vem agrupada por região).
-2. **Escolha o ente** no menu suspenso:
-   - O **governo estadual** aparece primeiro (ex.: *Acre (12)*);
-   - Depois vêm os **municípios**, em ordem alfabética.
-3. **Veja e edite** as matrículas por segmento no acordeão.
-4. Se quiser, **ajuste os montantes** VAAF/VAAT/VAAR.
-5. Clique em **Simular**.
-
-### 7.3 Entes estaduais e o código IBGE
-
-Cada ente é identificado por um **código do IBGE**. Um truque simples permite saber se é um estado ou um município: **o tamanho do número**.
-
-| Código IBGE | Tipo | Exemplo |
-|-------------|------|---------|
-| Menor que 100 (2 dígitos) | Governo estadual | `12` = Acre |
-| Maior que 100 (7 dígitos) | Município | `1200054` = Assis Brasil/AC |
-
-Os **27 governos estaduais** estão disponíveis em **2024, 2025 e 2026**. O nome aparece no padrão oficial (ex.: "Acre", e não "GOVERNO DO ESTADO DO ACRE").
-
-### 7.4 Por que o sistema recalcula o país inteiro
-
-Pode parecer exagero recalcular tudo só porque um município mudou. Mas é necessário, por causa da equalização (lembre-se dos copos d'água, seção 2.6):
-
-1. Mudar as matrículas de um município **muda a participação dele** no fundo estadual;
-2. Isso **altera como o fundo estadual se reparte** entre todos;
-3. Portanto, pode afetar **todos os entes daquele estado**, em cascata.
-
-Para medir esse efeito, o sistema roda a simulação **duas vezes** — uma com os números originais e outra com os ajustados — e **compara as duas**.
-
-### 7.5 O que aparece nos resultados
-
-| Painel | O que mostra |
-|--------|--------------|
-| **Cards** | VAAF, VAAT, complementos e recursos, **antes e depois** da sua mudança |
-| **Explicação textual** | Um passo a passo em português (gerado por `explicacao.js`): matrículas ponderadas, coeficiente do ente no estado, o valor mínimo do VAAF etc. |
-| **Tabela de impacto** | O efeito da sua mudança **sobre os outros entes** do mesmo estado |
-| **Gráficos** | Comparativos em 2D e 3D |
-
-> A "explicação textual" é ótima para quem está aprendendo: em vez de só mostrar números, o sistema **narra** o que aconteceu, quase como um professor comentando a conta.
+As linhas do fundo estadual (matrículas ponderadas, receitas e complemento) permitem verificar o **contexto** em que o ente está inserido: um mesmo município pode ganhar ou perder conforme o comportamento do fundo do seu estado.
 
 ---
 
 ## 8. Administração de usuários
 
-Esta tela (`/admin.html`) só aparece e só funciona para **administradores**.
+A tela `/admin.html` só aparece e só funciona para administradores.
 
-### 8.1 Cadastrar um novo usuário
+### 8.1 Cadastrar um usuário
 
 | Campo | Regra |
 |-------|-------|
-| CPF | 11 dígitos, e precisa ser um CPF **válido** (o sistema confere os dígitos verificadores) |
+| CPF | 11 dígitos e **CPF válido** (dígitos verificadores conferidos) |
 | Nome | Opcional |
-| Senha | No mínimo 6 caracteres |
+| Senha | Mínimo de 6 caracteres |
 | Perfil | `usuario` (padrão) ou `admin` |
 
 ### 8.2 Gerenciar usuários existentes
 
-| Botão | O que faz |
-|-------|-----------|
-| ✏️ Editar | Abre uma janela para mudar nome, perfil, status (ativo/inativo) e, opcionalmente, a senha |
-| 🔑 Reset de senha | Um atalho rápido para definir uma nova senha |
-| 🚫 / ✓ | Desativa ou reativa o usuário |
-| 🗑️ Excluir | Remove o usuário de vez |
+| Ação | O que faz |
+|------|-----------|
+| Editar | Altera nome, perfil, status (ativo/inativo) e, se quiser, a senha |
+| Redefinir senha | Atalho para definir uma nova senha |
+| Ativar / desativar | Bloqueia ou libera o acesso sem excluir o cadastro |
+| Excluir | Remove o usuário definitivamente |
 
-**Regras de segurança que o sistema impõe automaticamente:**
+**Travas de segurança aplicadas pelo servidor:**
 
-- Você **não pode** desativar nem excluir a **si mesmo** (evita ficar trancado para fora);
-- **Não é permitido** remover o **último administrador ativo** (senão ninguém mais poderia administrar);
-- Um usuário **inativo** que tentar entrar recebe erro "HTTP 403" (acesso proibido).
+- não é possível **desativar ou excluir a si mesmo** (evita ficar trancado para fora);
+- não é possível **remover, rebaixar ou desativar o último administrador ativo**;
+- usuário **inativo** recebe **HTTP 403** ao tentar entrar;
+- senhas são gravadas apenas como hash bcrypt — nem o administrador consegue lê-las, só redefini-las.
 
 ---
 
+# Parte III — Manter
+
 ## 9. Arquitetura técnica
 
-> A partir daqui, o manual fica mais técnico. Se você só quer *usar* o sistema, pode parar na seção 8. As seções seguintes são para quem **mantém, integra ou audita** o sistema.
-
-O diagrama abaixo mostra como as partes conversam. À esquerda, o **navegador** (o que o usuário vê); à direita, o **servidor** (onde as contas acontecem); embaixo, os **componentes internos**.
+> Daqui em diante o conteúdo é técnico. Quem apenas usa o sistema pode parar na seção 8.
 
 ```
 ┌──────────────┐     cookie JWT      ┌─────────────────────────────────┐
@@ -576,147 +614,156 @@ O diagrama abaixo mostra como as partes conversam. À esquerda, o **navegador** 
             └───────────────┘
 ```
 
-Em palavras: o navegador manda um pedido (por exemplo, "simule com estes valores"); o FastAPI recebe, confere o crachá (JWT), pega os dados já preparados pelo ETL, entrega ao motor de cálculo, valida o resultado e devolve tudo em formato JSON para a tela desenhar os gráficos.
+Em palavras: o navegador envia um pedido; o FastAPI valida o cookie JWT, obtém os dados já preparados pelo ETL, aciona o motor de cálculo, roda as conferências e devolve JSON para a tela desenhar tabelas e gráficos.
 
 ### 9.1 Arquivos principais
 
-| Arquivo | De que é responsável |
-|---------|----------------------|
-| `main.py` | Liga o servidor FastAPI, cuida das rotas de 2024 e serve as páginas |
-| `api_simulacao.py` | Rotas dos anos 2025/2026, executa a simulação e monta o resumo |
-| `simulador.py` | O motor: `simula_fundeb` e as funções de equalização |
-| `dados/fundeb_dataset.py` | O ETL: lê Excel/RDA/PDF, organiza tudo e guarda cache |
-| `validacao.py` | As conferências RF-10 |
-| `auth/*` | Login (JWT + bcrypt) e o banco de usuários |
-| `static/js/app.js` | A tela do exercício 2024 |
-| `static/js/app_multi_ano.js` | As telas de 2025/2026 |
-| `static/js/auth.js` | Controle de sessão e comunicação segura com a API |
-| `static/js/explicacao.js` | A narrativa da simulação municipal |
-| `static/js/charts3d.js` | Os gráficos em 3D |
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `main.py` | Sobe o FastAPI, carrega 2024, registra as rotas de 2024 e serve as páginas |
+| `api_simulacao.py` | Handlers compartilhados e rotas dos exercícios 2025/2026 |
+| `simulador.py` | Motor: `simula_fundeb` e as funções de equalização |
+| `dados/fundeb_dataset.py` | ETL: lê XLSX/ODS/PDF/RDA, monta os datasets e gerencia o cache |
+| `validacao.py` | Conferências RF-10 e comparação com dados oficiais (CA-05) |
+| `auth/` | JWT, bcrypt, banco de usuários e dependências de permissão |
+| `static/js/app.js` | Telas do exercício 2024 |
+| `static/js/app_multi_ano.js` | Telas dos exercícios 2025 e 2026 |
+| `static/js/auth.js` | Sessão, `apiFetch` e redirecionamento em 401 |
+| `static/js/explicacao.js` | Narrativa textual da simulação municipal |
+| `static/js/charts3d.js` | Gráficos 3D |
 
-### 9.2 O caminho de uma simulação, do clique ao gráfico
+### 9.2 O caminho de uma simulação
 
-1. A tela envia um `POST /api/simular` (ou `/api/2026/simular`) com os parâmetros em JSON;
-2. O servidor **confere o crachá** (cookie JWT);
-3. `preparar_pesos` decide quais pesos usar: os oficiais ou os personalizados (só admin);
-4. `executar_simulacao` chama o motor `simula_fundeb`;
-5. `validar_interno` roda as conferências RF-10;
-6. `gerar_resumo` monta as caixas-resumo e os agrupamentos;
-7. O resultado, já "limpo", volta em JSON para a tela;
-8. O Plotly desenha os gráficos e as tabelas.
+1. A tela envia `POST /api/simular` (ou `/api/{ano}/simular`) com os parâmetros em JSON.
+2. `get_current_user` valida o cookie JWT e confirma que o usuário está ativo.
+3. `_checar_simulacao` verifica se o exercício está habilitado (senão, HTTP 503).
+4. `preparar_pesos` decide entre pesos oficiais e personalizados, conforme o perfil.
+5. `executar_simulacao` chama `simula_fundeb`.
+6. `validar_interno` roda as conferências RF-10.
+7. `gerar_resumo`, `gerar_dados_por_uf` e `gerar_vencedores_perdedores` montam os agregados.
+8. `sanitize_for_json` troca `NaN`/`inf` por `null` e a resposta volta em JSON.
+9. O Plotly desenha os gráficos e as tabelas.
 
 ---
 
-## 10. Fontes de dados
+## 10. Fontes de dados e cache
 
-Os números do simulador **não são inventados**: vêm de planilhas e arquivos oficiais. Esta seção lista de onde sai cada coisa.
+Os números do simulador vêm de arquivos oficiais. Esta seção diz de onde sai cada coisa.
 
 ### 10.1 Exercício 2024 (pasta `data/`)
 
-| Arquivo | O que contém |
-|---------|--------------|
-| `dados_unificados.xlsx` | Matrículas, receitas e a chave de identificação (IBGE) |
-| `pesos.rda` | Os pesos VAAF/VAAT das 41 etapas |
-| `complementar.rda` | NF, inabilitados do VAAT e peso do VAAR |
-| `matriculas.rda` | Reserva para etapas ausentes na planilha |
-| `cenario_atual*.rda` | O cenário oficial de referência |
-| `PonderadorNSE 2024.pdf` | O NSE por código IBGE |
+| Arquivo | Conteúdo |
+|---------|----------|
+| `pesos.rda` | Pesos VAAF/VAAT das 41 etapas |
+| `matriculas.rda` | Matrículas por etapa e por ente |
+| `complementar.rda` | Receitas, NF, peso VAAR e flag de inabilitados ao VAAT |
+| `cenario_atual*.rda` | Cenário oficial de referência (por ente, agregado e por UF) |
+| `PonderadorNSE 2024.pdf` | NSE por código IBGE, extraído do PDF oficial |
 
-> **Política híbrida:** as matrículas oficiais vêm do arquivo `matriculas.rda`; a planilha Excel fornece as receitas e campos extras. Isso combina a fonte mais confiável de cada dado.
+> **Observação para quem for mexer no código:** a pasta contém também `dados_unificados.xlsx`, e o `main.py` mantém funções auxiliares para lê-lo (`carregar_matriculas_da_planilha`, `carregar_campos_tecnicos_xlsx`). Elas são **remanescentes de uma versão anterior e não são chamadas**: o dataset de 2024 em uso é montado inteiramente a partir dos arquivos `.rda` e do PDF de NSE, em `carregar_dataset_2024` ([dados/fundeb_dataset.py](dados/fundeb_dataset.py)).
 
 ### 10.2 Exercícios 2025 e 2026 (pasta `20252026/`)
 
-| Arquivo | Ano | Uso |
-|---------|-----|-----|
-| `Matrículas Fundeb 2026.xlsx` | **2026** | Matrículas + pesos (aba FPs) — fonte dedicada |
-| `Matrículas Fundeb 2025 e 2026.xlsx` | **2025** | Matrículas (`ANO=2025`) + pesos |
-| `1-receita-total-do-fundeb-por-ente-federado.xlsx` | 2026 | Receitas e peso VAAR |
-| `1-receita-total-do-fundeb-por-ente-federado-2025.xlsx` | 2025 | Receitas |
+O mapa de arquivos por exercício está em `RAW_ARQUIVOS` ([dados/fundeb_dataset.py:37](dados/fundeb_dataset.py#L37)).
+
+| Arquivo | Exercício | Uso |
+|---------|-----------|-----|
+| `Matrículas Fundeb 2026.xlsx` | 2026 | Matrículas (aba `Detalhadas`) e pesos (aba `FPs`) |
+| `Matrículas Fundeb 2025 e 2026.xlsx` | 2025 | Matrículas filtradas por `ANO = 2025` e pesos |
+| `1-receita-total-do-fundeb-por-ente-federado.xlsx` | 2026 | Receita da contribuição, complementações oficiais e peso VAAR |
+| `1-receita-total-do-fundeb-por-ente-federado-2025.xlsx` | 2025 | Idem, para 2025 |
 | `ponderador-de-nivel-socioeconomico.xlsx` | 2026 | NSE |
-| `ponderador-de-nivel-socioeconomico-2025.xlsx` | 2025 | NSE |
+| `PonderadorNSEFundeb2025.pdf` | 2025 | NSE (o FNDE não publicou XLSX para 2025) |
 | `ponderador-de-disponibilidade-de-recursos.xlsx` | 2026 | DREC |
-| `ponderador-de-disponibilidade-de-recursos-2025.xlsx` | 2025 | DREC |
-| `MemriadeClculoVAAT2026 (2).xlsx` | 2026 | Memória de cálculo do VAAT, inabilitados |
-| `Receita STN 2023 VAAT 2025 para publicação.xlsx` | 2025 | Memória de cálculo do VAAT |
+| `PonderadorDRecFundeb2025.pdf` | 2025 | DREC |
+| `MemriadeClculoVAAT2026 (2).xlsx` | 2026 | Memória de cálculo do VAAT |
+| `Receita STN 2023 VAAT 2025 para publicação.xlsx` | 2025 | Memória de cálculo do VAAT (aba `COM CORREÇÃO`) |
+| `ListadosenteshabilitadoseinabilitadosaoVAAT2026...xlsm` | 2026 | Lista oficial de inabilitados ao VAAT |
+| `Receitas Fundos 2026.ods` | 2026 | Anexo STN usado no teste de regressão por UF |
 
-### 10.3 O cache do ETL (por que a segunda vez é mais rápida)
+**Três decisões do ETL que vale conhecer:**
 
-Depois da primeira carga, o sistema **guarda o resultado já preparado** em arquivos `.pkl`, para não precisar reler as planilhas toda vez:
+1. **Receita do fundo:** o VAAF usa a coluna `recursos_contribuicao` da planilha de receita (Anexo I/Portaria). A coluna equivalente da memória de cálculo do VAAT é base VAAT e **não** substitui a contribuição oficial.
+2. **Peso VAAR:** é derivado da participação de cada ente na complementação VAAR oficial da planilha de receita.
+3. **Montantes padrão:** são a **soma das colunas oficiais** da planilha de receita do exercício. As constantes `COMPLEMENTACAO_2025` e `COMPLEMENTACAO_2026` no código funcionam apenas como reserva, caso a soma resulte em zero.
 
-- `data/2024/` — preparado no início, em `main.py`;
-- `data/2025/dataset.pkl`;
-- `data/2026/dataset.pkl`.
+> **Ponto de atenção:** as constantes de reserva de 2026 estão exatamente no dobro dos valores somados da planilha (R$ 60,25 bi contra R$ 30,12 bi de VAAF, por exemplo). Como o sistema usa a soma da planilha, isso não afeta os resultados hoje, mas as constantes devem ser revistas na próxima atualização de portaria para não induzirem a erro se algum dia forem acionadas.
 
-Existe uma "versão do cache" (`DATASET_CACHE_VERSION`, em `fundeb_dataset.py`). **Sempre que você mudar o ETL ou trocar uma planilha**, aumente esse número **ou** apague os arquivos `.pkl` — assim o sistema entende que precisa reler os dados novos. (Se esquecer disso, o sistema continuará mostrando os dados antigos do cache.)
+### 10.3 Cache do ETL
+
+Depois da primeira carga, o resultado já preparado é gravado em disco para evitar reler as planilhas:
+
+- `data/2025/dataset.pkl`
+- `data/2026/dataset.pkl`
+
+O arquivo guarda a constante `DATASET_CACHE_VERSION` (hoje **8**). Se a versão gravada não bate com a do código, o cache é descartado e os dados são relidos. **Sempre que alterar o ETL ou trocar uma planilha, incremente essa constante ou apague os `.pkl`** — caso contrário, o sistema continuará exibindo os dados antigos.
 
 ### 10.4 Banco de usuários
 
-- Arquivo: `data/usuarios.db` (banco SQLite);
-- Tabela `users`: guarda CPF, senha (criptografada com bcrypt), perfil (`role`), nome, status (ativo) e data de criação.
-
-> **A senha nunca é guardada "em texto puro".** O bcrypt transforma a senha num código embaralhado e irreversível ("hash"). Nem o administrador consegue ler a senha de um usuário — só pode redefini-la.
+- Arquivo: `data/usuarios.db` (SQLite).
+- Tabela `users`: CPF (chave primária), hash da senha, perfil (`admin`/`usuario`), nome, status ativo e data de criação.
 
 ---
 
-## 11. Motor de simulação (algoritmo, passo a passo)
+## 11. Motor de simulação, passo a passo
 
-Toda a mágica acontece na função **`simula_fundeb`** ([simulador.py:175](simulador.py#L175)). Vamos percorrê-la em etapas, sempre traduzindo a matemática para o português.
+Tudo acontece em `simula_fundeb` ([simulador.py:175](simulador.py#L175)).
 
-### Etapa 1 — Transformar matrículas em matrículas ponderadas
+### Etapa 0 — Separar os inabilitados ao VAAT
 
-```
-matriculas_vaaf = Σ (matrícula da etapa × peso VAAF da etapa)
-matriculas_vaat = Σ (matrícula da etapa × peso VAAT da etapa)
-```
+A lista de entes inabilitados é extraída da tabela complementar e reservada para uso na etapa 7.
 
-O símbolo `Σ` (sigma) significa apenas "some tudo". Para cada ente, multiplicamos as matrículas de cada etapa pelo peso correspondente e somamos. (Tecnicamente é uma multiplicação de matrizes: `matriz @ vetor_pesos`.)
-
-### Etapa 2 — Aplicar NSE e NF/DREC
-
-Multiplica-se as matrículas ponderadas pelo **NSE** (no VAAF e no VAAT) e pelo **NF ou DREC** (só no VAAF). É aqui que o contexto social e a capacidade fiscal entram na conta.
-
-### Etapa 3 — Juntar por estado (UF)
+### Etapa 1 — Matrículas ponderadas por etapa
 
 ```
-vaaf_estado_inicial = recursos do estado (VAAF) / matrículas do estado (VAAF)
+matriculas_vaaf = Σ (matrículas da etapa × peso VAAF da etapa)
+matriculas_vaat = Σ (matrículas da etapa × peso VAAT da etapa)
 ```
 
-Ou seja: quanto cada estado tem por aluno **antes** de qualquer complementação. É o "nível de água" inicial de cada copo (seção 2.6).
+O símbolo `Σ` significa "some tudo". Tecnicamente é uma multiplicação de matrizes: matriz de matrículas × vetor de pesos.
 
-### Etapa 4 — Equalização do VAAF (entre estados)
+### Etapa 2 — Ponderadores de contexto
 
-Aqui entra o algoritmo `equaliza_fundo`. Ele ordena os estados do menor valor por aluno para o maior e **despeja** a complementação `complementacao_vaaf` nos mais pobres, elevando-os até um patamar comum, **até o dinheiro acabar**. Estados que já estavam acima da linha final mantêm seus recursos originais. (É a analogia dos copos d'água em ação.)
+Aplica **NSE** (VAAF e VAAT) e **NF ou DREC** (só VAAF). No modo NF, o vetor é reescalonado antes, dentro do intervalo informado pelo usuário.
 
-### Etapa 5 — Redistribuir dentro de cada estado
+### Etapa 3 — Agregação por fundo estadual
+
+```
+vaaf_estado_inicial = recursos do estado (VAAF) / matrículas ponderadas do estado (VAAF)
+```
+
+É o "nível de água" inicial de cada copo.
+
+### Etapa 4 — Equalização do VAAF entre estados
+
+`equaliza_fundo` ordena os fundos do menor valor por aluno para o maior, calcula quanto seria preciso para elevar cada nível acumulado e distribui a complementação VAAF até esgotá-la. Fundos já acima da linha final mantêm seus recursos originais.
+
+### Etapa 5 — Redistribuição dentro de cada estado
 
 ```
 recursos_vaaf_final = matriculas_vaaf × (recursos do estado após equalização / matrículas do estado)
 vaaf_final          = recursos_vaaf_final / matriculas_vaaf
 ```
 
-Depois de definir quanto **cada estado** ficou tendo, reparte-se esse total **entre os entes daquele estado**, na proporção das matrículas ponderadas de cada um.
+O total do fundo é repartido entre seus entes na proporção das matrículas ponderadas.
 
-### Etapa 6 — Calcular o VAAT antes da complementação
+### Etapa 6 — VAAT antes da complementação
 
 ```
 vaat_pre = recursos_vaat / matriculas_vaat
 ```
 
-O valor total por aluno de cada ente **antes** da complementação nacional.
+### Etapa 7 — Equalização do VAAT em nível nacional
 
-### Etapa 7 — Equalização do VAAT (nacional)
+Mesmo algoritmo, agora **ente a ente** (chave `ibge`) e em âmbito nacional, **excluindo os inabilitados**: eles ficam fora do ordenamento e mantêm os recursos originais, sem complementação VAAT.
 
-Mesmo algoritmo dos copos, mas agora **ente por ente** (por código `ibge`) e em nível nacional, **excluindo os entes inabilitados** do VAAT (aqueles que, por regra, não têm direito a essa complementação).
-
-### Etapa 8 — VAAR (o prêmio por resultado)
+### Etapa 8 — VAAR
 
 ```
 complemento_vaar = peso_vaar × complementacao_vaar
 ```
 
-Distribui o prêmio conforme o peso de resultado de cada ente.
-
-### Etapa 9 — Somar tudo (totais finais)
+### Etapa 9 — Totais finais
 
 ```
 complemento_vaaf  = recursos_vaaf_final - recursos_vaaf
@@ -725,24 +772,22 @@ complemento_uniao = complemento_vaaf + complemento_vaat + complemento_vaar
 recursos_fundeb   = recursos_vaaf + complemento_uniao
 ```
 
-Em português: **o complemento** de cada modalidade é o quanto o ente ganhou a mais graças à União; a **complementação total da União** é a soma das três fatias; e os **recursos finais do FUNDEB** são os recursos próprios mais tudo o que a União acrescentou.
+Em português: o complemento de cada modalidade é o quanto o ente ganhou graças à União; a complementação total é a soma das três fatias; e a receita total do FUNDEB é a contribuição própria mais tudo o que a União acrescentou.
 
 ---
 
-## 12. Validação automática
+## 12. Validação automática (RF-10)
 
-Como confiar que o sistema não errou uma conta? Ele **confere a si mesmo**. Depois de cada simulação, o `validacao.py` roda quatro verificações — o conjunto apelidado de **RF-10**:
+Depois de cada simulação, `validar_interno` ([validacao.py:23](validacao.py#L23)) refaz as contas por outro caminho — como conferir o troco.
 
-| # | O que verifica | Que erro isso pegaria |
-|---|----------------|-----------------------|
-| 1 | A soma dos `recursos_vaaf` de um estado bate com o total daquele estado | Erro ao juntar/agrupar dados |
-| 2 | `vaaf_final` é mesmo igual a `recursos_vaaf_final ÷ matriculas_vaaf` | Fórmula inconsistente |
-| 3 | As participações VAAF dentro do estado somam 100% | Erro no rateio interno |
-| 4 | `recursos_fundeb` é mesmo `recursos_vaaf + complemento_uniao` | Erro nas colunas finais |
+| # | Verificação | Erro que detecta |
+|---|-------------|------------------|
+| 1 | Soma de `recursos_vaaf` por UF = total do fundo estadual | Falha ao juntar ou agrupar dados |
+| 2 | `vaaf_final` = `recursos_vaaf_final / matriculas_vaaf` | Fórmula inconsistente |
+| 3 | Participações VAAF dentro do estado somam 100% | Erro no rateio interno |
+| 4 | `recursos_fundeb` = `recursos_vaaf + complemento_uniao` | Erro nas colunas finais |
 
-Pense nisso como a **conferência do troco**: depois de fazer as contas, o sistema refaz algumas somas por outro caminho para garantir que tudo fecha.
-
-**Como o resultado aparece na resposta da API:**
+Resposta da API:
 
 ```json
 "validacao": {
@@ -753,73 +798,77 @@ Pense nisso como a **conferência do troco**: depois de fazer as contas, o siste
 }
 ```
 
-> Se `valido` for `false`, os resultados **ainda são exibidos**, mas com um alerta bem visível para você desconfiar dos números e investigar (por exemplo, parâmetros extremos ou dados inconsistentes).
+Se `valido` for `false`, os resultados continuam sendo exibidos, mas com alerta visível para que os números sejam investigados antes de qualquer uso.
+
+Há ainda `comparar_com_oficial` ([validacao.py:79](validacao.py#L79)), que calcula as diferenças médias e máximas entre a simulação e uma tabela oficial. É usado em auditorias pontuais, fora do fluxo automático das telas.
 
 ---
 
 ## 13. API REST
 
-> Esta seção interessa a **desenvolvedores** que queiram integrar o simulador a outros sistemas. Se você só usa a tela, pode pular.
+> Seção voltada a desenvolvedores que queiram integrar o simulador a outros sistemas.
 
-Uma "API REST" é a **porta de entrada programável** do sistema: em vez de clicar em botões, outro programa pode enviar pedidos diretamente. Todas as rotas que começam com `/api/*` (menos o login) exigem o crachá `fundeb_token`.
+Todas as rotas `/api/*` — exceto o login — exigem o cookie `fundeb_token`.
 
 ### 13.1 Autenticação
 
-| Método | Rota | O que faz |
-|--------|------|-----------|
-| POST | `/api/auth/login` | Recebe `{cpf, senha}` e devolve o cookie |
+| Método | Rota | Função |
+|--------|------|--------|
+| POST | `/api/auth/login` | Recebe `{cpf, senha}` e grava o cookie |
 | POST | `/api/auth/logout` | Apaga o cookie |
-| GET | `/api/auth/me` | Diz quem você é: `{cpf, role, nome}` |
+| GET | `/api/auth/me` | Retorna `{cpf, cpf_formatado, role, nome}` |
 
-### 13.2 Administração
+### 13.2 Administração (somente admin)
 
-| Método | Rota | O que faz |
-|--------|------|-----------|
+| Método | Rota | Função |
+|--------|------|--------|
 | GET | `/api/admin/usuarios` | Lista os usuários |
 | POST | `/api/admin/usuarios` | Cria um usuário |
 | PATCH | `/api/admin/usuarios/{cpf}` | Atualiza nome, perfil, status ou senha |
 | DELETE | `/api/admin/usuarios/{cpf}` | Remove um usuário |
 
-### 13.3 FUNDEB 2024
+### 13.3 Exercício 2024
 
-| Método | Rota | O que faz |
-|--------|------|-----------|
-| GET | `/api/estados` | Lista UFs e regiões |
+| Método | Rota | Função |
+|--------|------|--------|
+| GET | `/api/estados` | UFs e regiões |
 | GET | `/api/municipios?uf=XX` | Entes da UF (estado primeiro, depois municípios) |
-| GET | `/api/pesos` | Pesos por etapa |
+| GET | `/api/pesos` | Pesos por etapa, com a família |
 | GET | `/api/etapas` | Nomes amigáveis das etapas |
-| GET | `/api/municipio/{ibge}/matriculas` | Matrículas e dados de um ente |
-| GET | `/api/cenario-atual/resumo` | O cenário oficial de referência |
-| POST | `/api/simular` | Simulação agregada (resumo + gráficos) |
+| GET | `/api/municipio/{ibge}/matriculas` | Matrículas e dados do ente |
+| GET | `/api/cenario-atual/resumo` | Cenário de referência |
+| POST | `/api/simular` | Simulação agregada (resumo, gráficos, validação) |
 | POST | `/api/simular/completo` | Uma linha por ente |
 | POST | `/api/simular/municipio` | Comparativo original × ajustado |
 
-### 13.4 Por exercício (`/api/2025/...`, `/api/2026/...`)
+### 13.4 Exercícios 2025 e 2026
 
-A mesma estrutura, só que com o ano no endereço:
+Mesma estrutura, com o ano no caminho:
 
-| Método | Rota | O que faz |
-|--------|------|-----------|
-| GET | `/api/{ano}/meta` | Metadados, valores padrão, se a simulação está habilitada |
+| Método | Rota | Função |
+|--------|------|--------|
+| GET | `/api/{ano}/meta` | Estado do exercício, montantes padrão, ponderador, nº de etapas e famílias |
 | GET | `/api/{ano}/estados` | UFs e regiões |
 | GET | `/api/{ano}/municipios?uf=XX` | Entes da UF |
 | GET | `/api/{ano}/pesos` | Pesos por segmento |
-| GET | `/api/{ano}/etapas` | Nomes das etapas |
-| GET | `/api/{ano}/municipio/{ibge}/matriculas` | Matrículas de um ente |
+| GET | `/api/{ano}/etapas` | `{etapas, familias}` |
+| GET | `/api/{ano}/municipio/{ibge}/matriculas` | Matrículas do ente |
 | GET | `/api/{ano}/cenario-atual/resumo` | Cenário de referência |
 | POST | `/api/{ano}/simular` | Simulação agregada |
 | POST | `/api/{ano}/simular/completo` | Dados completos por ente |
 | POST | `/api/{ano}/simular/municipio` | Simulação municipal |
 
-### 13.5 Como é o pedido de uma simulação
+> **Diferença sutil:** `GET /api/etapas` (2024) devolve um dicionário simples `{etapa: nome}`, enquanto `GET /api/{ano}/etapas` devolve `{etapas, familias}`.
 
-O corpo de um pedido de simulação é um JSON assim (os valores são exemplos):
+### 13.5 Corpo das requisições
+
+Simulação:
 
 ```json
 {
-  "complementacao_vaaf": 60249853912.98,
-  "complementacao_vaat": 63262346608.62,
-  "complementacao_vaar": 0,
+  "complementacao_vaaf": 30124926956.49,
+  "complementacao_vaat": 31631173304.31,
+  "complementacao_vaar": 7531231739.12,
   "max_nse": 1.1,
   "min_nse": 1.0,
   "max_nf": 1.0,
@@ -829,7 +878,7 @@ O corpo de um pedido de simulação é um JSON assim (os valores são exemplos):
 }
 ```
 
-A simulação **municipal** acrescenta o ente e as matrículas alteradas:
+Simulação municipal (acrescenta o ente e as matrículas alteradas):
 
 ```json
 {
@@ -841,27 +890,36 @@ A simulação **municipal** acrescenta o ente e as matrículas alteradas:
 }
 ```
 
-> Os campos `pesos_vaaf` e `pesos_vaat` **só têm efeito para administradores**. Se um usuário comum enviá-los, o servidor os ignora e usa os pesos oficiais.
+> `pesos_vaaf` e `pesos_vaat` só têm efeito para administradores, e apenas se o tamanho da lista coincidir com o número de etapas do exercício. Para usuários comuns, são ignorados.
 
-### 13.6 Exemplo prático com `curl` (depois do login)
+### 13.6 Códigos de erro
+
+| Código | Quando ocorre |
+|--------|---------------|
+| 401 | Sem cookie, sessão expirada ou usuário inativo |
+| 403 | Rota de administrador acessada por usuário comum; login de usuário inativo |
+| 404 | Ente não encontrado no exercício |
+| 409 | CPF já cadastrado |
+| 422 | Corpo inválido (por exemplo, CPF sem dígitos verificadores válidos) |
+| 503 | Exercício sem dados completos para simular |
+
+### 13.7 Exemplo com `curl`
 
 ```powershell
-# 1) Fazer login e salvar o cookie num arquivo
+# 1) Login, salvando o cookie
 curl -c cookies.txt -X POST http://localhost:8000/api/auth/login `
   -H "Content-Type: application/json" `
   -d '{"cpf":"52998224725","senha":"admin123"}'
 
-# 2) Simular 2026 usando o cookie salvo
+# 2) Simular 2026 usando o cookie
 curl -b cookies.txt -X POST http://localhost:8000/api/2026/simular `
   -H "Content-Type: application/json" `
-  -d '{"complementacao_vaaf":60249853912.98,"complementacao_vaat":63262346608.62}'
+  -d '{"complementacao_vaaf":30124926956.49,"complementacao_vaat":31631173304.31}'
 ```
 
 ---
 
 ## 14. Testes automatizados
-
-O projeto vem com **testes** — pequenos programas que verificam, sozinhos, se o sistema continua correto depois de qualquer mudança. Para rodá-los:
 
 ```powershell
 python -m pytest tests/ -v
@@ -869,91 +927,116 @@ python -m pytest tests/ -v
 
 | Arquivo | O que verifica |
 |---------|----------------|
-| `test_requisitos.py` | Regras de participação (CA-02), redistribuição (RN-03) e a validação RF-10 |
-| `test_dataset_2025.py` | A leitura dos dados de 2025 e os entes estaduais |
-| `test_dataset_2026.py` | A leitura dos dados de 2026 e o arquivo dedicado de matrículas |
-| `test_auth.py` | Login, perfis e a proibição de pesos personalizados |
+| `tests/test_requisitos.py` | Rateio proporcional (CA-02), redistribuição em cascata (RN-03) e validação interna (RF-10), com dados sintéticos |
+| `tests/test_dataset_2025.py` | Carga do exercício 2025, mapeamento de arquivos e coerência entre modo consulta e modo simulação |
+| `tests/test_dataset_2026.py` | Carga do exercício 2026, consistência do VAAF e conferência das receitas por UF contra o Anexo STN (`Receitas Fundos 2026.ods`) |
+| `tests/test_auth.py` | Login, CPF inválido, usuário inativo, restrição de rotas de admin e bloqueio de pesos personalizados |
 
-> **Por que isso importa para um leigo?** Porque significa que, sempre que alguém melhora o sistema, esses testes avisam **na hora** se algo quebrou — como um alarme de fumaça para o código.
+O arquivo `test_app.py`, na raiz, é um conjunto legado de verificações do exercício 2024 e não faz parte da suíte principal.
 
----
-
-## 15. Solução de problemas
-
-| Problema | Causa provável | O que fazer |
-|----------|----------------|-------------|
-| O sistema volta para a tela de login sozinho | Sessão expirou ou o cookie sumiu | Faça login novamente |
-| Erro "HTTP 503" ao simular 2025 | Faltam arquivos de dados de 2025 | Consulte `checklist-dados-2025.md` |
-| A primeira carga está muito lenta | O ETL está lendo planilhas grandes | Aguarde; nas próximas vezes o cache `.pkl` acelera |
-| O menu de município não mostra o estado | Cache ou página desatualizada | Aperte Ctrl+F5; se preciso, apague `data/2026/dataset.pkl` |
-| A validação RF-10 falhou | Dados inconsistentes ou valores extremos | Veja o campo `validacao.erros` na resposta |
-| `ModuleNotFoundError: pypdf` | As dependências não foram instaladas | Rode `pip install -r requirements.txt` |
-| Administrador não consegue editar pesos | O perfil não é de admin | Confirme se `role: admin` aparece em `/api/auth/me` |
-
-### 15.1 Como atualizar a planilha de matrículas de 2026
-
-1. Substitua o arquivo `20252026/Matrículas Fundeb 2026.xlsx` pela versão nova;
-2. Aumente `DATASET_CACHE_VERSION` em `dados/fundeb_dataset.py` **ou** apague `data/2026/dataset.pkl` (para o sistema reler os dados);
-3. Reinicie o servidor;
-4. Rode `pytest tests/test_dataset_2026.py` para confirmar que está tudo certo.
+> **Por que isso importa mesmo para quem não programa?** Porque, sempre que alguém altera o sistema, esses testes avisam na hora se algum cálculo saiu do lugar — funcionam como alarme de fumaça para o código.
 
 ---
 
-## 16. Glossário
+## 15. Operação e manutenção
 
-| Termo | Significado em uma frase |
-|-------|---------------------------|
-| **FUNDEB** | O fundo que financia a educação básica pública no Brasil |
-| **Ente** | Um município ou um governo estadual que participa do fundo |
-| **IBGE** | O código que identifica cada ente (`12` = AC; `1200054` = Assis Brasil/AC) |
-| **VAAF** | Valor Aluno Ano do Fundeb — equaliza **entre os fundos estaduais** |
-| **VAAT** | Valor Aluno Ano Total — equaliza **entre todos os entes**, considerando todas as receitas |
-| **VAAR** | Valor Aluno Ano Resultado — o **prêmio por desempenho** educacional |
-| **NSE** | Ponderador de Nível Socioeconômico — favorece contextos mais vulneráveis |
-| **NF** | Ponderador de disponibilidade de recursos (modelo de 2024) |
+### 15.1 Atualizar uma planilha de matrículas
+
+1. Substitua o arquivo em `20252026/` mantendo exatamente o nome esperado em `RAW_ARQUIVOS`.
+2. Incremente `DATASET_CACHE_VERSION` em `dados/fundeb_dataset.py` **ou** apague o `data/{ano}/dataset.pkl` correspondente.
+3. Reinicie o servidor.
+4. Rode `python -m pytest tests/test_dataset_2026.py -v` (ou o teste do ano alterado).
+
+### 15.2 Atualizar a lista de inabilitados ao VAAT
+
+1. Substitua o `.xlsm` da lista oficial em `20252026/`, mantendo o nome mapeado em `RAW_ARQUIVOS` (ou ajustando o mapeamento).
+2. Invalide o cache, como no item anterior.
+3. Reinicie e confira o total de inabilitados; a leitura considera inabilitado todo ente cuja coluna de verificação **não** contenha "Habilitado".
+
+### 15.3 Atualizar os montantes de complementação
+
+Os valores iniciais das telas vêm da soma das colunas oficiais da planilha de receita. Para adotar outra portaria, basta substituir a planilha de receita e invalidar o cache — não é preciso editar código. As constantes `COMPLEMENTACAO_2025`/`COMPLEMENTACAO_2026` só entram em cena se a soma resultar em zero.
+
+### 15.4 Colocar em produção
+
+- Defina uma `FUNDEB_SECRET_KEY` própria e forte.
+- Troque a senha do administrador inicial e, se possível, defina `FUNDEB_ADMIN_CPF`/`FUNDEB_ADMIN_SENHA` antes da primeira execução.
+- Sirva o sistema atrás de HTTPS: o cookie é `HttpOnly` e `SameSite=Lax`, mas trafega sem criptografia se o transporte não for seguro.
+- Restrinja `allow_origins` do CORS em `main.py`, hoje aberto para qualquer origem.
+- Faça backup periódico de `data/usuarios.db`.
+
+---
+
+## 16. Solução de problemas
+
+| Sintoma | Causa provável | O que fazer |
+|---------|----------------|-------------|
+| O sistema volta sozinho para a tela de login | Sessão expirada ou cookie removido | Faça login novamente; para sessões mais longas, ajuste `FUNDEB_TOKEN_HOURS` |
+| Erro HTTP 503 ao simular | Exercício sem todos os arquivos oficiais | Confira `GET /api/{ano}/meta` e o `checklist-dados-2025.md` |
+| Primeira carga muito lenta | O ETL está lendo planilhas grandes e PDFs | Aguarde; as execuções seguintes usam o cache `.pkl` |
+| Alterei uma planilha e nada mudou | O cache antigo continua válido | Incremente `DATASET_CACHE_VERSION` ou apague `data/{ano}/dataset.pkl` |
+| Ente estadual não aparece na lista | Página em cache no navegador | Ctrl+F5; se persistir, invalide o cache do dataset |
+| Validação RF-10 falhou | Parâmetros extremos ou dados inconsistentes | Leia `validacao.erros` na resposta da simulação |
+| `ModuleNotFoundError` na inicialização | Dependências não instaladas ou venv inativo | Ative o venv e rode `pip install -r requirements.txt` |
+| Administrador não consegue editar pesos | Perfil não é admin | Confira se `role` é `admin` em `GET /api/auth/me` |
+| Erro 422 ao criar usuário | CPF sem dígitos verificadores válidos ou senha curta | Use CPF válido e senha com pelo menos 6 caracteres |
+
+---
+
+## 17. Glossário
+
+| Termo | Significado |
+|-------|-------------|
+| **FUNDEB** | Fundo que financia a educação básica pública no Brasil |
+| **Ente** | Município ou governo estadual que participa do fundo |
+| **IBGE** | Código que identifica cada ente (`12` = AC; `1200054` = Assis Brasil/AC) |
+| **VAAF** | Valor Aluno Ano do Fundeb — equaliza entre os fundos estaduais |
+| **VAAT** | Valor Aluno Ano Total — equaliza entre todos os entes, considerando todas as receitas |
+| **VAAR** | Valor Aluno Ano Resultado — prêmio por desempenho educacional |
+| **VAAF-MIN / VAAT-MIN** | Menor valor por aluno alcançado após a equalização |
+| **NSE** | Ponderador de nível socioeconômico |
+| **NF** | Ponderador de disponibilidade de recursos usado em 2024 |
 | **DREC** | Disponibilidade de Recursos — substitui o NF no VAAF a partir de 2025 |
-| **FP** | Fator de Ponderação — o "peso" de cada tipo de matrícula |
-| **Segmento / etapa** | Uma categoria de matrícula (ex.: creche integral urbana) |
-| **Família** | Um agrupamento visual de segmentos na tela |
-| **Matrícula ponderada** | Matrícula × peso × (NSE e, no VAAF, NF/DREC) |
-| **Equalização** | O algoritmo que distribui a complementação "do mais pobre para o mais rico" |
-| **Cenário atual** | Os dados oficiais publicados, usados como comparação |
-| **RF-10** | O conjunto de conferências automáticas da matemática |
-| **Inabilitados VAAT** | Entes que, por regra, não recebem a complementação VAAT |
-| **ETL** | O processo de ler, limpar e organizar os dados das planilhas |
-| **JWT / cookie** | O "crachá digital" que prova que você já fez login |
+| **FP** | Fator de ponderação: o peso de cada tipo de matrícula |
+| **Segmento / etapa** | Categoria de matrícula (ex.: creche integral urbana) |
+| **Família** | Agrupamento de segmentos usado na interface |
+| **Matrícula ponderada** | Matrícula × peso × NSE × (NF/DREC, no VAAF) |
+| **Coeficiente** | Participação do ente no total de matrículas ponderadas do fundo estadual |
+| **Equalização** | Algoritmo que distribui a complementação começando pelos mais pobres |
+| **Inabilitado ao VAAT** | Ente que, por regra, fica fora da complementação VAAT |
+| **Cenário de referência** | Resultado calculado com os parâmetros oficiais, usado para comparação |
+| **RF-10** | Conjunto de conferências automáticas da matemática da simulação |
+| **ETL** | Processo de ler, limpar e organizar os dados das planilhas |
+| **JWT / cookie** | Credencial que comprova o login durante a sessão |
 
 ---
 
-## 17. Referências
+## 18. Referências
 
 ### Legislação
 
-- [Lei nº 14.113/2020](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/lei/L14113.htm) — o marco legal do FUNDEB
+- [Lei nº 14.113/2020](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/lei/L14113.htm) — marco legal do FUNDEB
 
 ### Dados oficiais
 
 - [FNDE — FUNDEB](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb)
 - [Matrículas da educação básica](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica)
 - [FUNDEB 2025](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2025)
-- Portaria MEC/MF nº 6/2026 — montantes da complementação de 2026
+- Portarias interministeriais MEC/MF com os montantes da complementação de cada exercício
 
 ### Documentação complementar no repositório
 
 | Arquivo | Conteúdo |
 |---------|----------|
 | `README.md` | Visão geral e início rápido |
-| `documentacao2.md` | Guia didático detalhado (complementar) |
+| `documentacao2.md` | Guia didático detalhado |
 | `documentacao.md` | Referência técnica resumida |
 | `explicacao.md` | Roteiro para apresentações |
-| `checklist-dados-2025.md` | Checklist de arquivos para habilitar 2025 |
+| `checklist-dados-2025.md` | Checklist de arquivos oficiais do exercício 2025 |
 | `alteracoes.md` | Histórico de alterações no pipeline de dados |
+| `melhorias.md` | Melhorias planejadas |
 
 ### Créditos
 
 - **Desenvolvimento:** IFCE — prof. João Cláudio Nunes Carvalho
 - **Motor original:** pacote R [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb2)
-
----
-
-*Manual gerado para o Simulador FUNDEB v2 — branch maio2026.*
