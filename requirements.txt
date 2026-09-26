@@ -3,5 +3,9 @@ uvicorn[standard]
 pandas
 numpy
 pyreadr
-pydantic
+pydantic>=2.6,<3
 pytest
+httpx>=0.27,<1
+openpyxl>=3.1,<4
+reportlab>=4,<5
+pypdf>=5,<7

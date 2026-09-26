@@ -647,7 +647,7 @@ function renderResultadosVAAR(data, totalVaar) {
   // Tabela VAAR — top 50 entes
   const sorted = [...data].sort((a, b) => (b.complemento_vaar || 0) - (a.complemento_vaar || 0));
   const top = sorted.slice(0, 50);
-  const headers = ['Posição', 'UF', 'Município', 'VAAR (R$)', 'VAAF (R$)', 'VAAT (R$)', 'Total Comp. (R$)', 'Recursos FUNDEB (R$)'];
+  const headers = ['Posição', 'UF', 'Ente federado', 'VAAR (R$)', 'VAAF (R$)', 'VAAT (R$)', 'Total Comp. (R$)', 'Recursos FUNDEB (R$)'];
   const rows = top.map((d, i) => [
     i + 1, d.uf, d.nome,
     fmt.moeda(d.complemento_vaar), fmt.moeda(d.complemento_vaaf),
@@ -666,7 +666,7 @@ function renderResultadosVAAR(data, totalVaar) {
 // =========================================================================
 async function executarSimulacaoMunicipal() {
   const ibge = parseInt($('#sel-mun-cidade').value);
-  if (!ibge) { alert('Selecione um município'); return; }
+  if (!ibge) { alert('Selecione um ente federado'); return; }
 
   const loading = $('#loading-municipio');
   loading.classList.remove('d-none');
@@ -753,7 +753,7 @@ function renderResultadosMunicipio(data) {
 
   // Tabela impacto no estado
   if (data.estado_original && data.estado_ajustado) {
-    const headers = ['Município', 'VAAF Original', 'VAAF Ajustado', 'Dif VAAF', 'VAAT Original', 'VAAT Ajustado', 'Dif VAAT'];
+    const headers = ['Ente federado', 'VAAF Original', 'VAAF Ajustado', 'Dif VAAF', 'VAAT Original', 'VAAT Ajustado', 'Dif VAAT'];
     const rows = [];
     const origMap = {};
     data.estado_original.forEach(d => origMap[d.ibge] = d);

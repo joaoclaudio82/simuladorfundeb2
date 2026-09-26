@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "bases": [
+    {
+      "id": "legado",
+      "nome": "Base existente — exercício não identificado",
+      "ano_exercicio": null,
+      "ano_censo": null,
+      "data_publicacao": null,
+      "periodo_receita": null,
+      "status": "pendente",
+      "referencia_oficial": false,
+      "modo_vaat": "fixo",
+      "fontes": {
+        "dados": "Arquivos existentes no repositório em d7876b8",
+        "receita": null,
+        "censo": null
+      },
+      "arquivos": {
+        "matriculas": "matriculas.rda",
+        "complementar": "complementar.rda",
+        "pesos": "pesos.rda",
+        "entes": "legado/entes.csv",
+        "referencia": "cenario_atual.rda"
+      },
+      "hashes": {
+        "matriculas": "cc10ff4af4629524e193fa27d38c851ccca56883967b5fa474c9abeb0b83dbc6",
+        "complementar": "d8e31655dc7d8eeb4a35006dd4f428781511b26eaf639854af6bffabdbfd2cc9",
+        "pesos": "3aff131e5e90c4a906d1d3abd9a04ab8ffe9c73446d370859d10783269852145",
+        "entes": "c04ab6025814e64f4f6054bba7a2311e8edbcf2f17e5198c942def248cebe327",
+        "referencia": "d77dc7bd6725e39c72176947a714ce8fadc91d1e849b9fe7f08e8a9e9e9bdd34"
+      },
+      "parametros": {
+        "complementacao_vaaf": 24153287047,
+        "complementacao_vaat": 18114965285,
+        "complementacao_vaar": 0,
+        "min_nse": 1,
+        "max_nse": 1.1,
+        "min_nf": 1,
+        "max_nf": 1
+      },
+      "tolerancias": {
+        "absoluta": 1,
+        "relativa": 0.0001
+      },
+      "etapas_ept": [
+        "ensino_medio_integrado_a_educacao_profissional_rede_publica"
+      ],
+      "propag": {
+        "status": "pendente",
+        "ufs": [],
+        "fonte": null
+      },
+      "amazonico": {
+        "status": "pendente",
+        "norma": null
+      },
+      "pendencias": [
+        "Confirmar exercício financeiro e ano do censo.",
+        "Receber receita de agosto e identificar seu período de referência.",
+        "Conferir divergência de Pernambuco com a fonte oficial.",
+        "Confirmar composição do grupo Propag.",
+        "Validar composição das receitas VAAT antes de recompor o efeito do VAAF.",
+        "Receber norma e especificação do fator amazônico.",
+        "A base contém 804 células fracionárias em AEE/educação especial conveniada; confirmar tratamento na fonte. Valores preservados, sem arredondamento."
+      ],
+      "categorias_fracionarias": [
+        "atendimento_educacional_especializado_aee",
+        "educacao_especial_rede_conveniada"
+      ]
+    }
+  ]
+}

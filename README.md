@@ -2,8 +2,17 @@
 ![CI](https://github.com/joaoclaudio82/simuladorfundeb2/actions/workflows/ci.yml/badge.svg)
 Simulador de Fatores de Ponderação do FUNDEB — Versão Python com frontend e backend separados.
 
+- **Cenários nacionais**: alteração conjunta de várias redes, recortes por rede estadual/DF, municipal ou UF e comparação A–D de matrículas e receitas.
+- **Exportações**: PDF, Excel e CSV associados ao resultado calculado, com dados, hipóteses e identificação da base.
+- **Bases versionadas**: catálogo com hashes, auditoria de cobertura, importação de versões preliminares e conferência com referência.
+- **Trajetória de EPT**: expansão linear e receita composta, com hipóteses explícitas.
+
+Abra **Cenários nacionais** no menu ou acesse `/?tab=cenarios`. Consulte o [guia de uso, importação e API](docs/CENARIOS_NACIONAIS.md) e o [status de implementação e validação](docs/STATUS_IMPLEMENTACAO.md).
+
+**Dados atuais:** a base legada contém 5.595 redes e não tem exercício identificado. Ela não é apresentada como base homologada de 2026. Receitas de agosto, divergências de PE, composição do grupo Propag e regra amazônica dependem de confirmação e fornecimento dos insumos correspondentes. Os resultados são cenários hipotéticos, não previsões.
+
 - **Simulação VAAR**:  aba para simular a distribuição da complementação VAAR
-- **Simulação Municipal**: Permite ajustar matrículas de um município e ver o impacto em VAAF, VAAT e VAAR
+- **Simulação por ente federado**: Permite ajustar matrículas de uma rede e ver o impacto em VAAF, VAAT e VAAR
 - **Interface moderna**: Dashboard com sidebar, Bootstrap 5 e Plotly.js
 - **API REST**: Backend FastAPI com endpoints para integração
 
@@ -63,6 +72,16 @@ Para comparar com dados oficiais do FUNDEB (CA-05), use a função `comparar_com
 ```bash
 python -m pytest tests/test_requisitos.py -v
 ```
+
+Para a suíte completa e o fluxo da interface com API real:
+
+```bash
+python -m pytest tests/ -q
+npm ci
+npm run test:ui
+```
+
+O teste de interface usa DOM em memória; Node.js é necessário somente para os testes. A aplicação continua sendo servida pelo Python. Cenários persistem em `.runtime/cenarios.sqlite3`; use `FUNDEB_CENARIOS_DB` para apontar a um volume persistente na implantação.
 
 Inclui testes para:
 - **CA-02**: Participação 1000/10000 = 10% e 1100/10100 ≈ 10,89%

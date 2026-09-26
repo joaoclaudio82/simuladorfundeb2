@@ -23,3 +23,7 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+.runtime/
+.ruff_cache/
+qa-output/
+node_modules/
