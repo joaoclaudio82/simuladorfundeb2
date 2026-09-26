@@ -12,3 +12,4 @@ pyarrow
 bcrypt
 python-jose[cryptography]
 httpx
+reportlab

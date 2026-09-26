@@ -152,16 +152,18 @@ def gerar_resumo(sim: pd.DataFrame, atual: pd.DataFrame) -> dict:
 
 
 def gerar_dados_por_uf(sim: pd.DataFrame) -> list[dict]:
-    hab = sim[~sim["inabilitados_vaat"].isin([True, "Verdadeiro"]) | (sim["uf"] == "DF")]
-    por_uf = hab.groupby("uf", as_index=False).agg(
+    """Totais financeiros incluem todas as redes; a habilitação VAAT só restringe a média de VAAT."""
+    por_uf = sim.groupby("uf", as_index=False).agg(
         vaaf_medio=("vaaf_final", "mean"),
-        vaat_medio=("vaat_final", "mean"),
         complemento_vaaf=("complemento_vaaf", "sum"),
         complemento_vaat=("complemento_vaat", "sum"),
         complemento_vaar=("complemento_vaar", "sum"),
         complemento_uniao=("complemento_uniao", "sum"),
         recursos_fundeb=("recursos_fundeb", "sum"),
-    ).round(2)
+    )
+    hab = sim[~sim["inabilitados_vaat"].isin([True, "Verdadeiro"]) | (sim["uf"] == "DF")]
+    vaat = hab.groupby("uf", as_index=False).agg(vaat_medio=("vaat_final", "mean"))
+    por_uf = por_uf.merge(vaat, on="uf", how="left").round(2)
     return sanitize_for_json(por_uf.to_dict(orient="records"))
 
 
