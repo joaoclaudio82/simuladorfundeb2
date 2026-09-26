@@ -964,3 +964,9 @@ button:focus-visible,
   .main-content { margin-left: 0 !important; }
   .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
 }
+
+/* ---- Cenário nacional ---- */
+.cen-categorias { max-height: 420px; overflow-y: auto; }
+.cen-editado input { border-color: var(--warning); background: #fff8ec; }
+.cen-tabela td, .cen-tabela th { white-space: nowrap; font-size: .8rem; }
+#tab-cenario .d-none { display: none !important; }

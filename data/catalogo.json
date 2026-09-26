@@ -1,0 +1,141 @@
+{
+  "versao_catalogo": 2,
+  "base_padrao": "fundeb-2026",
+  "observacao": "Caminhos relativos à raiz do repositório. Os dados são montados por dados/fundeb_dataset.py; o catálogo identifica e confere os arquivos de origem.",
+  "bases": [
+    {
+      "base_id": "fundeb-2026",
+      "ano_exercicio": 2026,
+      "ano_censo": null,
+      "periodo_receita": "Receita total prevista do Fundeb 2026",
+      "data_publicacao": "2026-04-29",
+      "descricao": "Exercício 2026: matrículas FNDE (319 segmentos), receita prevista (Portaria Interministerial MEC/MF nº 6, de 29/04/2026), NSE e DREC oficiais, memória de cálculo VAAT e lista de inabilitados ao VAAT com ajuste judicial.",
+      "situacao": "preliminar",
+      "homologada": false,
+      "pendencias": [
+        "Incorporar a atualização de agosto/2026 da receita (FND-04).",
+        "Conferir as divergências de Pernambuco na complementação VAAF (FND-04).",
+        "Confirmar o tratamento de Canavieiras (BA): inabilitada na lista, mas com complementação VAAT na receita oficial."
+      ],
+      "arquivos": [
+        {
+          "papel": "matriculas",
+          "caminho": "20252026/Matrículas Fundeb 2026.xlsx",
+          "sha256": "91279d7dbd2b87b51cdd5f110cc1d8e6af0374b1ce94152915a63937e494db69"
+        },
+        {
+          "papel": "receita",
+          "caminho": "20252026/1-receita-total-do-fundeb-por-ente-federado.xlsx",
+          "sha256": "d4679c9c3004383f2b29aaa82166f741b2594f97d765dc2828c4bc00bd6011e4"
+        },
+        {
+          "papel": "nse",
+          "caminho": "20252026/ponderador-de-nivel-socioeconomico.xlsx",
+          "sha256": "8e95aa2b9eb285d4bdfc0b19b3956ca856aa0985f76a9116f63e93cdd0df4576"
+        },
+        {
+          "papel": "drec",
+          "caminho": "20252026/ponderador-de-disponibilidade-de-recursos.xlsx",
+          "sha256": "1d5d34a2926f59fbaa6f70a244f1bd78b66ba8630768bf9e06aa5b442aaf65ff"
+        },
+        {
+          "papel": "vaat",
+          "caminho": "20252026/MemriadeClculoVAAT2026 (2).xlsx",
+          "sha256": "910fad0c111c81ccf264fcb72c3f84e5ce67621f21cd3a4a7e58977d2de4aac8"
+        },
+        {
+          "papel": "inabilitados_vaat",
+          "caminho": "20252026/ListadosenteshabilitadoseinabilitadosaoVAAT2026Posicaofinalcomajustededecisaojudicial.xlsm",
+          "sha256": "b61af6bc759c9548dc5a511c47c2d10a2a99d7a78e3878bad138696dd41e8ed3"
+        }
+      ],
+      "grupos": {
+        "propag": null
+      }
+    },
+    {
+      "base_id": "fundeb-2025",
+      "ano_exercicio": 2025,
+      "ano_censo": null,
+      "periodo_receita": "Ajuste anual das receitas efetivas de 2025",
+      "data_publicacao": "2026-04-29",
+      "descricao": "Exercício 2025: matrículas FNDE (aba ANO=2025), receita da Portaria Interministerial nº 5/2026 (ajuste anual), NSE e DREC extraídos de PDF, receita STN VAAT.",
+      "situacao": "definitiva",
+      "homologada": false,
+      "pendencias": [
+        "Sem lista oficial de inabilitados ao VAAT: o critério de reserva marca nenhuma rede como inabilitada."
+      ],
+      "arquivos": [
+        {
+          "papel": "matriculas",
+          "caminho": "20252026/Matrículas Fundeb 2025 e 2026.xlsx",
+          "sha256": "c15893c9d7dbc32824decab13988db5ad65c4a87005e686adc03ad809a1fed72"
+        },
+        {
+          "papel": "receita",
+          "caminho": "20252026/1-receita-total-do-fundeb-por-ente-federado-2025.xlsx",
+          "sha256": "919d1d4ce58d59531393aef49673057b6dc006cc48071f8ec08659d994b9b76e"
+        },
+        {
+          "papel": "nse",
+          "caminho": "20252026/PonderadorNSEFundeb2025.pdf",
+          "sha256": "305867d1b3b3550d90c6bf1f4ddbe75a522227bfbe9edf40851a764d0a64cd1b"
+        },
+        {
+          "papel": "drec",
+          "caminho": "20252026/PonderadorDRecFundeb2025.pdf",
+          "sha256": "699b5d73bbd2b45739b8cfffaad352804bc28c1a1fe2fccd9e722e4057c79ff0"
+        },
+        {
+          "papel": "vaat",
+          "caminho": "20252026/Receita STN 2023 VAAT 2025 para publicação.xlsx",
+          "sha256": "e9ae32f9d07afad385a75b011c8bda11161b3e4633406b1e6303427486e07435"
+        }
+      ],
+      "grupos": {
+        "propag": null
+      }
+    },
+    {
+      "base_id": "fundeb-2024",
+      "ano_exercicio": 2024,
+      "ano_censo": null,
+      "periodo_receita": null,
+      "data_publicacao": null,
+      "descricao": "Exercício 2024 (legado): arquivos .rda do pacote simulador.fundeb e NSE do PDF de 2024.",
+      "situacao": "legado",
+      "homologada": false,
+      "pendencias": [],
+      "arquivos": [
+        {
+          "papel": "matriculas",
+          "caminho": "data/matriculas.rda",
+          "sha256": "cc10ff4af4629524e193fa27d38c851ccca56883967b5fa474c9abeb0b83dbc6"
+        },
+        {
+          "papel": "complementar",
+          "caminho": "data/complementar.rda",
+          "sha256": "d8e31655dc7d8eeb4a35006dd4f428781511b26eaf639854af6bffabdbfd2cc9"
+        },
+        {
+          "papel": "pesos",
+          "caminho": "data/pesos.rda",
+          "sha256": "3aff131e5e90c4a906d1d3abd9a04ab8ffe9c73446d370859d10783269852145"
+        },
+        {
+          "papel": "referencia",
+          "caminho": "data/cenario_atual.rda",
+          "sha256": "d77dc7bd6725e39c72176947a714ce8fadc91d1e849b9fe7f08e8a9e9e9bdd34"
+        },
+        {
+          "papel": "nse",
+          "caminho": "PonderadorNSE 2024.pdf",
+          "sha256": "49aff1e4456faffb9db4f0ebbad607468dc8b86701d406f6d3c9981de1d675e9"
+        }
+      ],
+      "grupos": {
+        "propag": null
+      }
+    }
+  ]
+}

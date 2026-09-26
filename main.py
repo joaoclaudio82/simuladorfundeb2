@@ -16,7 +16,7 @@ import pandas as pd
 from pypdf import PdfReader
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -311,7 +311,13 @@ from auth.database import init_db, seed_admin_if_empty
 from auth.routes import router as auth_router
 from dados.fundeb_dataset import ESTADOS_REGIOES, carregar_dataset, listar_entes_por_uf
 from auth.deps import get_current_user
-from auth.models import UserRecord
+from auth.models import Role, UserRecord
+from schemas.cenarios import AVISO_METODOLOGICO, CenarioRequest, Recorte
+from services.bases import ErroBase, carregar_base, listar_bases, resolver_base_id
+from services.calibracao import comparar_com_oficial
+from services.cenarios import ErroCenario, executar_cenario, repositorio
+from services.comparacao import ErroRecorte, montar_comparacao
+from services.exportacao import EXPORTADORES, nome_arquivo
 from api_simulacao import (
     SimulacaoRequest,
     SimulacaoMunicipioRequest,
@@ -478,6 +484,137 @@ def simular_municipio(req: SimulacaoMunicipioRequest, user: UserRecord = Depends
 # Rotas por exercício (2025 e 2026)
 registrar_rotas_ano(app, 2025)
 registrar_rotas_ano(app, 2026)
+
+
+# ---------------------------------------------------------------------------
+# Rotas de cenários (FND-03, FND-04, FND-05, FND-07, FND-08, FND-11)
+# ---------------------------------------------------------------------------
+
+def _base_ou_erro(base_id: Optional[str], ano_exercicio: Optional[int] = None):
+    try:
+        return carregar_base(resolver_base_id(base_id, ano_exercicio))
+    except ErroBase as e:
+        texto = str(e)
+        codigo = 404 if ("desconhecido" in texto or "nenhuma base" in texto) else 422 if "informe base_id" in texto else 503
+        raise HTTPException(codigo, texto)
+
+
+def _cenario_ou_404(cenario_id: str):
+    res = repositorio.obter(cenario_id)
+    if res is None:
+        raise HTTPException(404, "Cenário não encontrado (resultados são mantidos apenas em memória)")
+    return res
+
+
+def _ler_selecionadas(selecionadas: Optional[str], res) -> list[int]:
+    if selecionadas is None:
+        return res.requisicao.get("selecionadas", [])
+    try:
+        return [int(x) for x in selecionadas.split(",") if x.strip()]
+    except ValueError:
+        raise HTTPException(422, "selecionadas deve ser uma lista de códigos separados por vírgula")
+
+
+def _resposta_cenario(res, recorte, selecionadas):
+    try:
+        comparacao = montar_comparacao(res, recorte, selecionadas)
+    except ErroRecorte as e:
+        raise HTTPException(422, str(e))
+    return sanitize_for_json({
+        "metadados": res.metadados(),
+        "ajustes": res.ajustes.to_dict(orient="records"),
+        "comparacao": comparacao,
+    })
+
+
+@app.get("/api/bases")
+def api_listar_bases(_user: UserRecord = Depends(get_current_user)):
+    return {"bases": listar_bases(), "aviso": AVISO_METODOLOGICO}
+
+
+@app.get("/api/bases/{base_id}")
+def api_obter_base(base_id: str, _user: UserRecord = Depends(get_current_user)):
+    base = _base_ou_erro(base_id)
+    return sanitize_for_json({
+        **base.identificacao(),
+        "pendencias": base.manifesto.get("pendencias", []),
+        "parametros_referencia": base.parametros_referencia,
+        "quantidade_entes": int(len(base.entes)),
+        "quantidade_categorias": len(base.etapas),
+        "avisos": base.avisos,
+    })
+
+
+@app.get("/api/bases/{base_id}/calibracao")
+def api_calibracao(base_id: str, _user: UserRecord = Depends(get_current_user)):
+    return sanitize_for_json(comparar_com_oficial(_base_ou_erro(base_id)))
+
+
+@app.get("/api/entes")
+def api_listar_entes(base_id: Optional[str] = None, uf: Optional[str] = None, tipo: Optional[str] = None,
+                     _user: UserRecord = Depends(get_current_user)):
+    base = _base_ou_erro(base_id)
+    ent = base.entes
+    if uf:
+        ent = ent[ent["uf"] == uf.upper()]
+    if tipo:
+        ent = ent[ent["tipo_rede"] == tipo]
+    return {"base_id": base.base_id, "entes": ent.to_dict(orient="records")}
+
+
+@app.get("/api/entes/{ibge}/matriculas")
+def api_matriculas_ente(ibge: int, base_id: Optional[str] = None, _user: UserRecord = Depends(get_current_user)):
+    base = _base_ou_erro(base_id)
+    linha = base.matriculas[base.matriculas["ibge"] == ibge]
+    if len(linha) == 0:
+        raise HTTPException(404, "Ente não encontrado na base")
+    ente = base.entes[base.entes["ibge"] == ibge].iloc[0].to_dict()
+    mat = linha.iloc[0]
+    return sanitize_for_json({
+        **ente,
+        "base_id": base.base_id,
+        "matriculas": {e: float(mat[e]) for e in base.etapas},
+        "nomes_categorias": dict(zip(base.pesos["etapa"], base.pesos["nome"])),
+    })
+
+
+@app.post("/api/cenarios")
+def api_criar_cenario(req: CenarioRequest, user: UserRecord = Depends(get_current_user)):
+    if (req.parametros.pesos_vaaf is not None or req.parametros.pesos_vaat is not None) and user.role != Role.admin:
+        raise HTTPException(403, "Somente administradores podem simular com pesos alterados")
+    base = _base_ou_erro(req.base_id, req.ano_exercicio)
+    try:
+        res = executar_cenario(req, base)
+    except ErroCenario as e:
+        raise HTTPException(422, str(e))
+    resposta = _resposta_cenario(res, req.recorte, req.selecionadas)
+    repositorio.guardar(res)
+    return resposta
+
+
+@app.get("/api/cenarios/{cenario_id}")
+def api_obter_cenario(cenario_id: str, recorte: Optional[Recorte] = None, selecionadas: Optional[str] = None,
+                      _user: UserRecord = Depends(get_current_user)):
+    res = _cenario_ou_404(cenario_id)
+    return _resposta_cenario(res, recorte or res.requisicao["recorte"], _ler_selecionadas(selecionadas, res))
+
+
+@app.get("/api/cenarios/{cenario_id}/exportar")
+def api_exportar_cenario(cenario_id: str, formato: str = "csv", recorte: Optional[Recorte] = None,
+                         selecionadas: Optional[str] = None, _user: UserRecord = Depends(get_current_user)):
+    res = _cenario_ou_404(cenario_id)
+    if formato not in EXPORTADORES:
+        raise HTTPException(422, f"formato deve ser um de {sorted(EXPORTADORES)}")
+    funcao, mime = EXPORTADORES[formato]
+    try:
+        conteudo = funcao(res, recorte or res.requisicao["recorte"], _ler_selecionadas(selecionadas, res))
+    except ErroRecorte as e:
+        raise HTTPException(422, str(e))
+    return Response(
+        content=conteudo,
+        media_type=mime,
+        headers={"Content-Disposition": f'attachment; filename="{nome_arquivo(res, formato)}"'},
+    )
 
 
 # ---------------------------------------------------------------------------

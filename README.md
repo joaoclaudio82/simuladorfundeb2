@@ -144,6 +144,24 @@ Rotas `/api/*` (exceto login) exigem cookie de sessão (`fundeb_token`).
 
 Rotas equivalentes por exercício: `/api/2026/...` e `/api/2025/...` (2025: leitura; POST simular retorna 503).
 
+### Cenário nacional (várias redes, cenários A–D e exportações)
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/api/bases` | Bases do catálogo (`data/catalogo.json`) e situação de cada uma |
+| GET | `/api/bases/{base_id}` | Identificação, pendências e parâmetros de referência |
+| GET | `/api/bases/{base_id}/calibracao` | Comparação do cenário sem alterações com os valores oficiais por ente |
+| GET | `/api/entes?base_id=&uf=&tipo=` | Cadastro de entes com tipo de rede |
+| GET | `/api/entes/{ibge}/matriculas?base_id=` | Matrículas de uma rede |
+| POST | `/api/cenarios` | Calcula um cenário com ajustes em várias redes (A–D com hipótese de receita) |
+| GET | `/api/cenarios/{id}?recorte=` | Resultado já calculado, em outro recorte |
+| GET | `/api/cenarios/{id}/exportar?formato=pdf\|xlsx\|csv` | Exportação do cenário calculado |
+
+A aba **Cenário Nacional** usa essas rotas. A situação de cada item do plano de implementação está em
+`docs/SITUACAO_PLANO.md`; o inventário e a calibração das bases estão em `docs/INVENTARIO_BASE.md`
+(gerado por `python scripts/inventario_base.py > docs/INVENTARIO_BASE.md`). Ao substituir um arquivo em
+`20252026/`, atualize o hash correspondente em `data/catalogo.json`; caso contrário, a base é recusada.
+
 ## Créditos
 
 Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho.
