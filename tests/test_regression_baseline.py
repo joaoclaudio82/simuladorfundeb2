@@ -13,7 +13,7 @@ from app.repositories.bases import load_dataset, load_base
 from app.ingestion.migrate import import_data
 from services.bases import carregar_base
 from services.cenarios import executar_cenario
-from dados.fundeb_dataset import carregar_dataset
+from dados.fundeb_dataset import carregar_dataset_arquivo
 from schemas.cenarios import CenarioRequest
 from api_simulacao import SimulacaoRequest, executar_simulacao, _resposta_simular
 
@@ -35,15 +35,8 @@ def digest(df):
 
 
 @pytest.fixture(scope="module")
-def imported_engine(tmp_path_factory):
-    existing = os.getenv("FUNDEB_IMPORTED_TEST_URL")
-    engine = get_engine(
-        existing or "sqlite:///" + str(tmp_path_factory.mktemp("full-import") / "fundeb.db")
-    )
-    if not existing:
-        report = import_data(engine=engine)
-        assert len(report["bases"]) == 3
-    return engine
+def imported_engine(postgres_seed):
+    return postgres_seed
 
 
 def test_motor_source_preserved_byte_for_byte():
@@ -54,7 +47,7 @@ def test_motor_source_preserved_byte_for_byte():
 @pytest.mark.parametrize("year", [2024, 2025, 2026])
 def test_all_dataset_cells_and_all_scenarios_exact(year, imported_engine):
     expected = BASELINE["years"][str(year)]
-    legacy = carregar_dataset(year)
+    legacy = carregar_dataset_arquivo(year)
     stored = load_dataset(year, engine=imported_engine)
     for field, checksum in expected["datasets"].items():
         assert digest(getattr(legacy, field)) == checksum, field

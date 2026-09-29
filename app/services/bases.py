@@ -87,10 +87,15 @@ def sha256_arquivo(caminho: str) -> str:
 
 
 def ler_catalogo(caminho: str = CATALOGO_PATH) -> dict:
-    from app.core.config import database_source
-    if database_source() and caminho == CATALOGO_PATH:
-        from app.repositories.bases import catalog
-        return catalog()
+    """Catálogo ativo armazenado no PostgreSQL."""
+    from app.repositories.bases import catalog
+    if caminho != CATALOGO_PATH:
+        raise ErroBase("Importe o catálogo para PostgreSQL antes de utilizá-lo.")
+    return catalog()
+
+
+def ler_catalogo_arquivo(caminho: str = CATALOGO_PATH) -> dict:
+    """Leitura explícita para importação e auditoria."""
     with open(caminho, encoding="utf-8") as f:
         return json.load(f)
 
@@ -276,17 +281,21 @@ def _referencia_oficial(ano: int) -> pd.DataFrame | None:
 
 def carregar_base(base_id: str | None = None, caminho_catalogo: str = CATALOGO_PATH,
                   verificar_hash: bool = True) -> Base:
-    """Carrega uma base do catálogo. Resultado é compartilhado: consumidores devem copiar antes de alterar."""
-    from app.ingestion.fundeb_dataset import carregar_dataset
+    """Bases usadas pela API vêm exclusivamente do PostgreSQL."""
+    from app.repositories.bases import load_base
+    if caminho_catalogo != CATALOGO_PATH:
+        raise ErroBase("Importe o catálogo para PostgreSQL antes de utilizá-lo.")
+    try:
+        return load_base(base_id or ler_catalogo()["base_padrao"])
+    except ValueError as exc:
+        raise ErroBase(str(exc)) from exc
 
-    from app.core.config import database_source
-    if database_source() and caminho_catalogo == CATALOGO_PATH:
-        from app.repositories.bases import load_base
-        try:
-            return load_base(base_id or ler_catalogo()["base_padrao"])
-        except ValueError as exc:
-            raise ErroBase(str(exc)) from exc
-    cat = ler_catalogo(caminho_catalogo)
+
+def carregar_base_arquivo(base_id: str | None = None, caminho_catalogo: str = CATALOGO_PATH,
+                         verificar_hash: bool = True) -> Base:
+    """Somente importação/auditoria: constrói a representação histórica dos arquivos."""
+    from app.ingestion.fundeb_dataset import carregar_dataset_arquivo as carregar_dataset
+    cat = ler_catalogo_arquivo(caminho_catalogo)
     base_id = base_id or cat["base_padrao"]
     entradas = {b["base_id"]: b for b in cat["bases"]}
     if base_id not in entradas:

@@ -27,16 +27,17 @@ Se não existir esse acesso, **não trate a captura como concluída** e não rei
 
 ## 2. Preparar um destino vazio
 
-Localmente, use Python 3.12:
+Use PostgreSQL também em desenvolvimento. Crie um banco de destino e configure a conexão por variável de ambiente/gerenciador de segredos. Com Python 3.12:
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
 pip install -r requirements-dev.txt
-export FUNDEB_DATABASE_URL='sqlite:///data/fundeb.db'
+export FUNDEB_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost:5432/fundeb'
 python -m app.cli migrate
 python -m app.cli import-data --dry-run
 python -m app.cli import-data
+python -m app.cli verify-data
 python -m app.cli import-users /caminho/protegido/usuarios.db --dry-run
 python -m app.cli import-users /caminho/protegido/usuarios.db
 python -m app.cli import-live /caminho/protegido/worker1.live-scenarios.zip --dry-run
@@ -46,6 +47,21 @@ python -m app.cli import-live /caminho/protegido/worker1.live-scenarios.zip
 Para uma instalação sem usuários anteriores, `python -m app.cli create-admin` solicita CPF e senha no terminal; não passa a senha na linha de comando. Não execute isso antes de migrar os usuários existentes.
 
 `import-data --dry-run` confere todos os arquivos e compara os caches com uma construção nova das bases, sem gravar dados. A importação efetiva é uma única transação: originais, versões, projeções e aliases. Repetir a mesma importação mantém as versões existentes. Conflitos de usuários/cenários interrompem a transação, sem sobrescrita nem rehash de senhas.
+
+### Se já existir um banco unificado `data/fundeb.db`
+
+Use um PostgreSQL **vazio**, com o esquema migrado. Esta alternativa importa todas as tabelas: fontes, versões, usuários, cenários, resultados, exportações e auditoria. Não execute `import-data` antes desta transferência, pois o destino precisa estar vazio.
+
+```bash
+python -m app.cli migrate
+python -m app.cli import-sqlite /caminho/protegido/fundeb.db --dry-run
+python -m app.cli import-sqlite /caminho/protegido/fundeb.db
+python -m app.cli verify-data
+```
+
+Um `fundeb.db` da versão anterior pode conter apenas os exercícios já utilizados. Se `verify-data` indicar bases ausentes, execute `import-data` **depois** da transferência: isso adiciona as bases sem excluir cenários ou usuários. A origem SQLite não é apagada, não é aberta para escrita e não passa a ser o banco ativo. O comando só aceita o esquema unificado conhecido; para o antigo `usuarios.db`, use `import-users`.
+
+Quem já usa PostgreSQL na versão anterior mantém o mesmo banco e roda `migrate` e `verify-data`. Não é necessário recriar usuários ou recalcular cenários.
 
 ## 3. PostgreSQL com Compose
 
@@ -73,10 +89,9 @@ Confira usuários, quantidades, IDs, parâmetros, resultados e exportações ant
 ## 4. Validar antes da troca
 
 ```bash
-pytest -q
-# Banco PostgreSQL exclusivo de testes; o teste cria/remove schemas temporários.
-FUNDEB_TEST_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/testes' \
-  pytest tests/test_persistence.py -q
+# Toda a suíte usa PostgreSQL e cria/remove apenas schemas temporários próprios.
+FUNDEB_TEST_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/fundeb_test' \
+  pytest -q
 ```
 
 Confronte também os cenários reais capturados da produção. Garanta que cada worker foi capturado, que as senhas antigas continuam funcionando, que usuários inativos continuam inativos e que os IDs antigos podem ser consultados sem novo cálculo. A mudança de infraestrutura só deve ser liberada após esses critérios.
@@ -90,8 +105,8 @@ mkdir -p backups
 python -m app.cli backup backups/pre-corte.fundeb-backup.zip
 python -m app.cli verify-backup backups/pre-corte.fundeb-backup.zip
 # Use OUTRO banco vazio para o ensaio. Nunca restaure sobre a produção atual.
-FUNDEB_DATABASE_URL='sqlite:///backups/ensaio.db' python -m app.cli migrate
-FUNDEB_DATABASE_URL='sqlite:///backups/ensaio.db' \
+FUNDEB_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/fundeb_ensaio' python -m app.cli migrate
+FUNDEB_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/fundeb_ensaio' \
   python -m app.cli restore backups/pre-corte.fundeb-backup.zip
 ```
 

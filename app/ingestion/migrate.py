@@ -4,7 +4,6 @@ from contextlib import nullcontext
 from dataclasses import fields
 from pathlib import Path
 import json
-import os
 import sqlite3
 import pandas as pd
 from sqlalchemy import select
@@ -28,7 +27,7 @@ def assert_dataset_equal(left, right):
 def prepare_data():
     """Legacy pickles are read only from the checked-in, hash-verified source inventory."""
     from app.ingestion import fundeb_dataset as fd
-    from app.services.bases import carregar_base, conferir_arquivos
+    from app.services.bases import carregar_base_arquivo, conferir_arquivos
 
     inventory = json.loads((ROOT / "data/manifesto_arquivos.json").read_text())
     originals = {}
@@ -39,9 +38,7 @@ def prepare_data():
                 f"Arquivo divergente: {record['path']}. Crie outra versão explícita do inventário."
             )
         originals[record["path"]] = content
-    previous = os.environ.get("FUNDEB_DATA_SOURCE")
     save_cache = fd._salvar_cache
-    os.environ["FUNDEB_DATA_SOURCE"] = "files"
     fd._salvar_cache = lambda *_: (
         None
     )  # ETL validation must not rewrite the existing source caches.
@@ -49,11 +46,11 @@ def prepare_data():
     try:
         fd._DATASETS.clear()
         for year in (2024, 2025, 2026):
-            dataset = fd.carregar_dataset(year)
+            dataset = fd.carregar_dataset_arquivo(year)
             if year != 2024:
                 fresh = getattr(fd, f"construir_dataset_{year}")(usar_cache=False)
                 assert_dataset_equal(dataset, fresh)
-            base = carregar_base(f"fundeb-{year}")
+            base = carregar_base_arquivo(f"fundeb-{year}")
             conferir_arquivos(base.manifesto)
             paths = [a["caminho"] for a in base.manifesto["arquivos"]]
             if year == 2024:
@@ -64,10 +61,6 @@ def prepare_data():
             prepared.append((base, dataset, sources))
     finally:
         fd._salvar_cache = save_cache
-        if previous is None:
-            os.environ.pop("FUNDEB_DATA_SOURCE", None)
-        else:
-            os.environ["FUNDEB_DATA_SOURCE"] = previous
     return inventory, originals, prepared
 
 

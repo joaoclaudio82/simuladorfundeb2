@@ -2,11 +2,8 @@
 
 from functools import lru_cache
 from threading import RLock
-from pathlib import Path
-from sqlalchemy import create_engine, event, text
-from sqlalchemy.engine import make_url
-from sqlalchemy.pool import StaticPool
-from app.core.config import ROOT, database_url, production
+from sqlalchemy import create_engine, text
+from app.core.config import ROOT, database_url, production, require_postgresql
 
 _LOCK = RLock()
 _READY = set()
@@ -14,23 +11,8 @@ _READY = set()
 
 @lru_cache(maxsize=16)
 def engine_for(url):
-    parsed = make_url(url)
-    kwargs = {"pool_pre_ping": True, "hide_parameters": True}
-    if parsed.get_backend_name() == "sqlite":
-        if parsed.database and parsed.database != ":memory:":
-            Path(parsed.database).parent.mkdir(parents=True, exist_ok=True)
-        kwargs["connect_args"] = {"check_same_thread": False, "timeout": 30}
-        if not parsed.database or parsed.database == ":memory:":
-            kwargs["poolclass"] = StaticPool
-    engine = create_engine(url, **kwargs)
-    if engine.dialect.name == "sqlite":
-
-        @event.listens_for(engine, "connect")
-        def pragmas(dbapi, _record):
-            dbapi.execute("PRAGMA foreign_keys=ON")
-            dbapi.execute("PRAGMA busy_timeout=30000")
-
-    return engine
+    require_postgresql(url)
+    return create_engine(url, pool_pre_ping=True, hide_parameters=True)
 
 
 def migrate(engine=None):

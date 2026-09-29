@@ -51,7 +51,7 @@ Valores não finitos viram `null` nas projeções JSON consultáveis, como já a
 
 ## Versões e imutabilidade
 
-A identidade de uma base inclui hash do snapshot, hashes das fontes e hash do processamento. Um arquivo novo não substitui uma versão antiga. Uma nova versão só passa a ser ativa com `import-data --activate`; a ativação é auditada. Faça isso em manutenção e reinicie todos os workers juntos: o endpoint legado 2024 conserva seu dataset inicial durante a vida do processo.
+A identidade de uma base inclui hash do snapshot, hashes das fontes e hash do processamento. Um arquivo novo não substitui uma versão antiga. Uma nova versão só passa a ser ativa com `import-data --activate`; a ativação é auditada. A aplicação lê a versão ativa no PostgreSQL a cada nova solicitação, inclusive nos endpoints legados de 2024. Um cenário já calculado mantém sua própria versão.
 
 Cenários novos mantêm a versão da base utilizada. Uma tentativa de substituir o resultado de um ID existente por outro conteúdo falha. Consultas não executam novamente o motor. A resposta original de criação é devolvida quando o cenário é consultado sem alterar o recorte. Um novo recorte reorganiza os resultados armazenados; não recalcula o Fundeb. A primeira exportação de cada combinação de formato/recorte/seleção é gravada; downloads seguintes devolvem os mesmos bytes, inclusive XLSX/PDF.
 
@@ -61,8 +61,17 @@ Cenários trazidos do processo antigo mantêm seu ID, data e versão de motor. O
 
 ## Operação
 
-PostgreSQL é o banco exigido em produção. SQLite serve ao desenvolvimento e aos testes locais. `FUNDEB_DATABASE_URL` seleciona o destino; usuários, fontes e simulações usam o mesmo banco. Em produção, o processo exige esquema migrado, fonte `database`, segredo forte e cookies seguros. Não há administrador com senha padrão. Cookies de sessões antigas podem continuar válidos se o mesmo segredo for mantido na migração; perfil e situação continuam consultados no banco.
+PostgreSQL é o único banco em produção, desenvolvimento e testes. `FUNDEB_DATABASE_URL` (driver `postgresql+psycopg`) ou `FUNDEB_DB_HOST/NAME/USER/PASSWORD` selecionam o destino. Usuários, fontes e simulações usam esse mesmo banco. Sem conexão configurada, a aplicação recusa a inicialização; não cria `data/fundeb.db`. O modo `FUNDEB_DATA_SOURCE=files` é recusado. A inicialização exige os três exercícios importados. Em produção também exige esquema previamente migrado, segredo forte e cookies seguros. Não há administrador com senha padrão. Cookies de sessões antigas podem continuar válidos se o mesmo segredo for mantido na migração; perfil e situação continuam consultados no banco.
 
 Backups lógicos são consistentes, incluem todas as tabelas, usam checksums e são gravados com permissão local `0600`. A restauração exige um banco vazio e ocorre em transação. O arquivo contém CPFs e hashes: armazenamento e transporte precisam ser restritos, com criptografia provida pela infraestrutura. Mantenha também o backup nativo/PITR do PostgreSQL conforme a política do ambiente.
 
 Novas migrações recebem novas revisões Alembic. A revisão inicial não deve ser editada depois de implantada. Downgrade destrutivo é recusado; a recuperação usa backup em outro banco e troca controlada de conexão.
+
+
+## Separação entre importação e execução
+
+`carregar_dataset` e `carregar_base` leem exclusivamente PostgreSQL. `carregar_dataset_arquivo` e `carregar_base_arquivo` são operações explícitas do importador/auditoria, sem fallback de execução. A importação não muda variáveis globais de seleção de banco nem o ambiente da API. Fontes ausentes no banco causam erro; os arquivos locais não são usados para mascarar essa ausência.
+
+`verify-data` confere os hashes e tamanhos dos arquivos armazenados, os snapshots das bases ativas e as contagens das projeções, retornando as quantidades de usuários, cenários e exportações sem expor dados pessoais. A equivalência numérica completa é verificada pelos testes de regressão.
+
+`import-sqlite` lê um banco unificado legado com a revisão `0001` e todas as tabelas esperadas, obtém um snapshot consistente e transfere todas as linhas e BLOBs em uma transação para PostgreSQL vazio. Divergências de esquema são recusadas para evitar descarte silencioso. Arquivos SQLite antigos somente são lidos na migração e continuam intactos.

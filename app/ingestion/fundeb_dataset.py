@@ -771,10 +771,13 @@ _DATASETS: dict[int, FundebDataset] = {}
 
 
 def carregar_dataset(ano: int, lazy: bool = True) -> FundebDataset:
-    from app.core.config import database_source
-    if database_source():
-        from app.repositories.bases import load_dataset
-        return load_dataset(ano)
+    """Execução normal: PostgreSQL, sem fallback para arquivos."""
+    from app.repositories.bases import load_dataset
+    return load_dataset(ano)
+
+
+def carregar_dataset_arquivo(ano: int, lazy: bool = True) -> FundebDataset:
+    """Somente importação/auditoria das fontes históricas; não usado pela API."""
     if ano in _DATASETS:
         return _DATASETS[ano]
     if ano == 2024:

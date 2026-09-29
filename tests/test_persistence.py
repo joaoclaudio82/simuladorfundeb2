@@ -25,33 +25,6 @@ from services.cenarios import executar_cenario
 from schemas.cenarios import CenarioRequest
 
 
-@pytest.fixture
-def engine(tmp_path):
-    """CI also executes against PostgreSQL, one isolated schema per test."""
-    url = os.getenv("FUNDEB_TEST_DATABASE_URL")
-    if not url:
-        yield get_engine("sqlite:///" + str(tmp_path / "test.db"))
-        return
-    from sqlalchemy.engine import make_url
-
-    schema = "test_" + uuid.uuid4().hex
-    admin = engine_for(url)
-    with admin.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA "{schema}"'))
-    scoped_url = (
-        make_url(url)
-        .update_query_dict({"options": "-csearch_path=" + schema})
-        .render_as_string(hide_password=False)
-    )
-    result = get_engine(scoped_url)
-    try:
-        yield result
-    finally:
-        result.dispose()
-        with admin.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
-
-
 def assert_result_equal(a, b):
     for f in fields(a):
         left, right = getattr(a, f.name), getattr(b, f.name)
@@ -198,7 +171,9 @@ def test_user_conflict_rolls_back_every_insert(engine, tmp_path):
         assert conn.execute(select(func.count()).select_from(s.users)).scalar_one() == 1
 
 
-def test_backup_restore_is_exact_and_refuses_nonempty(engine, tmp_path, base_sintetica):
+def test_backup_restore_is_exact_and_refuses_nonempty(
+    engine, tmp_path, base_sintetica, postgres_engine_factory
+):
     from app.repositories.bases import store_source
 
     result = executar_cenario(CenarioRequest(), base_sintetica)
@@ -215,7 +190,7 @@ def test_backup_restore_is_exact_and_refuses_nonempty(engine, tmp_path, base_sin
         restore(archive, engine=engine)
     with pytest.raises(FileExistsError):
         backup(archive, engine=engine)
-    target = get_engine("sqlite:///" + str(tmp_path / "restore.db"))
+    target = postgres_engine_factory()
     assert restore(archive, engine=target) == manifest
     assert_result_equal(result, RepositorioCenarios(engine=target).obter(result.cenario_id))
     second = tmp_path / "second.zip"

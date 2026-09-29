@@ -20,13 +20,14 @@ def main():
         action="store_true",
         help="Ativar novas versões explicitamente; mantém anteriores",
     )
-    for name in ("import-users", "import-live"):
+    for name in ("import-users", "import-live", "import-sqlite"):
         p = sub.add_parser(name)
         p.add_argument("path", type=Path)
         p.add_argument("--dry-run", action="store_true")
     for name in ("backup", "verify-backup", "restore"):
         p = sub.add_parser(name)
         p.add_argument("path", type=Path)
+    sub.add_parser("verify-data", help="Conferir fontes, bases e quantidades no PostgreSQL")
     sub.add_parser("create-admin", help="Criar administrador sem senha em argumento de shell")
     args = parser.parse_args()
     from app.db.session import migrate
@@ -38,6 +39,14 @@ def main():
         from app.ingestion.migrate import import_data
 
         result = import_data(dry_run=args.dry_run, activate=args.activate)
+    elif args.command == "verify-data":
+        from app.services.database_inventory import inventory
+
+        result = inventory()
+    elif args.command == "import-sqlite":
+        from app.ingestion.sqlite_archive import import_sqlite
+
+        result = import_sqlite(args.path, dry_run=args.dry_run)
     elif args.command == "import-users":
         from app.ingestion.migrate import import_users
 

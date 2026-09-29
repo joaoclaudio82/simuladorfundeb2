@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -13,7 +14,7 @@ def production():
 def database_url():
     value = os.getenv("FUNDEB_DATABASE_URL")
     if value:
-        return value
+        return require_postgresql(value)
     if os.getenv("FUNDEB_DB_HOST"):
         from sqlalchemy.engine import URL
 
@@ -25,24 +26,33 @@ def database_url():
             port=int(os.getenv("FUNDEB_DB_PORT", "5432")),
             database=os.getenv("FUNDEB_DB_NAME", "fundeb"),
         ).render_as_string(hide_password=False)
-    return "sqlite:///" + os.getenv("FUNDEB_USERS_DB", str(ROOT / "data/fundeb.db"))
+    raise RuntimeError(
+        "Configure FUNDEB_DATABASE_URL (postgresql+psycopg) ou FUNDEB_DB_HOST. PostgreSQL é obrigatório."
+    )
 
 
-def database_source():
-    return os.getenv("FUNDEB_DATA_SOURCE", "database" if production() else "files") == "database"
+def require_postgresql(url):
+    try:
+        driver = make_url(url).drivername
+    except Exception:
+        raise ValueError("URL de banco inválida; use postgresql+psycopg.") from None
+    if driver != "postgresql+psycopg":
+        raise ValueError("Use postgresql+psycopg: PostgreSQL é o único banco da aplicação.")
+    return url
 
 
 def validate_configuration():
+    database_url()
+    if os.getenv("FUNDEB_DATA_SOURCE", "database") != "database":
+        raise RuntimeError(
+            "A aplicação consulta somente PostgreSQL; use import-data para carregar arquivos."
+        )
     if production():
-        if not database_url().startswith("postgresql+psycopg://"):
-            raise RuntimeError("Produção exige FUNDEB_DATABASE_URL com postgresql+psycopg.")
         secret = os.getenv("FUNDEB_SECRET_KEY", "")
         if len(secret) < 32 or secret.startswith("dev-fundeb"):
             raise RuntimeError(
                 "Produção exige FUNDEB_SECRET_KEY aleatória com pelo menos 32 caracteres."
             )
-        if not database_source():
-            raise RuntimeError("Produção exige FUNDEB_DATA_SOURCE=database.")
 
 
 def cookie_secure():

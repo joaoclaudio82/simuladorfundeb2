@@ -11,10 +11,9 @@ def capture_calculation(req, ds, matriculas, pesos, result, user):
         return
     version = getattr(ds, "version_id", None)
     if version is None:
-        from app.repositories.bases import ensure_file_base
-        from app.services.bases import carregar_base
-
-        version = ensure_file_base(carregar_base(f"fundeb-{ds.ano}"))
+        raise RuntimeError(
+            "Simulação sem versão de base PostgreSQL; importe a base antes de calcular."
+        )
     context["owner_cpf"] = user.cpf if user else None
     context["calculations"].append(
         {

@@ -9,13 +9,9 @@ from app.repositories.common import now, audit
 from app.auth.models import Role, UserRecord
 from app.auth.security import hash_password
 
-_DEFAULT_PATH = os.getenv("FUNDEB_USERS_DB", str(ROOT / "data/fundeb.db"))
-DB_PATH = _DEFAULT_PATH  # compatibility for existing integrations/tests
-
 
 def _engine():
-    url = "sqlite:///" + str(DB_PATH) if DB_PATH != _DEFAULT_PATH else database_url()
-    return get_engine(url)
+    return get_engine()
 
 
 def init_db():
@@ -111,7 +107,7 @@ def seed_admin_if_empty():
     with _engine().connect() as conn:
         if conn.execute(select(func.count()).select_from(users)).scalar_one():
             return
-    if (ROOT / "data/usuarios.db").exists() and not os.getenv("FUNDEB_USERS_DB"):
+    if (ROOT / "data/usuarios.db").exists():
         raise RuntimeError("Usuários legados encontrados. Execute import-users antes de iniciar.")
     cpf, senha = os.getenv("FUNDEB_ADMIN_CPF"), os.getenv("FUNDEB_ADMIN_SENHA")
     if not cpf and not senha:

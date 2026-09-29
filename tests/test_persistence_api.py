@@ -70,7 +70,8 @@ def test_production_rejects_insecure_configuration(monkeypatch):
     from app.core.config import validate_configuration
 
     monkeypatch.setenv("FUNDEB_ENV", "production")
-    with pytest.raises(RuntimeError, match="postgresql"):
+    monkeypatch.setenv("FUNDEB_DATABASE_URL", "sqlite:///forbidden.db")
+    with pytest.raises(ValueError, match="postgresql"):
         validate_configuration()
     monkeypatch.setenv("FUNDEB_DATABASE_URL", "postgresql+psycopg://unused")
     monkeypatch.setenv("FUNDEB_SECRET_KEY", "short")

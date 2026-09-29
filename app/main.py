@@ -5,10 +5,9 @@ from contextlib import asynccontextmanager
 from typing import Optional
 from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException, Query
-from app.core.config import validate_configuration, production
+from app.core.config import validate_configuration
 from app.api.persistence import PersistLegacyMiddleware
 from app.db.session import get_engine
-validate_configuration()
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -33,29 +32,18 @@ from app.api.legacy import (
     sanitize_for_json,
 )
 
-print("Carregando dados 2024...")
-_DS2024 = carregar_dataset(2024)
-pesos = _DS2024.pesos
-matriculas = _DS2024.matriculas
-complementar = _DS2024.complementar
-cenario_atual = _DS2024.cenario_atual
-cenario_atual_agregada = _DS2024.cenario_atual_agregada
-cenario_ufs_atual = _DS2024.cenario_ufs_atual
-ETAPAS_NOMES = _DS2024.etapas_nomes
-print("Dados 2024 carregados.")
-
 # ---------------------------------------------------------------------------
 # App FastAPI
 # ---------------------------------------------------------------------------
 
 @asynccontextmanager
 async def lifespan(_app):
+    validate_configuration()
     init_db()
+    # Toda execução, inclusive desenvolvimento, exige os três exercícios no PostgreSQL.
+    for year in (2024, 2025, 2026):
+        carregar_dataset(year)
     seed_admin_if_empty()
-    if production():
-        # Refuse partial deployments: every supported exercise must already be imported.
-        for year in (2024, 2025, 2026):
-            carregar_dataset(year)
     yield
 
 
@@ -79,18 +67,24 @@ app.include_router(auth_router, prefix="/api")
 
 @app.get("/api/estados")
 def listar_estados(_user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    complementar = _DS2024.complementar
     ufs = sorted(complementar["uf"].unique().tolist())
     return {"estados": ufs, "regioes": ESTADOS_REGIOES}
 
 
 @app.get("/api/municipios")
 def listar_municipios(uf: str, _user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    complementar = _DS2024.complementar
     df = listar_entes_por_uf(complementar, uf)
     return sanitize_for_json(df.to_dict(orient="records"))
 
 
 @app.get("/api/pesos")
 def obter_pesos(_user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    pesos = _DS2024.pesos
     from app.ingestion.fundeb_dataset import familia_segmento
 
     out = pesos.to_dict(orient="records")
@@ -101,12 +95,18 @@ def obter_pesos(_user: UserRecord = Depends(get_current_user)):
 
 @app.get("/api/etapas")
 def obter_etapas(_user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    ETAPAS_NOMES = _DS2024.etapas_nomes
     """Retorna as etapas de matrícula com nomes amigáveis."""
     return ETAPAS_NOMES
 
 
 @app.get("/api/municipio/{ibge}/matriculas")
 def obter_matriculas_municipio(ibge: int, _user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    pesos = _DS2024.pesos
+    matriculas = _DS2024.matriculas
+    complementar = _DS2024.complementar
     row = matriculas[matriculas["ibge"] == ibge]
     if len(row) == 0:
         raise HTTPException(404, "Município não encontrado")
@@ -130,6 +130,9 @@ def obter_matriculas_municipio(ibge: int, _user: UserRecord = Depends(get_curren
 
 @app.get("/api/cenario-atual/resumo")
 def resumo_cenario_atual(_user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    cenario_atual_agregada = _DS2024.cenario_atual_agregada
+    cenario_ufs_atual = _DS2024.cenario_ufs_atual
     """Retorna dados do cenário atual para comparação."""
     ufs = cenario_ufs_atual.to_dict(orient="records") if cenario_ufs_atual is not None else []
     agregada = cenario_atual_agregada.to_dict(orient="records") if cenario_atual_agregada is not None else []
@@ -152,6 +155,7 @@ def simular(req: SimulacaoRequest, user: UserRecord = Depends(get_current_user))
 
 @app.post("/api/simular/completo")
 def simular_completo(req: SimulacaoRequest, user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
     try:
         sim = executar_simulacao(req, _DS2024, user=user)
         sim["inabilitados_vaat"] = sim["inabilitados_vaat"].apply(
@@ -166,6 +170,8 @@ def simular_completo(req: SimulacaoRequest, user: UserRecord = Depends(get_curre
 
 @app.post("/api/simular/municipio")
 def simular_municipio(req: SimulacaoMunicipioRequest, user: UserRecord = Depends(get_current_user)):
+    _DS2024 = carregar_dataset(2024)
+    matriculas = _DS2024.matriculas
     try:
         mat = matriculas.copy()
         if req.matriculas_ajustadas:
@@ -294,8 +300,6 @@ def api_criar_cenario(req: CenarioRequest, user: UserRecord = Depends(get_curren
     if (req.parametros.pesos_vaaf is not None or req.parametros.pesos_vaat is not None) and user.role != Role.admin:
         raise HTTPException(403, "Somente administradores podem simular com pesos alterados")
     base = _base_ou_erro(req.base_id, req.ano_exercicio)
-    from app.repositories.bases import ensure_file_base
-    ensure_file_base(base)
     try:
         res = executar_cenario(req, base)
     except ErroCenario as e:

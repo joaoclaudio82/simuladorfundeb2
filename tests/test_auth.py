@@ -28,14 +28,10 @@ USER_PASS = "userpass"
 
 @pytest.fixture()
 def auth_client(tmp_path, monkeypatch):
-    db_path = tmp_path / "usuarios_test.db"
-    monkeypatch.setenv("FUNDEB_USERS_DB", str(db_path))
     monkeypatch.setenv("FUNDEB_SECRET_KEY", "test-secret-key")
 
-    import auth.database as db_mod
     import auth.security as sec_mod
 
-    monkeypatch.setattr(db_mod, "DB_PATH", str(db_path))
     monkeypatch.setattr(sec_mod, "SECRET_KEY", "test-secret-key")
 
     init_db()

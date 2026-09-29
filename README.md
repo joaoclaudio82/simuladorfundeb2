@@ -2,24 +2,31 @@
 
 Aplicação FastAPI para simulações de 2024, 2025 e 2026, com PostgreSQL, bases versionadas, usuários e resultados persistidos. A refatoração conserva o motor de cálculo e os contratos da interface existente.
 
-## Começar em desenvolvimento
+## Banco único: PostgreSQL
 
-Python 3.12:
+Dados de 2024/2025/2026, arquivos originais, matrículas, pesos, receitas, usuários, cenários, resultados e exportações ficam no **mesmo PostgreSQL**. A aplicação e os testes exigem PostgreSQL. Não há banco SQLite local nem consulta automática a planilhas, RDA, PKL ou Parquet durante a execução.
+
+Os arquivos continuam no Git como fontes preservadas para importação e auditoria. O comando `import-data` grava também seus bytes integrais no PostgreSQL. Após a importação, as simulações consultam o banco.
+
+## Executar
+
+Configure `.env` a partir de `.env.example`, com senha do PostgreSQL e segredo JWT. Depois:
 
 ```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install -r requirements-dev.txt
-python -m app.cli migrate
-python -m app.cli import-data --dry-run
-python -m app.cli import-data
-python -m app.cli create-admin
-FUNDEB_DATA_SOURCE=database uvicorn app.main:app --reload
+docker compose up -d db
+docker compose build app
+docker compose run --rm app python -m app.cli migrate
+docker compose run --rm app python -m app.cli import-data --dry-run
+docker compose run --rm app python -m app.cli import-data
+docker compose run --rm app python -m app.cli verify-data
+# Apenas em instalação nova, sem usuários anteriores:
+docker compose run --rm app python -m app.cli create-admin
+docker compose up -d app
 ```
 
-Abra `http://localhost:8000`. O banco local padrão é `data/fundeb.db` (ignorado pelo Git). `uvicorn main:app` continua funcionando. Não existe usuário/senha padrão.
+A aplicação escuta em `127.0.0.1:8000`; configure o proxy HTTPS para o cookie seguro de produção. Em desenvolvimento HTTP local, use `FUNDEB_ENV=development` e `FUNDEB_COOKIE_SECURE=false`, mantendo PostgreSQL. Para execução Python direta, configure `FUNDEB_DATABASE_URL` com `postgresql+psycopg://…` ou as variáveis `FUNDEB_DB_HOST`, `FUNDEB_DB_NAME`, `FUNDEB_DB_USER` e `FUNDEB_DB_PASSWORD`. Não coloque senhas no Git.
 
-**Instalação existente:** antes de reiniciar ou substituir o servidor, siga [MIGRACAO.md](docs/MIGRACAO.md). Os cenários antigos podem existir apenas na memória do processo; o código novo, sozinho, não os recupera. Migre o SQLite real de usuários antes de criar um administrador.
+**Instalação existente:** siga [MIGRACAO.md](docs/MIGRACAO.md) antes de reiniciar o servidor. `import-users` lê o SQLite antigo de autenticação; `import-sqlite` transfere integralmente um eventual `fundeb.db` unificado para PostgreSQL vazio, incluindo os cálculos já salvos. SQLite é aceito somente como arquivo de origem da migração.
 
 ## Organização
 
@@ -37,10 +44,10 @@ Há `Dockerfile`, `compose.yaml` e `.env.example`. Produção exige PostgreSQL, 
 ## Verificação
 
 ```bash
-pytest -q
-ruff check app tests/test_persistence.py tests/test_regression_baseline.py tests/test_persistence_api.py
+FUNDEB_TEST_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/fundeb_test' pytest -q
+ruff check app tests
 ```
 
-A integração contínua executa testes com SQLite e PostgreSQL, importa todas as bases e confronta resultados com o commit original `b34590c`. Testes verificam o código idêntico do motor, todas as células das bases, cenários A/B/C/D, precisão, usuários/hashes, retenção após reinício, exportações e backup/restauração.
+Toda a integração contínua executa em PostgreSQL, importa as três bases e confronta resultados com o commit original `b34590c`. Os testes usam schemas próprios em banco de testes explicitamente configurado; verificam também a execução com a leitura dos arquivos originais bloqueada. Testes verificam o código idêntico do motor, todas as células das bases, cenários A/B/C/D, precisão, usuários/hashes, retenção após reinício, exportações e backup/restauração.
 
 Os dados continuam com suas pendências metodológicas de origem. A reorganização não muda fórmulas, padrões de complementação nem resultados para tentar corrigir essas pendências.

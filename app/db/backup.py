@@ -36,14 +36,11 @@ def backup(path, *, engine=None):
     manifest = {"format": "fundeb-database-v1", "revision": "0001", "tables": {}}
     try:
         with os.fdopen(descriptor, "wb") as target, engine.connect() as conn:
-            if engine.dialect.name == "postgresql":
-                conn = conn.execution_options(isolation_level="REPEATABLE READ")
+            conn = conn.execution_options(isolation_level="REPEATABLE READ")
             with (
                 conn.begin(),
                 zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive,
             ):
-                if engine.dialect.name == "sqlite":
-                    conn.exec_driver_sql("BEGIN")
                 manifest["revision"] = conn.execute(
                     text("SELECT version_num FROM alembic_version")
                 ).scalar_one()

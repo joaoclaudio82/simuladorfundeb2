@@ -30,3 +30,7 @@ Qualquer correção metodológica posterior deve criar outra versão do motor/ba
 Os perfis cobrem A/B, A/B/C/D com receita ampliada, ajustes de matrícula, pesos customizados e parâmetros fiscais. A regressão compara todas as linhas nacionais, não apenas totais ou amostras. O arquivo `app/domain/calculo/motor.py` mantém exatamente os bytes do motor original, verificados em teste.
 
 A referência usa Python 3.12, pandas 3.0.6, NumPy 2.5.3 e PyArrow 25.0.1; as dependências são fixadas em `requirements.txt`. O ambiente efetivo do servidor antigo deve ser registrado antes da troca. Não se presume que suas versões sejam estas. Se a produção tiver outras versões, capture resultados representativos nesse ambiente e confronte antes da liberação.
+
+## Destino operacional
+
+Todos os três exercícios são lidos exclusivamente do PostgreSQL. Os caminhos acima identificam as fontes históricas preservadas no Git; não são o armazenamento ativo da aplicação. A carga inclui seus bytes integrais em `source_files`, as versões completas em `base_versions` e as projeções por ente/categoria. `python -m app.cli verify-data` permite conferir o banco de destino.
