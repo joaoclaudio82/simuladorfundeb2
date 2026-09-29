@@ -16,7 +16,7 @@ def reescala_vetor(var: np.ndarray, maximo: float = 1.05, minimo: float = 0.95) 
     maior = np.max(var)
     menor = np.min(var)
     if maior == menor:
-        return var.copy()
+        return np.full(len(var), minimo, dtype=float)
     return minimo + (maximo - minimo) * (var - menor) / (maior - menor)
 
 
@@ -42,7 +42,7 @@ def pondera_matriculas_etapa(dados_matriculas: pd.DataFrame, dados_peso: pd.Data
 
 def pondera_matriculas_sociofiscal(dados_matriculas: pd.DataFrame, dados_complementar: pd.DataFrame) -> pd.DataFrame:
     """Aplica os fatores socioeconômico (NSE) e fiscal (NF) às matrículas ponderadas."""
-    df = dados_matriculas.merge(dados_complementar, on="ibge")
+    df = dados_matriculas.merge(dados_complementar, on="ibge", validate="one_to_one")
     df["matriculas_vaaf"] = df["matriculas_vaaf"] * df["nse"] * df["nf"]
     df["matriculas_vaat"] = df["matriculas_vaat"] * df["nse"]
     return df
@@ -72,12 +72,13 @@ def equaliza_fundo(
     Redistribui a complementação da União de baixo para cima, igualando o
     valor-aluno dos entes mais pobres até esgotar o montante disponível.
     """
+    excluidos = dados[var_matriculas].le(0)
     if entes_excluidos:
-        df_excluidos = dados[dados["ibge"].isin(entes_excluidos)].copy()
-        df = dados[~dados["ibge"].isin(entes_excluidos)].copy()
-    else:
-        df = dados.copy()
-        df_excluidos = None
+        excluidos |= dados[identificador].isin(entes_excluidos)
+    df_excluidos = dados[excluidos].copy()
+    df = dados[~excluidos].copy()
+    if df.empty and complementacao_uniao > 0:
+        raise ValueError("Não há matrículas elegíveis para distribuir a complementação.")
 
     df = df.sort_values(var_ordem).reset_index(drop=True)
     df["matriculas_acumulados"] = df[var_matriculas].cumsum()
@@ -122,7 +123,7 @@ def une_vaaf(
 
     df["recursos_vaaf_final"] = df["matriculas_vaaf"] * df["recursos_pos"] / df["matriculas_estado_vaaf"]
     df["recursos_vaaf"] = df["matriculas_vaaf"] * df["recursos_estado_vaaf"] / df["matriculas_estado_vaaf"]
-    df["vaaf_final"] = df["recursos_vaaf_final"] / df["matriculas_vaaf"]
+    df["vaaf_final"] = df["recursos_vaaf_final"] / df["matriculas_vaaf"].replace(0, np.nan)
 
     df.drop(columns=["matriculas_estado_vaaf", "recursos_pos", "recursos_estado_vaaf"], inplace=True)
     return df
@@ -132,7 +133,7 @@ def une_vaat(dados_entes: pd.DataFrame, dados_complementacao_vaat: pd.DataFrame)
     """Une a equalização VAAT com a tabela de entes."""
     df = dados_entes.merge(dados_complementacao_vaat, on="ibge", how="left")
     df.rename(columns={"recursos_pos": "recursos_vaat_final"}, inplace=True)
-    df["vaat_final"] = df["recursos_vaat_final"] / df["matriculas_vaat"]
+    df["vaat_final"] = df["recursos_vaat_final"] / df["matriculas_vaat"].replace(0, np.nan)
     return df
 
 
@@ -151,11 +152,38 @@ def simula_fundeb(
     min_nse: float = 0.95,
     max_nf: float = 1.05,
     min_nf: float = 0.95,
+    *,
+    arredondar: bool = True,
+    modo_vaat: str = "fixo",
+    fatores_matriculas: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Função principal de simulação do FUNDEB.
-    Reproduz fielmente a lógica do pacote R simulador.fundeb.
+    modo_vaat='fixo' preserva o snapshot de receitas VAAT do modelo legado.
+    'componentes' requer outras_receitas_vaat explícitas, somadas ao VAAF final.
+    Nenhuma receita residual é inferida automaticamente do snapshot.
     """
+    for tabela in (dados_matriculas, dados_complementar):
+        if tabela["ibge"].duplicated().any():
+            raise ValueError("Identificadores duplicados na base.")
+    if set(dados_matriculas["ibge"]) != set(dados_complementar["ibge"]):
+        raise ValueError("Cobertura de matrículas e receitas é diferente.")
+    if not (0 < min_nse <= max_nse and 0 < min_nf <= max_nf):
+        raise ValueError("Intervalos NSE/NF inválidos.")
+    montantes = [complementacao_vaaf, complementacao_vaat, complementacao_vaar]
+    if not np.isfinite(montantes).all() or min(montantes) < 0:
+        raise ValueError("Complementações devem ser finitas e não negativas.")
+    etapas = dados_peso["etapa"].tolist()
+    if len(etapas) != len(set(etapas)):
+        raise ValueError("Categorias de ponderação duplicadas.")
+    valores = dados_matriculas[etapas].to_numpy(dtype=float)
+    ponderacoes = dados_peso[["peso_vaaf", "peso_vaat"]].to_numpy(dtype=float)
+    if not np.isfinite(valores).all() or (valores < 0).any():
+        raise ValueError("Matrículas inválidas.")
+    if not np.isfinite(ponderacoes).all() or (ponderacoes <= 0).any():
+        raise ValueError("Ponderações devem ser positivas e finitas.")
+    if complementacao_vaar > 0 and not np.isclose(dados_complementar["peso_vaar"].sum(), 1, atol=1e-8, rtol=0):
+        raise ValueError("Pesos VAAR devem somar 1 para distribuir o montante informado.")
     entes_excluidos = dados_complementar.loc[
         dados_complementar["inabilitados_vaat"] == True, "ibge"
     ].tolist()
@@ -170,9 +198,18 @@ def simula_fundeb(
 
     # 3 - Ponderação sociofiscal
     df_entes = pondera_matriculas_sociofiscal(df_matriculas, compl)
+    if fatores_matriculas is not None:
+        df_entes = df_entes.merge(fatores_matriculas, on="ibge", validate="one_to_one", how="left")
+        for modalidade in ("vaaf", "vaat"):
+            fator = df_entes[f"fator_{modalidade}"]
+            if fator.isna().any() or not np.isfinite(fator).all() or (fator <= 0).any():
+                raise ValueError("Fatores de matrícula ausentes ou inválidos.")
+            df_entes[f"matriculas_{modalidade}"] *= fator
 
     # 4 - Fundos estaduais
     df_estados = gera_fundo_estadual(df_entes)
+    if (df_estados["matriculas_estado_vaaf"] <= 0).any():
+        raise ValueError("Uma UF ficou sem matrículas ponderadas; revise os ajustes.")
 
     # 5 - Equalização VAAF (fundos estaduais)
     df_fundo_estadual = equaliza_fundo(
@@ -185,7 +222,13 @@ def simula_fundeb(
     df_entes = une_vaaf(df_entes, df_estados, df_fundo_estadual)
 
     # 7 - VAAT pré-complementação
-    df_entes["vaat_pre"] = df_entes["recursos_vaat"] / df_entes["matriculas_vaat"]
+    if modo_vaat == "componentes":
+        if "outras_receitas_vaat" not in df_entes:
+            raise ValueError("Modelo por componentes exige outras_receitas_vaat explícitas.")
+        df_entes["recursos_vaat"] = df_entes["recursos_vaaf_final"] + df_entes["outras_receitas_vaat"]
+    elif modo_vaat != "fixo":
+        raise ValueError("Modelo de receita VAAT desconhecido.")
+    df_entes["vaat_pre"] = df_entes["recursos_vaat"] / df_entes["matriculas_vaat"].replace(0, np.nan)
 
     # 8 - Equalização VAAT (entes individuais)
     fundo_vaat = equaliza_fundo(
@@ -215,4 +258,5 @@ def simula_fundeb(
         "recursos_vaat_final", "vaat_final", "complemento_vaaf",
         "complemento_vaat", "complemento_vaar", "complemento_uniao", "recursos_fundeb",
     ]
-    return df_entes[colunas].round(2)
+    resultado = df_entes[colunas]
+    return resultado.round(2) if arredondar else resultado

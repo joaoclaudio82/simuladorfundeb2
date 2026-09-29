@@ -11,13 +11,15 @@ import numpy as np
 import pandas as pd
 import pyreadr
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from simulador import simula_fundeb
 from validacao import validar_interno
+from routers.cenarios import router as cenarios_router
 
 # ---------------------------------------------------------------------------
 # Carregamento de dados
@@ -111,6 +113,9 @@ def sanitize_for_json(obj):
 def preparar_pesos(req: SimulacaoRequest | SimulacaoMunicipioRequest) -> pd.DataFrame:
     """Prepara dataframe de pesos a partir dos dados do request."""
     p = pesos.copy()
+    for valores in (req.pesos_vaaf, req.pesos_vaat):
+        if valores is not None and len(valores) != len(p):
+            raise ValueError("Quantidade de pesos diferente do catálogo de categorias.")
     if req.pesos_vaaf is not None and len(req.pesos_vaaf) == len(p):
         p["peso_vaaf"] = req.pesos_vaaf
     if req.pesos_vaat is not None and len(req.pesos_vaat) == len(p):
@@ -139,7 +144,7 @@ def executar_simulacao(req: SimulacaoRequest | SimulacaoMunicipioRequest,
 
 def gerar_resumo(sim: pd.DataFrame, atual: pd.DataFrame) -> dict:
     """Gera métricas resumo comparando simulação com cenário atual."""
-    merged = sim.merge(atual, on=["ibge", "nome", "uf"], suffixes=("_sim", "_atual"))
+    merged = sim.merge(atual.drop(columns=["nome", "uf"]), on="ibge", validate="one_to_one", suffixes=("_sim", "_atual"))
 
     vaaf_min_sim = sim["vaaf_final"].min()
     vaaf_min_atual = atual["vaaf_final"].min()
@@ -185,22 +190,26 @@ def gerar_resumo(sim: pd.DataFrame, atual: pd.DataFrame) -> dict:
 
 def gerar_dados_por_uf(sim: pd.DataFrame) -> list[dict]:
     """Agrega dados da simulação por UF para gráficos."""
-    hab = sim[~sim["inabilitados_vaat"].isin([True, "Verdadeiro"]) | (sim["uf"] == "DF")]
-    por_uf = hab.groupby("uf", as_index=False).agg(
-        vaaf_medio=("vaaf_final", "mean"),
-        vaat_medio=("vaat_final", "mean"),
+    por_uf = sim.groupby("uf", as_index=False).agg(
+        recursos_vaaf_final=("recursos_vaaf_final", "sum"),
+        recursos_vaat_final=("recursos_vaat_final", "sum"),
+        matriculas_vaaf=("matriculas_vaaf", "sum"),
+        matriculas_vaat=("matriculas_vaat", "sum"),
         complemento_vaaf=("complemento_vaaf", "sum"),
         complemento_vaat=("complemento_vaat", "sum"),
         complemento_vaar=("complemento_vaar", "sum"),
         complemento_uniao=("complemento_uniao", "sum"),
         recursos_fundeb=("recursos_fundeb", "sum"),
-    ).round(2)
+    )
+    for modalidade in ("vaaf", "vaat"):
+        por_uf[f"{modalidade}_medio"] = por_uf[f"recursos_{modalidade}_final"] / por_uf[f"matriculas_{modalidade}"].replace(0, np.nan)
+    por_uf = por_uf.round(2)
     return sanitize_for_json(por_uf.to_dict(orient="records"))
 
 
 def gerar_vencedores_perdedores(sim: pd.DataFrame, atual: pd.DataFrame) -> dict:
     """Gera tabela de vencedores e perdedores por região."""
-    merged = sim.merge(atual, on=["ibge", "nome", "uf"], suffixes=("_sim", "_atual"))
+    merged = sim.merge(atual.drop(columns=["nome", "uf"]), on="ibge", validate="one_to_one", suffixes=("_sim", "_atual"))
     regiao_map = {}
     for reg, ufs in ESTADOS_REGIOES.items():
         for uf in ufs:
@@ -238,6 +247,15 @@ def gerar_vencedores_perdedores(sim: pd.DataFrame, atual: pd.DataFrame) -> dict:
 # ---------------------------------------------------------------------------
 
 app = FastAPI(title="Simulador FUNDEB v2")
+app.include_router(cenarios_router)
+
+
+@app.exception_handler(RequestValidationError)
+async def erro_validacao_request(request, exc):
+    # Não ecoar NaN/Infinity ou o corpo recebido em uma resposta JSON de erro.
+    return JSONResponse(status_code=422, content={"detail": [
+        {"loc": list(e["loc"]), "msg": e["msg"], "type": e["type"]} for e in exc.errors()
+    ]})
 
 app.add_middleware(
     CORSMiddleware,
@@ -278,7 +296,7 @@ def obter_etapas():
 def obter_matriculas_municipio(ibge: int):
     row = matriculas[matriculas["ibge"] == ibge]
     if len(row) == 0:
-        raise HTTPException(404, "Município não encontrado")
+        raise HTTPException(404, "Ente federado não encontrado")
     etapas = pesos["etapa"].tolist()
     row_dict = row.iloc[0].to_dict()
     mat = {e: row_dict.get(e, 0) for e in etapas}
@@ -338,7 +356,7 @@ def simular(req: SimulacaoRequest):
         diff_uf = diff_uf[["uf", "diferenca"]].round(2)
 
         # Dados completos (primeiros 100 para preview, endpoint separado para todos)
-        dados_tabela = sim.fillna(0).head(200).to_dict(orient="records")
+        dados_tabela = sim.head(200).to_dict(orient="records")
 
         # RF-10: Validação interna dos resultados
         validacao = validar_interno(sim, complementar)
@@ -371,7 +389,7 @@ def simular_completo(req: SimulacaoRequest):
         sim["inabilitados_vaat"] = sim["inabilitados_vaat"].apply(
             lambda x: "Verdadeiro" if x else "Falso"
         )
-        return sanitize_for_json(sim.fillna(0).to_dict(orient="records"))
+        return sanitize_for_json(sim.to_dict(orient="records"))
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -382,13 +400,14 @@ def simular_municipio(req: SimulacaoMunicipioRequest):
     try:
         # Cria cópia das matrículas com ajustes
         mat = matriculas.copy()
+        idx = mat.index[mat["ibge"] == req.ibge]
+        if len(idx) == 0:
+            raise HTTPException(404, "Ente federado não encontrado")
         if req.matriculas_ajustadas:
-            idx = mat.index[mat["ibge"] == req.ibge]
-            if len(idx) == 0:
-                raise HTTPException(404, "Município não encontrado")
             for etapa, valor in req.matriculas_ajustadas.items():
-                if etapa in mat.columns:
-                    mat.loc[idx, etapa] = valor
+                if etapa not in ETAPAS_NOMES or not math.isfinite(valor) or valor < 0:
+                    raise HTTPException(422, "Categoria ou quantidade de matrículas inválida")
+                mat.loc[idx, etapa] = valor
 
         # Simulação com matrículas originais
         sim_original = executar_simulacao(req, matriculas)

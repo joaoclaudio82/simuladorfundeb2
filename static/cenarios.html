@@ -1,0 +1,53 @@
+<section id="cenarios-app" aria-labelledby="c-title">
+  <header class="c-heading"><div><span class="c-eyebrow">SIMULAÇÃO CONJUNTA</span><h1 id="c-title">Cenários nacionais</h1><p>Altere várias redes, compare os impactos e exporte o resultado.</p></div><span id="c-base-badge" class="c-badge"></span></header>
+  <div id="c-error" class="c-alert c-error" role="alert" hidden></div>
+  <div id="c-status" class="c-status" role="status" aria-live="polite"></div>
+  <form id="c-form">
+    <section class="c-panel">
+      <h2>1. Base e referência</h2>
+      <div class="c-grid"><label>Base de dados<select id="c-base"></select></label><label>Nome do cenário<input id="c-name" value="Cenário nacional" maxlength="120" required></label></div>
+      <p id="c-base-info" class="c-muted"></p>
+      <details class="c-notes"><summary>Pendências e identificação da base</summary><ul id="c-pendencias"></ul><p id="c-fontes"></p><button id="c-audit" type="button" class="c-btn c-secondary">Conferir referência disponível</button><div id="c-audit-result"></div></details>
+    </section>
+    <section class="c-panel">
+      <h2>2. Alterações de matrículas</h2>
+      <p class="c-muted">Adicione cada alteração ao conjunto. Elas permanecem na tabela ao trocar de rede ou UF. O cálculo inclui todas as redes do Brasil.</p>
+      <div class="c-grid c-grid-3"><label>UF<select id="c-uf"></select></label><label>Tipo de rede<select id="c-type"><option value="estaduais">Estadual / Distrito Federal</option><option value="municipal">Municipal</option></select></label><label>Ente federado<select id="c-ente"></select></label></div>
+      <div class="c-grid"><label>Categoria de matrícula<select id="c-stage"></select></label><label>Operação<select id="c-op"><option value="adicionar">Adicionar novas matrículas</option><option value="definir">Definir quantidade final</option><option value="percentual">Aumentar por percentual</option><option value="converter">Converter para outra categoria</option></select></label></div>
+      <div class="c-grid"><label id="c-destination-label" hidden>Categoria de destino<select id="c-destination"></select></label><label><span id="c-value-label">Quantidade</span><input id="c-value" type="number" min="0" max="1000000000" step="1" value="0"></label></div>
+      <div class="c-toolbar"><span id="c-original" class="c-muted"></span><button id="c-add" type="button" class="c-btn c-secondary">Adicionar ao conjunto</button></div>
+      <div class="c-table-wrap"><table class="c-table" id="c-adjustments"><caption>Alterações pendentes</caption><thead><tr><th>Rede</th><th>Categoria / operação</th><th>Antes</th><th>Depois</th><th>Ação</th></tr></thead><tbody></tbody></table></div>
+      <div class="c-toolbar"><span id="c-adjustment-count">Nenhuma alteração. A referência pode ser calculada sem ajustes.</span><button id="c-clear" type="button" class="c-btn c-link">Limpar alterações</button></div>
+    </section>
+    <section class="c-panel">
+      <h2>3. Receita e recorte de apresentação</h2>
+      <div class="c-grid"><label>Recorte<select id="c-scope"><option value="estaduais">Redes estaduais e Distrito Federal</option><option value="todas">Todas as redes</option><option value="selecionadas">Redes com alterações</option><option id="c-propag-option" value="propag" disabled>Grupo Propag — composição pendente</option></select></label><label>Filtrar UFs (opcional)<select id="c-filter" multiple size="4" aria-describedby="c-filter-help"></select><small id="c-filter-help">Sem seleção: todas. Use Ctrl/Cmd para selecionar várias.</small></label></div>
+      <div class="c-grid"><label>Hipótese de receita<select id="c-revenue-method"><option value="informada">Taxa nominal informada</option><option value="pib_cagr">Taxa anual composta do PIB nominal informado</option></select></label><label id="c-rate-label">Crescimento nominal (%)<input id="c-rate" type="number" min="-99.99" max="1000" step="0.01" value="0"><small>Zero mantém as receitas constantes.</small></label></div>
+      <div id="c-pib-fields" hidden><label>Série histórica de PIB nominal<textarea id="c-pib" rows="4" placeholder="Um ano e um valor por linha, separados por ponto e vírgula. Use ponto decimal, sem separador de milhar."></textarea></label><label>Fonte, unidade e período da série<input id="c-pib-source" maxlength="1000" placeholder="Identifique a fonte da série que você forneceu"></label></div>
+      <div class="c-grid"><fieldset><legend>Rubricas ajustadas pela taxa</legend><label class="c-check"><input type="checkbox" id="c-grow-vaaf" checked> Recursos do fundo antes da complementação VAAF</label><label class="c-check"><input type="checkbox" id="c-grow-vaat" checked><span id="c-vaat-rubric-label">Receita VAAT do snapshot</span></label></fieldset><label>Complementações da União<select id="c-union"><option value="fixas">Manter montantes informados</option><option value="proporcionais">Aplicar a mesma taxa nominal aos montantes</option></select><small>Esta escolha é uma hipótese do cenário, não uma regra normativa automática.</small></label></div>
+      <details class="c-notes"><summary>Parâmetros de cálculo e ponderações</summary><p class="c-muted">Os valores iniciais vêm da base selecionada. Todas as alterações são registradas no resultado.</p><div id="c-parameters" class="c-grid c-grid-3"></div><div class="c-table-wrap c-weights"><table class="c-table" id="c-weights"><thead><tr><th>Categoria</th><th>Peso VAAF</th><th>Peso VAAT</th></tr></thead><tbody></tbody></table></div></details>
+      <label class="c-check"><input type="checkbox" id="c-amazon" disabled> Aplicar fator amazônico validado para a base</label><p id="c-amazon-status" class="c-muted">Disponível após confirmação da norma, vigência e incidência.</p>
+      <button type="submit" id="c-run" class="c-btn c-primary">Calcular cenários A, B, C e D</button>
+    </section>
+  </form>
+  <section id="c-results" class="c-panel" hidden>
+    <div class="c-heading"><div><h2>Resultado calculado</h2><p id="c-result-info" class="c-muted"></p></div><span id="c-stale" class="c-badge c-warning" hidden>Parâmetros alterados — execute novamente</span></div>
+    <p id="c-result-caveat" class="c-alert"></p>
+    <div class="c-cards" id="c-cards"></div>
+    <div class="c-grid c-grid-3"><label>Comparação<select id="c-comparison"><option value="B-A">B − A: efeito das matrículas</option><option value="C-A">C − A: efeito da receita</option><option value="D-A">D − A: efeito combinado</option><option value="D-C">D − C: matrículas com receita ampliada</option></select></label><label>Indicador<select id="c-metric"></select></label><label id="c-year-label" hidden>Ano hipotético<select id="c-year"></select></label></div>
+    <p id="c-denominator" class="c-muted"></p>
+    <div class="c-table-wrap"><table class="c-table" id="c-comparison-table"><caption id="c-table-caption"></caption><thead><tr><th>UF</th><th>Rede</th><th>Referência</th><th>Simulado</th><th>Diferença</th><th>Variação (%)</th><th>Participação inicial (%)</th><th>Participação final (%)</th><th>Dif. participação (p.p.)</th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <div id="c-pagination" class="c-toolbar"></div>
+    <div class="c-toolbar"><div><button type="button" class="c-btn c-secondary c-export" data-format="pdf">Exportar PDF</button> <button type="button" class="c-btn c-secondary c-export" data-format="xlsx">Exportar Excel</button> <button type="button" class="c-btn c-secondary c-export" data-format="csv">Exportar CSV</button></div><a id="c-permalink">Abrir este resultado</a></div>
+    <p class="c-muted">PDF: indicador selecionado. CSV: todos os indicadores da comparação selecionada. Excel: quatro comparações e dados completos. Todos incluem as redes do recorte, além das linhas visíveis nesta página.</p>
+    <details class="c-notes"><summary>Hipóteses, validações e rastreabilidade</summary><pre id="c-result-meta"></pre></details>
+  </section>
+  <section class="c-panel">
+    <details id="c-trajectory"><summary>Trajetória hipotética de expansão de EPT</summary><p class="c-muted">Gera expansão linear a partir da base, nas redes estaduais das UFs filtradas (ou todas). Usa os parâmetros de receita acima, com crescimento composto anual. Pesos, elegibilidade e regras ficam constantes. Limpe os ajustes avulsos antes de executar.</p>
+      <div class="c-grid c-grid-3"><label>Ano inicial<input id="c-start-year" type="number" value="2026" min="2000" max="2100"></label><label>Ano final<input id="c-end-year" type="number" value="2036" min="2000" max="2100"></label><label>Aumento total de EPT (%)<input id="c-ept-growth" type="number" value="50" min="0" max="1000" step="0.1"></label></div>
+      <div class="c-grid"><label>Categoria EPT<select id="c-ept-stage"></select></label><label>Origem da expansão<select id="c-ept-op"><option value="adicionar">Novas matrículas</option><option value="converter">Conversão de outra categoria</option></select></label><label id="c-ept-origin-label" hidden>Categoria de origem<select id="c-ept-origin"></select></label></div>
+      <label>Hipótese da trajetória<input id="c-ept-hypothesis" maxlength="1000" placeholder="Descreva a hipótese de expansão; a meta normativa não é presumida"></label>
+      <button type="button" id="c-run-trajectory" class="c-btn c-primary">Calcular trajetória de EPT</button><div id="c-trajectory-summary"></div>
+    </details>
+  </section>
+</section>

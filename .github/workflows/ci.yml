@@ -26,3 +26,13 @@ jobs:
 
       - name: Testes
         run: pytest tests/ -v
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Interface com API real (DOM)
+        run: |
+          npm ci
+          npm run test:ui
