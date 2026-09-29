@@ -12,6 +12,7 @@ const state = {
   etapas: null,
   ultimaSimulacao: null,
   municipioMatriculas: null,
+  user: null,
 };
 
 const API = '';  // base URL (mesmo servidor)
@@ -28,14 +29,7 @@ const fmt = {
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return document.querySelectorAll(sel); }
 
-async function apiFetch(url, opts = {}) {
-  const res = await fetch(API + url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
-}
+// apiFetch definido em auth.js (credentials + redirect 401)
 
 function buildTable(headers, rows) {
   let html = '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
@@ -67,31 +61,47 @@ function openSidebarMobile() {
   document.body.style.overflow = 'hidden';
 }
 
+function activateTab(tabId) {
+  if (!tabId) return false;
+  const panel = document.getElementById(`tab-${tabId}`);
+  if (!panel) return false;
+  $$('.sidebar-nav li[data-tab]').forEach((l) => {
+    l.classList.toggle('active', l.dataset.tab === tabId);
+  });
+  $$('.tab-content').forEach((t) => t.classList.remove('active'));
+  panel.classList.add('active');
+  window.scrollTo(0, 0);
+  return true;
+}
+
 function initNavigation() {
   const sidebar = $('#sidebar');
   const toggleBtn = $('#sidebar-toggle');
   const backdrop = $('#sidebar-backdrop');
+  const sidebarNav = document.querySelector('.sidebar-nav');
 
-  $$('.sidebar-nav li').forEach(li => {
-    li.addEventListener('click', () => {
-      $$('.sidebar-nav li').forEach(l => l.classList.remove('active'));
-      li.classList.add('active');
-      $$('.tab-content').forEach(t => t.classList.remove('active'));
-      $(`#tab-${li.dataset.tab}`).classList.add('active');
+  if (sidebarNav) {
+    sidebarNav.addEventListener('click', (e) => {
+      const li = e.target.closest('li[data-tab]');
+      if (!li) return;
+      activateTab(li.dataset.tab);
       if (isMobile()) closeSidebarMobile();
     });
-  });
+  }
 
-  toggleBtn.addEventListener('click', () => {
-    if (isMobile()) {
-      const isOpen = sidebar.classList.contains('open');
-      if (isOpen) closeSidebarMobile();
-      else openSidebarMobile();
-    } else {
-      sidebar.classList.toggle('collapsed');
-      $('#main-content').classList.toggle('expanded');
-    }
-  });
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener('click', () => {
+      if (isMobile()) {
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) closeSidebarMobile();
+        else openSidebarMobile();
+      } else {
+        sidebar.classList.toggle('collapsed');
+        const main = $('#main-content');
+        if (main) main.classList.toggle('expanded');
+      }
+    });
+  }
 
   if (backdrop) {
     backdrop.addEventListener('click', () => {
@@ -102,8 +112,9 @@ function initNavigation() {
   window.addEventListener('resize', () => {
     if (!isMobile()) {
       closeSidebarMobile();
-      sidebar.classList.remove('collapsed');
-      $('#main-content').classList.remove('expanded');
+      if (sidebar) sidebar.classList.remove('collapsed');
+      const main = $('#main-content');
+      if (main) main.classList.remove('expanded');
     }
   });
 
@@ -112,17 +123,14 @@ function initNavigation() {
     const target = e.target.closest('[data-tab]');
     if (target && !target.closest('.sidebar-nav')) {
       e.preventDefault();
-      const tab = target.dataset.tab;
-      $$('.sidebar-nav li').forEach(l => {
-        l.classList.toggle('active', l.dataset.tab === tab);
-      });
-      $$('.tab-content').forEach(t => t.classList.remove('active'));
-      const el = $(`#tab-${tab}`);
-      if (el) el.classList.add('active');
+      activateTab(target.dataset.tab);
       if (isMobile()) closeSidebarMobile();
     }
   });
 }
+
+// exposto para app_multi_ano.js (abas injetadas apos o load)
+window.activateFundebTab = activateTab;
 
 // =========================================================================
 // Carregar dados iniciais
@@ -133,7 +141,10 @@ async function initData() {
     apiFetch('/api/estados'),
     apiFetch('/api/etapas'),
   ]);
-  state.pesos = pesosRes;
+  state.pesos = pesosRes.map((p) => ({
+    ...p,
+    familia: p.familia || familiaSegmento(p.nome),
+  }));
   state.estados = estadosRes.estados;
   state.regioes = estadosRes.regioes;
   state.etapas = etapasRes;
@@ -143,44 +154,106 @@ async function initData() {
 }
 
 // =========================================================================
-// Pesos — renderizar sliders
+// Pesos — accordion por família (igual FUNDEB 2026)
 // =========================================================================
+const ANO_PESOS_2024 = 2024;
+
+function familiaSegmento(nome) {
+  let n = String(nome);
+  const sufixos = [
+    ' Campo', ' Indígena', ' Indigena', ' Quilombola',
+    ' Especial', ' Bilíngue De Surdos', ' Bilingue De Surdos',
+    ' Urbano', ' Rural',
+  ];
+  for (const suf of sufixos) {
+    if (n.includes(suf)) n = n.split(suf)[0];
+  }
+  return n.trim();
+}
+
+function pesoInputId2024(tipo, etapa) {
+  return `peso-${tipo}-${ANO_PESOS_2024}-${etapa}`;
+}
+
 function renderPesos() {
-  const vaafContainer = $('#pesos-vaaf-container');
-  const vaatContainer = $('#pesos-vaat-container');
-  vaafContainer.innerHTML = '';
-  vaatContainer.innerHTML = '';
+  const container = document.getElementById('pesos-accordion-2024');
+  if (!container || !state.pesos) return;
 
-  state.pesos.forEach((p, i) => {
-    const makeSlider = (tipo, valor) => {
-      const id = `peso-${tipo}-${i}`;
-      return `
-        <div class="mb-2">
-          <label class="form-label small">${i + 1}. ${p.nome}:
-            <strong id="lbl-${id}">${Number(valor).toFixed(2)}</strong>
-          </label>
-          <input type="range" class="form-range" id="${id}" min="0.8" max="3.5" step="0.05" value="${valor}">
-        </div>`;
-    };
-    vaafContainer.innerHTML += makeSlider('vaaf', p.peso_vaaf);
-    vaatContainer.innerHTML += makeSlider('vaat', p.peso_vaat);
+  const readOnly = typeof canEditPesos === 'function' && !canEditPesos();
+  const roAttr = readOnly ? 'readonly disabled' : '';
+  let banner = '';
+  if (readOnly) {
+    banner = `<div class="alert alert-info py-2 mb-3">
+      <i class="fas fa-lock"></i> Somente administradores podem alterar os fatores de ponderação.
+    </div>`;
+  }
+
+  const famMap = {};
+  state.pesos.forEach((p) => {
+    const fam = p.familia || p.nome;
+    if (!famMap[fam]) famMap[fam] = [];
+    famMap[fam].push(p);
   });
 
-  // Atualizar labels
-  $$('[id^="peso-"]').forEach(inp => {
-    if (inp.tagName === 'INPUT') {
-      inp.addEventListener('input', () => {
-        $(`#lbl-${inp.id}`).textContent = Number(inp.value).toFixed(2);
-      });
-    }
-  });
+  let html = banner + `<div class="accordion" id="acc-pesos-${ANO_PESOS_2024}">`;
+  let i = 0;
+  for (const [fam, items] of Object.entries(famMap)) {
+    const id = `acc-${ANO_PESOS_2024}-${i++}`;
+    html += `<div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${id}">
+          ${fam} <span class="badge bg-secondary ms-2">${items.length} segmento${items.length > 1 ? 's' : ''}</span>
+        </button>
+      </h2>
+      <div id="${id}" class="accordion-collapse collapse" data-bs-parent="#acc-pesos-${ANO_PESOS_2024}">
+        <div class="accordion-body pesos-accordion-body">
+          <div class="peso-segmento-header row g-2 d-none d-md-flex small text-muted fw-semibold mb-2">
+            <div class="col-md-5">Segmento</div>
+            <div class="col-md-3">Peso VAAF</div>
+            <div class="col-md-3">Peso VAAT</div>
+          </div>`;
+    items.forEach((p) => {
+      const vaaf = Number(p.peso_vaaf);
+      const vaat = Number(p.peso_vaat);
+      const idVaaf = pesoInputId2024('vaaf', p.etapa);
+      const idVaat = pesoInputId2024('vaat', p.etapa);
+      html += `<div class="peso-segmento-row row g-2 align-items-end mb-2 pb-2">
+        <div class="col-12 col-md-5">
+          <span class="peso-segmento-nome">${p.nome}</span>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label form-label-sm d-md-none" for="${idVaaf}">VAAF</label>
+          <input type="number" class="form-control form-control-sm peso-input"
+            id="${idVaaf}" data-etapa="${p.etapa}" data-tipo="vaaf"
+            min="0" max="10" step="0.01" value="${vaaf}" ${roAttr}>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label form-label-sm d-md-none" for="${idVaat}">VAAT</label>
+          <input type="number" class="form-control form-control-sm peso-input"
+            id="${idVaat}" data-etapa="${p.etapa}" data-tipo="vaat"
+            min="0" max="10" step="0.01" value="${vaat}" ${roAttr}>
+        </div>
+      </div>`;
+    });
+    html += `</div></div></div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function getPesos() {
-  const vaaf = [], vaat = [];
-  state.pesos.forEach((_, i) => {
-    vaaf.push(parseFloat($(`#peso-vaaf-${i}`)?.value ?? state.pesos[i].peso_vaaf));
-    vaat.push(parseFloat($(`#peso-vaat-${i}`)?.value ?? state.pesos[i].peso_vaat));
+  const vaaf = [];
+  const vaat = [];
+  state.pesos.forEach((p) => {
+    if (typeof canEditPesos === 'function' && !canEditPesos()) {
+      vaaf.push(Number(p.peso_vaaf) || 0);
+      vaat.push(Number(p.peso_vaat) || 0);
+      return;
+    }
+    const elVaaf = document.getElementById(pesoInputId2024('vaaf', p.etapa));
+    const elVaat = document.getElementById(pesoInputId2024('vaat', p.etapa));
+    vaaf.push(parseFloat(elVaaf?.value ?? p.peso_vaaf) || 0);
+    vaat.push(parseFloat(elVaat?.value ?? p.peso_vaat) || 0);
   });
   return { vaaf, vaat };
 }
@@ -308,14 +381,13 @@ function getMatriculasAjustadas() {
 }
 
 // =========================================================================
-// Sliders de NSE/NF — atualização de labels
+// Slider de NF — atualização de label
 // =========================================================================
 function initSliders() {
-  $('#inp-nse').addEventListener('input', () => {
-    $('#lbl-nse').textContent = parseFloat($('#inp-nse').value).toFixed(2);
-  });
-  $('#inp-nf').addEventListener('input', () => {
-    $('#lbl-nf').textContent = parseFloat($('#inp-nf').value).toFixed(2);
+  const inpNf = $('#inp-nf');
+  if (!inpNf) return;
+  inpNf.addEventListener('input', () => {
+    $('#lbl-nf').textContent = parseFloat(inpNf.value).toFixed(2);
   });
 }
 
@@ -331,8 +403,6 @@ async function executarSimulacao() {
     complementacao_vaaf: parseFloat($('#inp-comp-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-comp-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-comp-vaar').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -385,6 +455,8 @@ function renderResultados(data) {
   render3D_CuboUFs(data);
   render3D_BarrasComplementacao(data);
   render3D_SuperficieDiferenca(data);
+
+  renderRegional();
 }
 
 function renderValidacao(validacao) {
@@ -572,8 +644,6 @@ async function executarSimulacaoVAAR() {
     complementacao_vaaf: parseFloat($('#inp-vaar-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-vaar-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-vaar-montante').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1.1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -677,8 +747,6 @@ async function executarSimulacaoMunicipal() {
     complementacao_vaaf: parseFloat($('#inp-mun-vaaf').value) || 0,
     complementacao_vaat: parseFloat($('#inp-mun-vaat').value) || 0,
     complementacao_vaar: parseFloat($('#inp-mun-vaar').value) || 0,
-    max_nse: parseFloat($('#inp-nse').value) || 1.1,
-    min_nse: 1,
     max_nf: parseFloat($('#inp-nf').value) || 1,
     min_nf: 1,
     pesos_vaaf: pesos.vaaf,
@@ -691,7 +759,7 @@ async function executarSimulacaoMunicipal() {
       method: 'POST',
       body: JSON.stringify(body),
     });
-    renderResultadosMunicipio(data);
+    renderResultadosMunicipio(data, {});
   } catch (e) {
     alert('Erro na simulação municipal: ' + e.message);
   } finally {
@@ -699,54 +767,79 @@ async function executarSimulacaoMunicipal() {
   }
 }
 
-function renderResultadosMunicipio(data) {
+function munId(base, ano) {
+  return ano ? `${base}-${ano}` : base;
+}
+
+function renderResultadosMunicipio(data, opts) {
+  opts = opts || {};
+  const ano = opts.ano || null;
   const orig = data.municipio_original;
   const ajust = data.municipio_ajustado;
 
-  // Mostrar cards
-  $('#mun-comparacao').style.display = '';
-  $('#mun-chart-card').style.display = '';
-  $('#mun-impacto-card').style.display = '';
-  $('#mun-explicacao-card').style.display = '';
-  $('#mun-3d-section').style.display = '';
+  const show = (id) => {
+    const el = document.getElementById(munId(id, ano));
+    if (el) el.style.display = '';
+  };
+  show('mun-comparacao');
+  show('mun-chart-card');
+  show('mun-impacto-card');
+  show('mun-explicacao-card');
+  show('mun-3d-section');
 
-  // Gerar explicação
-  renderExplicacao(orig, ajust);
+  renderExplicacao(orig, ajust, {
+    containerId: munId('mun-explicacao', ano),
+    explicacaoCardId: munId('mun-explicacao-card', ano),
+    munData: opts.munData,
+    etapasNomes: opts.etapasNomes,
+    getAjustadas: opts.getAjustadas,
+    ponderadorLabel: opts.ponderadorLabel || 'NF',
+  });
 
   // Card original
+  const fmtCoef = (v) => (v == null || isNaN(v)) ? '-' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 8, maximumFractionDigits: 8 });
   const renderCard = (container, d) => {
+    const ufFundo = d.fundo_estadual?.uf || d.uf;
     const items = [
-      ['Matrículas VAAF', fmt.numero(d.matriculas_vaaf)],
-      ['Matrículas VAAT', fmt.numero(d.matriculas_vaat)],
-      ['Recursos VAAF', fmt.moeda(d.recursos_vaaf)],
-      ['Recursos VAAT', fmt.moeda(d.recursos_vaat)],
+      ['Matrículas VAAF', fmt.numero(d.matriculas_brutas)],
+      ['Matrículas ponderadas VAAF', fmt.numero(d.matriculas_vaaf)],
+      ['Matrículas ponderadas VAAT', fmt.numero(d.matriculas_vaat)],
+      ['Matrículas ponderadas VAAF do Fundo', fmt.numero(d.fundo_estadual?.matriculas_pond_vaaf)],
+      [`Receitas VAAF Fundo ${ufFundo}`, fmt.moeda(d.fundo_estadual?.receitas_vaaf)],
+      [`Complemento VAAF Fundo ${ufFundo}`, fmt.moeda(d.fundo_estadual?.complemento_vaaf_fundo)],
+      ['Receita da contribuição de estados e municípios ao Fundeb', fmt.moeda(d.recursos_vaaf)],
+      ['Receitas VAAT', fmt.moeda(d.recursos_vaat)],
+      ['VAAF-MIN', fmt.numero(d.vaaf_minimo)],
+      ['VAAT-MIN', fmt.numero(d.vaat_minimo)],
+      ['VAAF (antes da complementação)', fmt.numero(d.vaaf)],
+      ['VAAT (antes da complementação)', fmt.numero(d.vaat)],
+      ['Coeficiente (matrículas ente / fundo)', fmtCoef(d.coeficiente)],
       ['VAAF Final', fmt.numero(d.vaaf_final)],
       ['VAAT Final', fmt.numero(d.vaat_final)],
       ['Complemento VAAF', fmt.moeda(d.complemento_vaaf)],
       ['Complemento VAAT', fmt.moeda(d.complemento_vaat)],
       ['Complemento VAAR', fmt.moeda(d.complemento_vaar)],
       ['Total Complementação', fmt.moeda(d.complemento_uniao)],
-      ['Recursos FUNDEB', fmt.moeda(d.recursos_fundeb)],
+      ['Receita Total do Fundeb', fmt.moeda(d.recursos_fundeb)],
     ];
     $(container).innerHTML = items.map(([label, value]) =>
       `<div class="comparison-row"><span class="comparison-label">${label}</span><span class="comparison-value">${value}</span></div>`
     ).join('');
   };
 
-  renderCard('#mun-original', orig);
-  renderCard('#mun-ajustado', ajust);
+  renderCard(`#${munId('mun-original', ano)}`, orig);
+  renderCard(`#${munId('mun-ajustado', ano)}`, ajust);
 
-  // Gráfico de comparação
   const labels = ['VAAF Final', 'VAAT Final', 'Comp. VAAF', 'Comp. VAAT', 'Comp. VAAR', 'Recursos FUNDEB'];
   const origVals = [orig.vaaf_final, orig.vaat_final, orig.complemento_vaaf, orig.complemento_vaat, orig.complemento_vaar, orig.recursos_fundeb];
   const ajustVals = [ajust.vaaf_final, ajust.vaat_final, ajust.complemento_vaaf, ajust.complemento_vaat, ajust.complemento_vaar, ajust.recursos_fundeb];
 
-  Plotly.newPlot('chart-mun-comparacao', [
+  Plotly.newPlot(munId('chart-mun-comparacao', ano), [
     { x: labels, y: origVals, type: 'bar', name: 'Original', marker: { color: '#94a3b8' } },
     { x: labels, y: ajustVals, type: 'bar', name: 'Ajustado', marker: { color: '#3b82f6' } },
   ], {
     barmode: 'group',
-    title: `<b>Comparação — ${orig.nome} (${orig.uf})</b>`,
+    title: `<b>Comparação — ${orig.nome} (${orig.uf})${ano ? ' — FUNDEB ' + ano : ''}</b>`,
     yaxis: { title: 'R$', separatethousands: true },
     margin: { t: 50, b: 40 },
   }, { responsive: true });
@@ -778,29 +871,67 @@ function renderResultadosMunicipio(data) {
       if (b[0].includes('<strong>')) return 1;
       return 0;
     });
-    $('#tbl-mun-impacto').innerHTML = buildTable(headers, rows.slice(0, 50));
+    const tbl = document.getElementById(munId('tbl-mun-impacto', ano));
+    if (tbl) tbl.innerHTML = buildTable(headers, rows.slice(0, 50));
   }
 
-  // Graficos 3D Municipal
-  render3D_Municipal(orig, ajust);
+  render3D_Municipal(orig, ajust, munId('chart3d-mun-comparacao', ano));
   if (data.estado_original && data.estado_ajustado) {
-    render3D_MunicipalEstado(data.estado_original, data.estado_ajustado, orig.ibge);
+    render3D_MunicipalEstado(
+      data.estado_original, data.estado_ajustado, orig.ibge,
+      munId('chart3d-mun-estado', ano),
+    );
   }
 }
+
+window.renderResultadosMunicipio = renderResultadosMunicipio;
 
 // =========================================================================
 // ANÁLISE REGIONAL
 // =========================================================================
-function initRegional() {
-  $('#sel-regional-uf').addEventListener('change', renderRegional);
+async function garantirDadosRegional() {
+  if (state.ultimaSimulacao) return state.ultimaSimulacao;
+  const pesos = getPesos();
+  const body = {
+    complementacao_vaaf: parseFloat($('#inp-comp-vaaf')?.value) || 0,
+    complementacao_vaat: parseFloat($('#inp-comp-vaat')?.value) || 0,
+    complementacao_vaar: parseFloat($('#inp-comp-vaar')?.value) || 0,
+    max_nf: parseFloat($('#inp-nf')?.value) || 1,
+    min_nf: 1,
+    pesos_vaaf: pesos.vaaf,
+    pesos_vaat: pesos.vaat,
+  };
+  const data = await apiFetch('/api/simular', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  state.ultimaSimulacao = data;
+  return data;
 }
 
-function renderRegional() {
-  const uf = $('#sel-regional-uf').value;
+function initRegional() {
+  const sel = $('#sel-regional-uf');
+  if (sel) sel.addEventListener('change', () => renderRegional());
+}
+
+async function renderRegional() {
+  const uf = $('#sel-regional-uf')?.value;
   const container = $('#resultados-regional');
-  if (!uf || !state.ultimaSimulacao) {
-    container.innerHTML = '<p class="text-muted">Execute uma simulação na aba principal e selecione uma UF.</p>';
+  if (!container) return;
+
+  if (!uf) {
+    container.innerHTML = '<p class="text-muted">Selecione uma UF para visualizar a análise regional.</p>';
     return;
+  }
+
+  if (!state.ultimaSimulacao) {
+    container.innerHTML = '<p class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Carregando dados regionais...</p>';
+    try {
+      await garantirDadosRegional();
+    } catch (e) {
+      container.innerHTML = `<p class="text-danger">Erro ao carregar dados regionais: ${e.message}</p>`;
+      return;
+    }
   }
 
   const data = state.ultimaSimulacao;
@@ -885,11 +1016,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNavigation();
   initSliders();
 
-  await initData();
+  try {
+    await guardAuth();
+    await initData();
+    // Pré-carrega simulação padrão para análise regional (cenário oficial / parâmetros iniciais)
+    await garantirDadosRegional().catch((e) => {
+      console.warn('Pré-carga regional:', e);
+    });
+  } catch (err) {
+    console.error('Falha ao carregar dados iniciais (2024):', err);
+  }
 
-  // Eventos
-  $('#btn-simular').addEventListener('click', executarSimulacao);
-  $('#btn-simular-vaar').addEventListener('click', executarSimulacaoVAAR);
-  $('#btn-simular-mun').addEventListener('click', executarSimulacaoMunicipal);
+  $('#btn-simular')?.addEventListener('click', executarSimulacao);
+  $('#btn-simular-vaar')?.addEventListener('click', executarSimulacaoVAAR);
+  $('#btn-simular-mun')?.addEventListener('click', executarSimulacaoMunicipal);
   initRegional();
 });

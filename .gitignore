@@ -23,3 +23,6 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Auth DB local
+data/usuarios.db
