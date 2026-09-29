@@ -1,168 +1,53 @@
-# Simulador FUNDEB v2
+# Simulador FUNDEB
 
-Simulador de Fatores de Ponderação do FUNDEB — Versão Python com frontend e backend separados.
+Aplicação FastAPI para simulações de 2024, 2025 e 2026, com PostgreSQL, bases versionadas, usuários e resultados persistidos. A refatoração conserva o motor de cálculo e os contratos da interface existente.
 
-## Novidades em relação à versão original (R/Shiny)
+## Banco único: PostgreSQL
 
-- **Simulação VAAR**: Nova aba para simular a distribuição da complementação VAAR
-- **Simulação Municipal**: Permite ajustar matrículas de um município e ver o impacto em VAAF, VAAT e VAAR
-- **Exercícios 2025 e 2026**: Abas dedicadas com dados da pasta `20252026/` (ambos operacionais; fontes 2025 em [checklist-dados-2025.md](checklist-dados-2025.md))
-- **DREC (2025+)**: Ponderador de Disponibilidade de Recursos aplicado no VAAF (substitui NF reescalado)
-- **325 segmentos de matrícula**: Detalhamento urbano/campo/indígena/quilombola/especial/bilíngue
-- **Interface moderna**: Dashboard com sidebar, Bootstrap 5 e Plotly.js
-- **API REST**: Backend FastAPI com endpoints para integração
+Dados de 2024/2025/2026, arquivos originais, matrículas, pesos, receitas, usuários, cenários, resultados e exportações ficam no **mesmo PostgreSQL**. A aplicação e os testes exigem PostgreSQL. Não há banco SQLite local nem consulta automática a planilhas, RDA, PKL ou Parquet durante a execução.
 
-## Requisitos
+Os arquivos continuam no Git como fontes preservadas para importação e auditoria. O comando `import-data` grava também seus bytes integrais no PostgreSQL. Após a importação, as simulações consultam o banco.
 
-- Python 3.10+
-- Pacotes listados em `requirements.txt`
+## Executar
 
-## Instalação
+Configure `.env` a partir de `.env.example`, com senha do PostgreSQL e segredo JWT. Depois:
 
 ```bash
-cd simulador-fundeb-v2
-pip install -r requirements.txt
+docker compose up -d db
+docker compose build app
+docker compose run --rm app python -m app.cli migrate
+docker compose run --rm app python -m app.cli import-data --dry-run
+docker compose run --rm app python -m app.cli import-data
+docker compose run --rm app python -m app.cli verify-data
+# Apenas em instalação nova, sem usuários anteriores:
+docker compose run --rm app python -m app.cli create-admin
+docker compose up -d app
 ```
 
-## Execução
+A aplicação escuta em `127.0.0.1:8000`; configure o proxy HTTPS para o cookie seguro de produção. Em desenvolvimento HTTP local, use `FUNDEB_ENV=development` e `FUNDEB_COOKIE_SECURE=false`, mantendo PostgreSQL. Para execução Python direta, configure `FUNDEB_DATABASE_URL` com `postgresql+psycopg://…` ou as variáveis `FUNDEB_DB_HOST`, `FUNDEB_DB_NAME`, `FUNDEB_DB_USER` e `FUNDEB_DB_PASSWORD`. Não coloque senhas no Git.
+
+**Instalação existente:** siga [MIGRACAO.md](docs/MIGRACAO.md) antes de reiniciar o servidor. `import-users` lê o SQLite antigo de autenticação; `import-sqlite` transfere integralmente um eventual `fundeb.db` unificado para PostgreSQL vazio, incluindo os cálculos já salvos. SQLite é aceito somente como arquivo de origem da migração.
+
+## Organização
+
+- [Arquitetura e modelo de dados](docs/ARQUITETURA.md)
+- [Inventário, diferenças existentes e equivalência](docs/DADOS_E_COMPATIBILIDADE.md)
+- [Migração, captura, backup e retorno](docs/MIGRACAO.md)
+- [Documentação anterior preservada](docs/README_ANTERIOR.md) — referência histórica; execução atual segue este README.
+
+Os dados originais permanecem nos caminhos existentes e também são importados integralmente. `data/manifesto_arquivos.json` confere todos os arquivos. Novas versões não substituem bases antigas. Cenários, solicitações, resultados e exportações ficam no banco e podem ser consultados em **Histórico de simulações**.
+
+## Produção
+
+Há `Dockerfile`, `compose.yaml` e `.env.example`. Produção exige PostgreSQL, dados carregados do banco e segredo de autenticação configurado. O roteiro completo está em [MIGRACAO.md](docs/MIGRACAO.md). Criar a branch não implanta nem altera o servidor existente.
+
+## Verificação
 
 ```bash
-python main.py
+FUNDEB_TEST_DATABASE_URL='postgresql+psycopg://usuario:senha@localhost/fundeb_test' pytest -q
+ruff check app tests
 ```
 
-O aplicativo estará disponível em: **http://localhost:8000**
+Toda a integração contínua executa em PostgreSQL, importa as três bases e confronta resultados com o commit original `b34590c`. Os testes usam schemas próprios em banco de testes explicitamente configurado; verificam também a execução com a leitura dos arquivos originais bloqueada. Testes verificam o código idêntico do motor, todas as células das bases, cenários A/B/C/D, precisão, usuários/hashes, retenção após reinício, exportações e backup/restauração.
 
-Na primeira execução, se não houver usuários no banco, é criado um administrador inicial (veja [Autenticação](#autenticação)).
-
-## Autenticação
-
-Login por **CPF** e **senha**. Usuários são cadastrados somente por administradores (`/admin.html`).
-
-### Variáveis de ambiente
-
-| Variável | Descrição |
-|----------|-----------|
-| `FUNDEB_SECRET_KEY` | Segredo para JWT (obrigatório em produção) |
-| `FUNDEB_ADMIN_CPF` | CPF do admin inicial (somente se o banco estiver vazio) |
-| `FUNDEB_ADMIN_SENHA` | Senha do admin inicial (padrão dev: `admin123`) |
-| `FUNDEB_USERS_DB` | Caminho do SQLite (padrão: `data/usuarios.db`) |
-| `FUNDEB_TOKEN_HOURS` | Expiração do cookie em horas (padrão: 12) |
-
-### Permissões
-
-| Recurso | Admin | Usuário |
-|---------|-------|---------|
-| Simulador e consultas | Sim | Sim |
-| Ponderações — visualizar | Sim | Sim (somente leitura) |
-| Ponderações — editar | Sim | Não |
-| Simular com pesos customizados | Sim | Não (API usa pesos oficiais) |
-| Cadastro de usuários | Sim | Não |
-
-### Primeiro acesso (desenvolvimento)
-
-1. Suba o servidor: `python main.py`
-2. Acesse `http://localhost:8000/login.html`
-3. CPF padrão: `529.982.247-25` / senha: `admin123` (se o banco foi criado vazio)
-4. Altere a senha em **Usuários** após o primeiro login
-
-## Estrutura
-
-```
-simulador-fundeb-v2/
-├── main.py            # API FastAPI (backend)
-├── auth/              # Autenticação (SQLite, JWT, perfis admin/usuario)
-├── simulador.py       # Motor de simulação (lógica de cálculo)
-├── validacao.py       # Validação interna (RF-10) e comparação com dados oficiais (CA-05)
-├── requirements.txt   # Dependências Python
-├── data/              # Dados híbridos (xlsx + rda)
-│   ├── dados_unificados.xlsx   # Base principal de matrículas/receitas
-│   ├── pesos.rda               # Pesos por etapa (VAAF/VAAT)
-│   ├── complementar.rda        # NF, inabilitados VAAT, peso VAAR (fallback técnico)
-│   ├── matriculas.rda          # Fallback para etapas ausentes no xlsx
-│   ├── cenario_atual*.rda      # Cenários de comparação
-│   └── PonderadorNSE 2024.pdf  # NSE oficial por ente (extraído por IBGE)
-├── tests/
-│   └── test_requisitos.py  # Testes unitários RF, RN e CA
-├── static/
-│   ├── index.html     # Frontend HTML
-│   ├── css/
-│   │   └── styles.css
-│   └── js/
-│       └── app.js     # Lógica do frontend
-└── README.md
-```
-
-## Validação (RF-10, CA-05)
-
-Cada simulação retorna um objeto `validacao` com:
-
-- **valido**: `true` se todas as checagens passaram
-- **erros**: inconsistências que indicam falha
-- **avisos**: alertas não críticos
-- **checagens**: lista das verificações realizadas (soma recursos = total estadual, VAAF = recursos/matrículas, participações = 100%, etc.)
-
-Para comparar com dados oficiais do FUNDEB (CA-05), use a função `comparar_com_oficial()` em `validacao.py` passando um DataFrame com os dados publicados.
-
-## Política de fontes de dados
-
-- **Base principal**: `data/dados_unificados.xlsx`.
-- **NSE oficial**: `PonderadorNSE 2024.pdf` (carregado por IBGE).
-- **Complementos técnicos**: `complementar.rda` para `nf`, `inabilitados_vaat` e `peso_vaar`.
-- **Pesos por etapa**: `pesos.rda`.
-- **Fallback de etapas não presentes no xlsx**: `matriculas.rda`.
-
-## Testes
-
-```bash
-python -m pytest tests/ -v
-```
-
-Inclui testes para:
-- **CA-02**: Participação 1000/10000 = 10% e 1100/10100 ≈ 10,89%
-- **RN-03**: Alteração em um município redistribui todos os entes do estado
-- **RF-10**: Validação interna (soma recursos, VAAF, participações)
-- **Auth**: login, perfis, restrição de pesos customizados para usuário comum
-
-## API Endpoints
-
-Rotas `/api/*` (exceto login) exigem cookie de sessão (`fundeb_token`).
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/auth/login` | Login (público) |
-| POST | `/api/auth/logout` | Encerra sessão |
-| GET | `/api/auth/me` | Usuário autenticado |
-| GET/POST/PATCH/DELETE | `/api/admin/usuarios` | CRUD de usuários (admin) |
-| GET | `/api/estados` | Lista estados e regiões (2024) |
-| GET | `/api/municipios?uf=XX` | Lista municípios de uma UF |
-| GET | `/api/pesos` | Retorna fatores de ponderação |
-| GET | `/api/etapas` | Retorna nomes das etapas |
-| GET | `/api/municipio/{ibge}/matriculas` | Matrículas de um município |
-| POST | `/api/simular` | Executa simulação principal |
-| POST | `/api/simular/completo` | Simulação com todos os dados |
-| POST | `/api/simular/municipio` | Simulação municipal com ajuste de matrículas |
-
-Rotas equivalentes por exercício: `/api/2026/...` e `/api/2025/...` (2025: leitura; POST simular retorna 503).
-
-### Cenário nacional (várias redes, cenários A–D e exportações)
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/bases` | Bases do catálogo (`data/catalogo.json`) e situação de cada uma |
-| GET | `/api/bases/{base_id}` | Identificação, pendências e parâmetros de referência |
-| GET | `/api/bases/{base_id}/calibracao` | Comparação do cenário sem alterações com os valores oficiais por ente |
-| GET | `/api/entes?base_id=&uf=&tipo=` | Cadastro de entes com tipo de rede |
-| GET | `/api/entes/{ibge}/matriculas?base_id=` | Matrículas de uma rede |
-| POST | `/api/cenarios` | Calcula um cenário com ajustes em várias redes (A–D com hipótese de receita) |
-| GET | `/api/cenarios/{id}?recorte=` | Resultado já calculado, em outro recorte |
-| GET | `/api/cenarios/{id}/exportar?formato=pdf\|xlsx\|csv` | Exportação do cenário calculado |
-
-A aba **Cenário Nacional** usa essas rotas. A situação de cada item do plano de implementação está em
-`docs/SITUACAO_PLANO.md`; o inventário e a calibração das bases estão em `docs/INVENTARIO_BASE.md`
-(gerado por `python scripts/inventario_base.py > docs/INVENTARIO_BASE.md`). Ao substituir um arquivo em
-`20252026/`, atualize o hash correspondente em `data/catalogo.json`; caso contrário, a base é recusada.
-
-## Créditos
-
-Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho.
-Motor de simulação baseado no pacote R [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb2).
+Os dados continuam com suas pendências metodológicas de origem. A reorganização não muda fórmulas, padrões de complementação nem resultados para tentar corrigir essas pendências.

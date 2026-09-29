@@ -1,0 +1,17 @@
+# Runtime. requirements.txt locks the versions used by the regression baseline.
+fastapi
+uvicorn[standard]
+pandas
+openpyxl
+numpy
+pyreadr
+pypdf
+pydantic
+odfpy
+pyarrow
+bcrypt
+python-jose[cryptography]
+reportlab
+SQLAlchemy
+alembic
+psycopg[binary]

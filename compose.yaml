@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fundeb}
+      POSTGRES_USER: ${POSTGRES_USER:-fundeb}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+    volumes:
+      - fundeb_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  app:
+    build: .
+    environment:
+      FUNDEB_DB_HOST: db
+      FUNDEB_DB_NAME: ${POSTGRES_DB:-fundeb}
+      FUNDEB_DB_USER: ${POSTGRES_USER:-fundeb}
+      FUNDEB_DB_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+      FUNDEB_ENV: ${FUNDEB_ENV:-production}
+      FUNDEB_DATA_SOURCE: database
+      FUNDEB_SECRET_KEY: ${FUNDEB_SECRET_KEY:?Configure FUNDEB_SECRET_KEY}
+      FUNDEB_ALLOWED_ORIGINS: ${FUNDEB_ALLOWED_ORIGINS:-}
+      FUNDEB_COOKIE_SECURE: ${FUNDEB_COOKIE_SECURE:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+volumes:
+  fundeb_postgres:
