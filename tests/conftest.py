@@ -61,3 +61,8 @@ def base_sintetica():
 @pytest.fixture(scope="session")
 def base_real():
     return carregar_base("fundeb-2026")
+
+
+@pytest.fixture(autouse=True)
+def isolated_application_database(tmp_path, monkeypatch):
+    monkeypatch.setenv("FUNDEB_DATABASE_URL", "sqlite:///" + str(tmp_path / "application.db"))

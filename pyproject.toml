@@ -1,0 +1,16 @@
+[project]
+name = "simulador-fundeb"
+version = "2.1.0"
+requires-python = ">=3.12,<3.13"
+description = "Simulações FUNDEB com bases versionadas e resultados preservados"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["app/domain/calculo/motor.py", "app/domain/calculo/validacao.py", "app/ingestion/legacy_2024.py"]
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]

@@ -1,0 +1,47 @@
+name: Preservação de dados e cálculos
+on:
+  push:
+    branches: [main, maio2026, 'refactor/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: fundeb
+          POSTGRES_PASSWORD: fundeb_test_only
+          POSTGRES_DB: fundeb_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U fundeb -d fundeb_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check app tests/test_persistence.py tests/test_regression_baseline.py tests/test_persistence_api.py
+      - name: Contratos existentes, migração e equivalência completa em SQLite
+        run: pytest -q
+      - name: Persistência real em PostgreSQL
+        env:
+          FUNDEB_TEST_DATABASE_URL: postgresql+psycopg://fundeb:fundeb_test_only@localhost:5432/fundeb_test
+        run: pytest tests/test_persistence.py -q
+      - name: Importação completa e cálculo a partir do PostgreSQL
+        env:
+          FUNDEB_DATABASE_URL: postgresql+psycopg://fundeb:fundeb_test_only@localhost:5432/fundeb_test
+          FUNDEB_IMPORTED_TEST_URL: postgresql+psycopg://fundeb:fundeb_test_only@localhost:5432/fundeb_test
+        run: |
+          python -m app.cli migrate
+          python -m app.cli import-data
+          pytest tests/test_regression_baseline.py -q
+      - name: Sintaxe do JavaScript
+        run: for file in static/js/*.js; do node --check "$file"; done
