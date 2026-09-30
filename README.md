@@ -31,6 +31,7 @@ A aplicação escuta em `127.0.0.1:8000`; configure o proxy HTTPS para o cookie 
 ## Organização
 
 - [Arquitetura e modelo de dados](docs/ARQUITETURA.md)
+- [Estado do PostgreSQL local](docs/BANCO.md)
 - [Inventário, diferenças existentes e equivalência](docs/DADOS_E_COMPATIBILIDADE.md)
 - [Migração, captura, backup e retorno](docs/MIGRACAO.md)
 - [Documentação anterior preservada](docs/README_ANTERIOR.md) — referência histórica; execução atual segue este README.
