@@ -8,7 +8,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-  <link href="/static/css/styles.css" rel="stylesheet">
+  <link href="/static/css/styles.css?v=chat4" rel="stylesheet">
 </head>
 <body>
 
@@ -18,29 +18,31 @@
     <h4><i class="fas fa-graduation-cap"></i> FUNDEB</h4>
     <span class="sidebar-subtitle">Simulador de Fatores de Ponderação v2</span>
   </div>
+  <div class="sidebar-exercicio">
+    <label for="exercicio-ativo">Exercício</label>
+    <select id="exercicio-ativo" aria-label="Exercício"></select>
+  </div>
   <ul class="sidebar-nav">
     <li class="active" data-tab="inicio">
       <i class="fas fa-home"></i> <span>Página Principal</span>
     </li>
-    <li class="sidebar-section-label"><span>Comparação nacional</span></li>
-    <li data-tab="cenario">
-      <i class="fas fa-layer-group"></i> <span>Cenário Nacional</span>
-    </li>
-    <li class="sidebar-section-label"><span>FUNDEB 2024</span></li>
     <li data-tab="simulacao">
-      <i class="fas fa-calculator"></i> <span>Simulação Principal</span>
+      <i class="fas fa-calculator"></i> <span>Simulação</span>
     </li>
     <li data-tab="pesos">
       <i class="fas fa-balance-scale"></i> <span>Ponderações</span>
     </li>
     <li data-tab="vaar">
-      <i class="fas fa-trophy"></i> <span>Simulação VAAR</span>
+      <i class="fas fa-trophy"></i> <span>VAAR</span>
     </li>
     <li data-tab="municipio">
-      <i class="fas fa-map-marker-alt"></i> <span>Simulação Municipal</span>
+      <i class="fas fa-map-marker-alt"></i> <span>Município</span>
     </li>
-    <li data-tab="regional">
+    <li class="d-none" data-tab="regional">
       <i class="fas fa-map"></i> <span>Análise Regional</span>
+    </li>
+    <li data-tab="cenario">
+      <i class="fas fa-layer-group"></i> <span>Cenário Nacional</span>
     </li>
     <li data-tab="documentacao">
       <i class="fas fa-book"></i> <span>Documentação</span>
@@ -53,8 +55,7 @@
   <div id="sidebar-user" class="sidebar-user px-3 py-2 d-none"></div>
   <div class="sidebar-footer">
     <a href="#" id="btn-logout" class="sidebar-logout"><i class="fas fa-sign-out-alt"></i> Sair</a><br>
-    <small><i class="fas fa-gavel"></i> Lei n. 14.113/2020</small><br>
-    <small>Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho</small>
+    <small>Desenvolvido pelo IFCE, Labvicia</small>
   </div>
 </nav>
 
@@ -613,7 +614,7 @@
               <li>Pesos: <a href="https://www.gov.br/mec/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-intergovernamental-fundeb/Resoluo4_30102023.pdf">Resolução MEC n. 04/2023</a></li>
             </ul>
             <h3><i class="fas fa-info-circle"></i> Créditos</h3>
-            <p>Desenvolvido pelo IFCE, prof. João Cláudio Nunes Carvalho.</p>
+            <p>Desenvolvido pelo IFCE, Labvicia.</p>
           </div>
         </div>
       </div>
@@ -629,5 +630,6 @@
 <script src="/static/js/explicacao.js"></script>
 <script src="/static/js/charts3d.js"></script>
 <script src="/static/js/cenarios.js"></script>
+<script src="/static/js/chat.js?v=5"></script>
 </body>
 </html>

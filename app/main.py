@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from app.auth.database import init_db, seed_admin_if_empty
+from app.api.chat import router as chat_router
 from app.auth.routes import router as auth_router
 from app.ingestion.fundeb_dataset import ESTADOS_REGIOES, carregar_dataset, listar_entes_por_uf
 from app.auth.deps import get_current_user
@@ -22,6 +23,7 @@ from app.services.calibracao import comparar_com_oficial
 from app.services.cenarios import ErroCenario, executar_cenario, repositorio
 from app.services.comparacao import ErroRecorte, montar_comparacao
 from app.services.exportacao import EXPORTADORES, nome_arquivo
+from app.ui.index_page import render_index_bytes
 from app.api.legacy import (
     SimulacaoRequest,
     SimulacaoMunicipioRequest,
@@ -59,6 +61,7 @@ app.add_middleware(
 
 app.add_middleware(PersistLegacyMiddleware)
 app.include_router(auth_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 
 # ---------------------------------------------------------------------------
@@ -389,7 +392,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 def serve_index():
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    return Response(content=render_index_bytes(), media_type="text/html")
 
 
 @app.get("/login.html")

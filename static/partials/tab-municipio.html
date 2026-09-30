@@ -1,0 +1,47 @@
+<!-- ====== TAB: Simulação Municipal ====== -->
+  <div id="tab-municipio" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-map-marker-alt"></i> Seleção do Município</div>
+          <div class="card-body">
+            <div class="mb-3"><label class="form-label">Estado</label><select class="form-select" id="sel-mun-uf"></select></div>
+            <div class="mb-3"><label class="form-label">Município</label><select class="form-select" id="sel-mun-cidade"></select></div>
+            <hr style="border-color:var(--warm-sand)">
+            <h6 class="section-title"><i class="fas fa-plus-circle"></i> Parametros Gerais</h6>
+            <div class="mb-2"><label class="form-label small">Complementação VAAF (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaaf" value="24153287047"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAT (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaat" value="18114965285"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAR (R$)</label><input type="number" class="form-control form-control-sm" id="inp-mun-vaar" value="5400000000"></div>
+            <button id="btn-simular-mun" class="btn btn-primary btn-lg w-100 mt-3" disabled><i class="fas fa-calculator"></i> Simular</button>
+          </div>
+        </div>
+        <div class="card card-input mt-3">
+          <div class="card-header"><i class="fas fa-edit"></i> Ajustar Matrículas</div>
+          <div class="card-body" id="matriculas-container"><p style="color:#6b6050;font-size:.85rem">Selecione um município para visualizar e ajustar as matrículas.</p></div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="loading-municipio" class="text-center py-5 d-none"><div class="spinner-border" role="status"></div><p class="mt-2" style="color:var(--deep-cocoa)">Simulando impacto municipal…</p></div>
+        <div id="resultados-municipio">
+          <div class="alert alert-info"><i class="fas fa-info-circle"></i> Selecione um estado e município, ajuste as matrículas se desejar, e clique em <strong>Simular</strong> para ver o impacto nos valores de VAAF, VAAT e VAAR.</div>
+          <div class="card mb-4" id="mun-explicacao-card" style="display:none">
+            <div class="card-header bg-dark text-white"><i class="fas fa-lightbulb"></i> Análise e Explicação dos Resultados</div>
+            <div class="card-body" id="mun-explicacao"></div>
+          </div>
+          <div class="row g-3 mb-4" id="mun-comparacao" style="display:none">
+            <div class="col-md-6"><div class="card"><div class="card-header bg-secondary text-white"><i class="fas fa-database"></i> Cenario Original</div><div class="card-body" id="mun-original"></div></div></div>
+            <div class="col-md-6"><div class="card"><div class="card-header bg-primary text-white"><i class="fas fa-edit"></i> Cenario Ajustado</div><div class="card-body" id="mun-ajustado"></div></div></div>
+          </div>
+          <div class="card mb-4" id="mun-chart-card" style="display:none"><div class="card-body"><div id="chart-mun-comparacao"></div></div></div>
+          <div id="mun-3d-section" style="display:none">
+            <h4 style="color:var(--deep-cocoa);margin:28px 0 16px;font-weight:700"><i class="fas fa-cube" style="color:var(--mocha-mousse)"></i> Análises 3D — Municipal</h4>
+            <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-mun-comparacao"></div></div></div>
+            <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-mun-estado"></div></div></div>
+          </div>
+          <div class="card mb-4" id="mun-impacto-card" style="display:none"><div class="card-header"><i class="fas fa-users"></i> Impacto nos entes do estado</div><div class="card-body table-responsive"><table id="tbl-mun-impacto" class="table table-sm table-striped"></table></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  

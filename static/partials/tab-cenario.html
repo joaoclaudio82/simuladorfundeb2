@@ -1,0 +1,112 @@
+<!-- ====== TAB: Cenário Nacional (edição conjunta de redes) ====== -->
+  <div id="tab-cenario" class="tab-content">
+    <div class="alert alert-warning small"><i class="fas fa-exclamation-triangle"></i> <span id="cen-aviso"></span></div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-database"></i> Base ativa</div>
+          <div class="card-body">
+            <label class="form-label small" for="cen-base">Exercício</label>
+            <select class="form-select form-select-sm mb-2" id="cen-base"></select>
+            <div id="cen-base-info"><p class="small text-muted">Carregando…</p></div>
+          </div>
+        </div>
+        <div class="card card-input mt-3">
+          <div class="card-header"><i class="fas fa-edit"></i> Editar matrículas</div>
+          <div class="card-body">
+            <div class="mb-2"><label class="form-label">UF</label><select class="form-select" id="cen-uf"></select></div>
+            <div class="mb-3"><label class="form-label">Ente federado</label><select class="form-select" id="cen-rede"><option value="">Selecione a UF</option></select></div>
+            <div class="input-group input-group-sm mb-2">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" id="cen-busca" placeholder="Filtrar categorias (ex.: médio integral)">
+            </div>
+            <div class="form-check small mb-2"><input class="form-check-input" type="checkbox" id="cen-todas"><label class="form-check-label" for="cen-todas">Mostrar também categorias sem matrículas</label></div>
+            <div id="cen-form"><p class="small text-muted">Selecione uma UF e um ente federado.</p></div>
+            <hr style="border-color:var(--warm-sand)">
+            <h6 class="section-title"><i class="fas fa-exchange-alt"></i> Converter entre categorias</h6>
+            <p class="small text-muted">Move matrículas da rede selecionada de uma categoria para outra, preservando o total.</p>
+            <div class="mb-2"><label class="form-label small">De</label><select class="form-select form-select-sm" id="cen-conv-origem"></select></div>
+            <div class="mb-2"><label class="form-label small">Para</label><select class="form-select form-select-sm" id="cen-conv-destino"></select></div>
+            <div class="input-group input-group-sm">
+              <input type="number" class="form-control" id="cen-conv-valor" min="0" step="any" placeholder="Quantidade">
+              <button class="btn btn-outline-secondary" id="cen-btn-converter"><i class="fas fa-plus"></i> Adicionar</button>
+            </div>
+          </div>
+        </div>
+        <div class="card card-input mt-3" id="cen-parametros">
+          <div class="card-header"><i class="fas fa-cog"></i> Parâmetros</div>
+          <div class="card-body">
+            <p class="small text-muted">Valores iniciais: complementações da planilha de receita do exercício.</p>
+            <div class="mb-2"><label class="form-label small">Complementação VAAF (R$)</label><input type="number" class="form-control form-control-sm" id="cen-vaaf"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAT (R$)</label><input type="number" class="form-control form-control-sm" id="cen-vaat"></div>
+            <div class="mb-2"><label class="form-label small">Complementação VAAR (R$)</label><input type="number" class="form-control form-control-sm" id="cen-vaar"></div>
+            <p class="small text-muted mb-0">NSE e DREC (ou NF, em 2024) seguem as tabelas oficiais da base.</p>
+            <h6 class="section-title mt-3"><i class="fas fa-coins"></i> Hipótese de receita</h6>
+            <select class="form-select form-select-sm mb-2" id="cen-receita-tipo">
+              <option value="constante">Receita constante (cenários A e B)</option>
+              <option value="crescimento">Crescimento informado (cenários A–D)</option>
+            </select>
+            <div id="cen-receita-opcoes" style="display:none">
+              <div class="mb-2"><label class="form-label small">Taxa nominal (%)</label><input type="number" step="0.01" class="form-control form-control-sm" id="cen-taxa" value="0"></div>
+              <div class="mb-2 small">
+                <div class="form-check"><input class="form-check-input" type="checkbox" id="cen-rub-vaaf" data-cen-rubrica="recursos_vaaf" checked><label class="form-check-label" for="cen-rub-vaaf">Receitas próprias do Fundeb (recursos_vaaf)</label></div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" id="cen-rub-vaat" data-cen-rubrica="recursos_vaat" checked><label class="form-check-label" for="cen-rub-vaat">Receitas para o VAAT (recursos_vaat)</label></div>
+              </div>
+              <div class="mb-2"><label class="form-label small">Complementações da União</label>
+                <select class="form-select form-select-sm" id="cen-complementacoes">
+                  <option value="fixas">Permanecem fixas</option>
+                  <option value="acompanham_taxa">Acompanham a taxa</option>
+                </select></div>
+              <div class="mb-2"><label class="form-label small">Fonte da taxa</label><input type="text" class="form-control form-control-sm" id="cen-fonte-taxa" placeholder="Ex.: hipótese do usuário"></div>
+            </div>
+            <button id="cen-btn-calcular" class="btn btn-primary btn-lg w-100 mt-3"><i class="fas fa-calculator"></i> Calcular cenário</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list"></i> Alterações pendentes</span>
+            <button class="btn btn-sm btn-outline-danger" id="cen-btn-limpar"><i class="fas fa-trash"></i> Limpar</button>
+          </div>
+          <div class="card-body">
+            <p class="small mb-2" id="cen-pendentes-resumo"></p>
+            <div class="table-responsive"><table class="table table-sm"><thead><tr><th>UF</th><th>Rede</th><th>Operação</th><th>Categoria</th><th class="text-end">Original</th><th class="text-end">Novo</th><th></th></tr></thead><tbody id="cen-pendentes-corpo"></tbody></table></div>
+            <div id="cen-desatualizado" class="alert alert-warning small py-2 mb-0 d-none"><i class="fas fa-sync"></i> Os controles foram alterados após o último cálculo. Os resultados e as exportações abaixo referem-se ao cenário calculado anteriormente.</div>
+          </div>
+        </div>
+        <div id="cen-loading" class="text-center py-4 d-none"><div class="spinner-border" role="status"></div><p class="mt-2">Calculando o cenário nacional…</p></div>
+        <div id="cen-resultados" class="d-none">
+          <div class="card mb-4">
+            <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+              <span><i class="fas fa-balance-scale"></i> Resultado</span>
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select class="form-select form-select-sm w-auto" id="cen-recorte">
+                  <option value="estaduais_df">Todas as redes estaduais e DF</option>
+                  <option value="selecionadas">Redes com ajuste</option>
+                  <option value="propag">Grupo Propag</option>
+                  <option value="universo">Universo completo</option>
+                </select>
+                <span id="cen-exportar" class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-secondary" data-cen-export="pdf" disabled><i class="fas fa-file-pdf"></i> PDF</button>
+                  <button class="btn btn-outline-secondary" data-cen-export="xlsx" disabled><i class="fas fa-file-excel"></i> Excel</button>
+                  <button class="btn btn-outline-secondary" data-cen-export="csv" disabled><i class="fas fa-file-csv"></i> CSV</button>
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="small" id="cen-ident"></p>
+              <div class="table-responsive"><table class="table table-sm table-striped" id="cen-tabela-totais"></table></div>
+              <p class="small text-muted mb-0" id="cen-universo"></p>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-table"></i> Comparativo por rede — referência (A) × simulado (B)</div>
+            <div class="card-body table-responsive"><table class="table table-sm table-striped cen-tabela" id="cen-tabela-comparativa"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  

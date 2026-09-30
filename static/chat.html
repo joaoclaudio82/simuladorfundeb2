@@ -1,0 +1,42 @@
+<button type="button" id="chat-abrir" aria-controls="chat-painel" aria-expanded="false">
+  <i class="fas fa-comments" aria-hidden="true"></i>
+  <span>Assistente</span>
+</button>
+<aside id="chat-painel" hidden>
+  <header class="chat-cabeca">
+    <div class="chat-avatar" aria-hidden="true"><i class="fas fa-comments"></i></div>
+    <div class="chat-identidade">
+      <strong>Assistente FUNDEB</strong>
+      <p><span class="chat-ponto" aria-hidden="true"></span> Consulta os dados já gravados</p>
+    </div>
+    <button type="button" id="chat-fechar" aria-label="Fechar assistente"><i class="fas fa-times" aria-hidden="true"></i></button>
+  </header>
+  <div id="chat-mensagens" aria-live="polite">
+    <div id="chat-boas-vindas">
+      <div class="chat-avatar" aria-hidden="true"><i class="fas fa-comments"></i></div>
+      <div class="chat-corpo">
+        <p>Olá. Posso explicar VAAF, VAAT e VAAR, consultar um município ou comparar simulações já gravadas.</p>
+        <div class="chat-sugestoes">
+          <button type="button" data-sugestao="O que é o VAAF?">O que é o VAAF?</button>
+          <button type="button" data-sugestao="Quais bases de exercício estão disponíveis?">Quais bases estão disponíveis?</button>
+          <button type="button" data-sugestao="Qual a diferença entre um valor oficial importado e um resultado simulado?">Oficial ou simulado?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <form id="chat-form">
+    <button type="button" id="chat-contexto-abrir" aria-expanded="false" aria-controls="chat-contexto">
+      <i class="fas fa-sliders-h" aria-hidden="true"></i> Contexto
+    </button>
+    <div id="chat-contexto" class="chat-contexto" hidden>
+      <label>Exercício<input name="ano" inputmode="numeric" maxlength="4" placeholder="2026"></label>
+      <label>Município<input name="municipio" maxlength="80" placeholder="Fortaleza"></label>
+      <label>Simulação salva<input name="cenario" maxlength="64" placeholder="em branco" title="Código de uma simulação que você já gravou. Para os dados oficiais, deixe vazio."></label>
+      <p class="chat-contexto-ajuda">Simulação salva é o código de um cálculo que você já gravou. Para perguntar sobre os dados oficiais, deixe esse campo vazio.</p>
+    </div>
+    <div class="chat-composer">
+      <textarea name="mensagem" required maxlength="2000" rows="1" placeholder="Pergunte sobre o FUNDEB"></textarea>
+      <button type="submit" aria-label="Enviar"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+    </div>
+  </form>
+</aside>

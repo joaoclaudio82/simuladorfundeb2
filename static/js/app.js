@@ -61,17 +61,97 @@ function openSidebarMobile() {
   document.body.style.overflow = 'hidden';
 }
 
-function activateTab(tabId) {
+const TAREFAS_DO_EXERCICIO = ['simulacao', 'pesos', 'vaar', 'municipio', 'regional'];
+const STORAGE_EXERCICIO = 'fundeb-exercicio';
+
+function anoExercicioAtivo() {
+  const sel = document.getElementById('exercicio-ativo');
+  const escolhido = Number(sel && sel.value);
+  if (escolhido) return escolhido;
+  const salvo = Number(sessionStorage.getItem(STORAGE_EXERCICIO));
+  return salvo || 2026;
+}
+
+function painelDaTarefa(tarefa, ano) {
+  if (!TAREFAS_DO_EXERCICIO.includes(tarefa)) return tarefa;
+  if (tarefa === 'regional') return ano === 2024 ? 'regional' : null;
+  return ano === 2024 ? tarefa : `${tarefa}-${ano}`;
+}
+
+function atualizarRegional(ano) {
+  const li = document.querySelector('.sidebar-nav li[data-tab="regional"]');
+  if (li) li.classList.toggle('d-none', ano !== 2024);
+}
+
+function activateTab(tabId, tarefa) {
   if (!tabId) return false;
   const panel = document.getElementById(`tab-${tabId}`);
   if (!panel) return false;
+  const marca = tarefa || tabId;
   $$('.sidebar-nav li[data-tab]').forEach((l) => {
-    l.classList.toggle('active', l.dataset.tab === tabId);
+    l.classList.toggle('active', l.dataset.tab === marca);
   });
   $$('.tab-content').forEach((t) => t.classList.remove('active'));
   panel.classList.add('active');
   window.scrollTo(0, 0);
   return true;
+}
+
+function activateTask(tarefa) {
+  const ano = anoExercicioAtivo();
+  let destino = tarefa;
+  let painel = painelDaTarefa(destino, ano);
+  if (!painel) {
+    destino = 'simulacao';
+    painel = painelDaTarefa(destino, ano);
+  }
+  return activateTab(painel, destino);
+}
+
+async function initExercicio() {
+  const sel = document.getElementById('exercicio-ativo');
+  if (!sel || sel.dataset.ready === '1') return;
+  let bases = [];
+  try {
+    const dados = await apiFetch('/api/bases');
+    bases = (dados.bases || []).filter((b) => b.ano_exercicio);
+  } catch (e) {
+    console.error('Falha ao listar exercícios:', e);
+    bases = [2026, 2025, 2024].map((ano) => ({
+      ano_exercicio: ano,
+      situacao: '',
+      padrao: ano === 2026,
+    }));
+  }
+  bases.sort((a, b) => b.ano_exercicio - a.ano_exercicio);
+  sel.replaceChildren();
+  bases.forEach((b) => {
+    const opt = document.createElement('option');
+    opt.value = String(b.ano_exercicio);
+    opt.textContent = String(b.ano_exercicio);
+    sel.appendChild(opt);
+  });
+  const salvo = sessionStorage.getItem(STORAGE_EXERCICIO);
+  const padrao = bases.find((b) => b.padrao);
+  const preferido = salvo || (padrao ? String(padrao.ano_exercicio) : sel.options[0] && sel.options[0].value);
+  if (preferido && [...sel.options].some((o) => o.value === String(preferido))) {
+    sel.value = String(preferido);
+  }
+  sessionStorage.setItem(STORAGE_EXERCICIO, sel.value);
+  atualizarRegional(anoExercicioAtivo());
+  sel.dataset.ready = '1';
+  sel.addEventListener('change', () => {
+    sessionStorage.setItem(STORAGE_EXERCICIO, sel.value);
+    const ano = anoExercicioAtivo();
+    atualizarRegional(ano);
+    const ativa = document.querySelector('.sidebar-nav li.active[data-tab]');
+    const tarefa = ativa ? ativa.dataset.tab : null;
+    if (tarefa === 'regional' && ano !== 2024) {
+      activateTask('simulacao');
+      return;
+    }
+    if (tarefa && TAREFAS_DO_EXERCICIO.includes(tarefa)) activateTask(tarefa);
+  });
 }
 
 function initNavigation() {
@@ -84,7 +164,7 @@ function initNavigation() {
     sidebarNav.addEventListener('click', (e) => {
       const li = e.target.closest('li[data-tab]');
       if (!li) return;
-      activateTab(li.dataset.tab);
+      activateTask(li.dataset.tab);
       if (isMobile()) closeSidebarMobile();
     });
   }
@@ -123,7 +203,7 @@ function initNavigation() {
     const target = e.target.closest('[data-tab]');
     if (target && !target.closest('.sidebar-nav')) {
       e.preventDefault();
-      activateTab(target.dataset.tab);
+      activateTask(target.dataset.tab);
       if (isMobile()) closeSidebarMobile();
     }
   });
@@ -1018,6 +1098,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     await guardAuth();
+    await initExercicio();
     await initData();
     // Pré-carrega simulação padrão para análise regional (cenário oficial / parâmetros iniciais)
     await garantirDadosRegional().catch((e) => {

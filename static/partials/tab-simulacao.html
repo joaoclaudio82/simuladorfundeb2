@@ -1,0 +1,82 @@
+<!-- ====== TAB: Simulacao Principal ====== -->
+  <div id="tab-simulacao" class="tab-content">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-input">
+          <div class="card-header"><i class="fas fa-cog"></i> Parâmetros da Simulação</div>
+          <div class="card-body">
+            <h6 class="section-title"><i class="fas fa-plus-circle"></i> Complementação da União</h6>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAF (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaaf" value="24153287047" step="1000000">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAT (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaat" value="18114965285" step="1000000">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Montante VAAR (R$)</label>
+              <input type="number" class="form-control" id="inp-comp-vaar" value="0" step="1000000">
+            </div>
+            <h6 class="section-title mt-4"><i class="fas fa-balance-scale"></i> Fatores de Ponderação</h6>
+            <div class="mb-3">
+              <label class="form-label">Ponderador NSE</label>
+              <input type="text" class="form-control" value="Tabela anual oficial por rede/ente (fixo, sem edição)" disabled>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fator Recursos Vinculados maximo: <strong id="lbl-nf">1.00</strong></label>
+              <input type="range" class="form-range" id="inp-nf" min="1" max="4" step="0.05" value="1">
+            </div>
+            <button id="btn-simular" class="btn btn-primary btn-lg w-100 mt-3">
+              <i class="fas fa-calculator"></i> Simular
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="loading-simulacao" class="text-center py-5 d-none">
+          <div class="spinner-border" role="status"></div>
+          <p class="mt-2" style="color:var(--deep-cocoa)">Executando simulação...</p>
+        </div>
+        <div id="resultados-simulacao">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="info-box info-box-orange"><div class="info-box-icon"><i class="fas fa-chart-line"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Mínimo Simulado</span><span class="info-box-value" id="ib-vaat-sim">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-purple"><div class="info-box-icon"><i class="fas fa-chart-line"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Mínimo Atual</span><span class="info-box-value" id="ib-vaat-atual">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-purple"><div class="info-box-icon"><i class="fas fa-percentage"></i></div><div class="info-box-content"><span class="info-box-label">VAAT Diferença</span><span class="info-box-value" id="ib-vaat-dif">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-chart-bar"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Mínimo Simulado</span><span class="info-box-value" id="ib-vaaf-sim">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-chart-bar"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Mínimo Atual</span><span class="info-box-value" id="ib-vaaf-atual">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-green"><div class="info-box-icon"><i class="fas fa-percentage"></i></div><div class="info-box-content"><span class="info-box-label">VAAF Diferença</span><span class="info-box-value" id="ib-vaaf-dif">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-blue"><div class="info-box-icon"><i class="fas fa-building"></i></div><div class="info-box-content"><span class="info-box-label">Complementação Municípios</span><span class="info-box-value" id="ib-compl-mun">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-cyan"><div class="info-box-icon"><i class="fas fa-landmark"></i></div><div class="info-box-content"><span class="info-box-label">Complementação Estados</span><span class="info-box-value" id="ib-compl-est">&mdash;</span></div></div></div>
+            <div class="col-md-4"><div class="info-box info-box-cyan"><div class="info-box-icon"><i class="fas fa-users"></i></div><div class="info-box-content"><span class="info-box-label">% Entes Complementados</span><span class="info-box-value" id="ib-perc-compl">&mdash;</span></div></div></div>
+          </div>
+          <div id="validacao-card" class="card mb-4 validacao-card d-none">
+            <div class="card-header validacao-header">
+              <i class="fas fa-check-circle validacao-icon"></i>
+              <span>Validação Interna (RF-10)</span>
+              <span id="validacao-status" class="validacao-status"></span>
+            </div>
+            <div class="card-body">
+              <div id="validacao-erros" class="validacao-lista validacao-erros"></div>
+              <div id="validacao-avisos" class="validacao-lista validacao-avisos"></div>
+              <div id="validacao-checagens" class="validacao-lista validacao-checagens"></div>
+            </div>
+          </div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaaf-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-vaat-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-chart-bar"></i> Entes com resultado positivo e negativo — VAAF</div><div class="card-body table-responsive"><table id="tbl-vp-vaaf" class="table table-sm table-striped"></table></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-chart-bar"></i> Entes com resultado positivo e negativo — VAAT</div><div class="card-body table-responsive"><table id="tbl-vp-vaat" class="table table-sm table-striped"></table></div></div>
+          <div class="card mb-4"><div class="card-header"><i class="fas fa-database"></i> Medidas Resumo</div><div class="card-body table-responsive"><table id="tbl-resumo" class="table table-sm table-striped"></table></div></div>
+          <h4 style="color:var(--deep-cocoa);margin:28px 0 16px;font-weight:700"><i class="fas fa-cube" style="color:var(--mocha-mousse)"></i> Análises 3D</h4>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-cubo-ufs"></div></div></div>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-barras-compl"></div></div></div>
+          <div class="card mb-4 chart3d-container"><div class="card-body"><div id="chart3d-superficie-diff"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-diff-uf"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-compl-modalidade"></div></div></div>
+          <div class="card mb-4"><div class="card-body"><div id="chart-compl-destino"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  

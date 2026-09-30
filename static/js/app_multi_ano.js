@@ -250,54 +250,9 @@ let navMultiAnoInjected = false;
 
 function injectNavAndTabs() {
   if (navMultiAnoInjected) return;
-  const nav = document.querySelector('.sidebar-nav');
   const main = document.getElementById('main-content');
-  if (!nav || !main) return;
+  if (!main) return;
   navMultiAnoInjected = true;
-
-  const items = [
-    { y: 2026, label: 'Simulação 2026', tab: 'simulacao-2026', icon: 'fa-calculator' },
-    { y: 2026, label: 'Ponderações 2026', tab: 'pesos-2026', icon: 'fa-balance-scale' },
-    { y: 2026, label: 'VAAR 2026', tab: 'vaar-2026', icon: 'fa-trophy' },
-    { y: 2026, label: 'Município 2026', tab: 'municipio-2026', icon: 'fa-map-marker-alt' },
-    { y: 2025, label: 'Simulação 2025', tab: 'simulacao-2025', icon: 'fa-calculator', navId: 'nav-simulacao-2025' },
-    { y: 2025, label: 'Ponderações 2025', tab: 'pesos-2025', icon: 'fa-balance-scale' },
-    { y: 2025, label: 'VAAR 2025', tab: 'vaar-2025', icon: 'fa-trophy' },
-    { y: 2025, label: 'Município 2025', tab: 'municipio-2025', icon: 'fa-map-marker-alt' },
-  ];
-
-  const anchor =
-    nav.querySelector('li[data-tab="documentacao"]') ||
-    nav.querySelector('#nav-admin-usuarios');
-
-  const frag = document.createDocumentFragment();
-
-  const addSection = (text) => {
-    const li = document.createElement('li');
-    li.className = 'sidebar-section-label';
-    li.innerHTML = `<span>${text}</span>`;
-    frag.appendChild(li);
-  };
-
-  addSection('FUNDEB 2026');
-  items.filter((it) => it.y === 2026).forEach((it) => {
-    const li = document.createElement('li');
-    li.dataset.tab = it.tab;
-    li.innerHTML = `<i class="fas ${it.icon}"></i> <span>${it.label}</span>`;
-    frag.appendChild(li);
-  });
-
-  addSection('FUNDEB 2025');
-  items.filter((it) => it.y === 2025).forEach((it) => {
-    const li = document.createElement('li');
-    li.dataset.tab = it.tab;
-    if (it.navId) li.id = it.navId;
-    li.innerHTML = `<i class="fas ${it.icon}"></i> <span>${it.label}</span>`;
-    frag.appendChild(li);
-  });
-
-  if (anchor) nav.insertBefore(frag, anchor);
-  else nav.appendChild(frag);
 
   if (!document.getElementById('multi-ano-status')) {
     main.insertAdjacentHTML(
@@ -376,13 +331,6 @@ function aplicarEstadoAno(ano) {
   if (!meta) return;
   const habilitado = meta.simulacao_habilitada !== false;
   setTabHabilitado(ano, habilitado, meta.mensagem_bloqueio);
-
-  const navSim = document.getElementById(`nav-simulacao-${ano}`);
-  if (navSim) {
-    const label = habilitado ? `Simulação ${ano}` : `Consulta ${ano}`;
-    const span = navSim.querySelector('span');
-    if (span) span.textContent = label;
-  }
 
   renderPesosAccordion(ano);
 }
