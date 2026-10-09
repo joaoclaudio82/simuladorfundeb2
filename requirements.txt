@@ -13,3 +13,6 @@ bcrypt
 python-jose[cryptography]
 httpx
 reportlab
+matplotlib
+seaborn
+markdown

@@ -1,0 +1,4 @@
+ano,n_entes,n_etapas,n_municipios_ce,modo_ponderador,complementacao_vaaf,complementacao_vaat,complementacao_vaar,fonte,n_cenarios,n_validos,n_invalidos,tempo_total_s,tempo_medio_s,erros_validacao
+2024,5595,41,184,nf,24153287047.0,18114965285.0,0.0,data/*.rda + PonderadorNSE 2024.pdf,4222,4222,0,47.0832138848491,0.011151874439803198,
+2025,5595,319,184,drec,26675375783.980003,24509321488.129997,5092263767.54,20252026/ planilhas oficiais + cache data/{ano}/,4222,4222,0,56.990114997606725,0.013498369255709788,
+2026,5596,319,184,drec,30124926956.489998,31631173304.309998,7531231739.120001,20252026/ planilhas oficiais + cache data/{ano}/,4222,4222,0,61.09069389128126,0.014469610111625121,

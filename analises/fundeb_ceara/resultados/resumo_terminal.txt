@@ -1,0 +1,75 @@
+ANO/DATASET ANALISADO: 2024, 2025, 2026 (2024 = .rda legado; 2025 e 2026 = planilhas oficiais)
+MUNICÍPIOS: 10
+CENÁRIOS EXECUTADOS: 12666
+CENÁRIOS VÁLIDOS: 12666
+TEMPO DE EXECUÇÃO: 165.2 s (média 13.0 ms/cenário)
+
+MAIOR GANHO ABSOLUTO:
+município: Fortaleza (2026)
+transformação: Fundamental anos iniciais urbano → fundamental integral
+alunos: 28.837,0
+ganho R$: R$ 233.908.847,17
+ganho %: 10,461%
+
+MAIOR GANHO PERCENTUAL:
+município: Juazeiro do Norte (2026)
+transformação: Fundamental anos iniciais urbano → fundamental integral
+alunos: 8.265,0
+ganho R$: R$ 68.555.235,07
+ganho %: 20,896%
+
+MAIOR GANHO POR ALUNO:
+município: Itapipoca (2026)
+transformação: Fundamental anos iniciais urbano → fundamental integral
+alunos: 2,4
+ganho R$: R$ 20.191,87
+R$/aluno: R$ 8.413,28
+
+MELHOR ESTRATÉGIA PARA CADA MUNICÍPIO:
+  [2024]
+    Caucaia: Fundamental anos iniciais urbano → fundamental integral @ 100% (11.688 alunos)  Δ R$ 65.272.336,76 (14,048%)
+    Crato: Fundamental anos iniciais urbano → fundamental integral @ 100% (3.531 alunos)  Δ R$ 19.791.128,56 (13,832%)
+    Fortaleza: Fundamental anos iniciais urbano → fundamental integral @ 100% (32.481 alunos)  Δ R$ 69.337.233,82 (3,938%)
+    Iguatu: Fundamental anos iniciais urbano → fundamental integral @ 100% (1.320 alunos)  Δ R$ 7.406.493,88 (6,962%)
+    Itapipoca: Pré-escola parcial → pré-escola integral (rede pública) @ 100% (3.288 alunos)  Δ R$ 11.637.498,48 (4,003%)
+    Juazeiro do Norte: Fundamental anos iniciais urbano → fundamental integral @ 100% (8.692 alunos)  Δ R$ 48.471.884,59 (19,396%)
+    Maracanaú: Fundamental anos iniciais urbano → fundamental integral @ 100% (7.935 alunos)  Δ R$ 44.185.740,70 (13,615%)
+    Maranguape: Fundamental anos iniciais urbano → fundamental integral @ 100% (3.052 alunos)  Δ R$ 17.150.864,44 (12,484%)
+    Quixadá: Fundamental anos iniciais urbano → fundamental integral @ 100% (2.185 alunos)  Δ R$ 12.320.828,62 (11,186%)
+    Sobral: Fundamental anos iniciais urbano → fundamental integral @ 100% (6.621 alunos)  Δ R$ 37.133.810,12 (12,426%)
+  [2025]
+    Caucaia: Fundamental anos iniciais urbano → fundamental integral @ 100% (10.880 alunos)  Δ R$ 76.643.208,95 (12,747%)
+    Crato: Fundamental anos iniciais urbano → fundamental integral @ 100% (3.137 alunos)  Δ R$ 22.194.006,21 (12,690%)
+    Fortaleza: Fundamental anos iniciais urbano → fundamental integral @ 100% (33.767 alunos)  Δ R$ 232.244.031,03 (11,152%)
+    Iguatu: Fundamental anos iniciais urbano → fundamental integral @ 100% (1.453 alunos)  Δ R$ 10.244.912,60 (7,546%)
+    Itapipoca: Pré-escola parcial → pré-escola integral (rede pública) @ 100% (1.421 alunos)  Δ R$ 7.454.856,22 (1,864%)
+    Juazeiro do Norte: Fundamental anos iniciais urbano → fundamental integral @ 100% (8.490 alunos)  Δ R$ 59.755.920,56 (19,752%)
+    Maracanaú: Fundamental anos iniciais urbano → fundamental integral @ 100% (9.447 alunos)  Δ R$ 66.304.917,65 (14,986%)
+    Maranguape: Fundamental anos iniciais urbano → fundamental integral @ 100% (3.157 alunos)  Δ R$ 22.370.391,76 (13,419%)
+    Quixadá: Fundamental anos iniciais urbano → fundamental integral @ 100% (2.246 alunos)  Δ R$ 15.977.492,71 (11,675%)
+    Sobral: Fundamental anos iniciais urbano → fundamental integral @ 100% (6.266 alunos)  Δ R$ 44.243.823,24 (11,448%)
+  [2026]
+    Caucaia: Fundamental anos iniciais urbano → fundamental integral @ 100% (11.380 alunos)  Δ R$ 94.481.460,59 (14,787%)
+    Crato: Fundamental anos iniciais urbano → fundamental integral @ 100% (3.031 alunos)  Δ R$ 25.271.240,46 (12,815%)
+    Fortaleza: Fundamental anos iniciais urbano → fundamental integral @ 100% (28.837 alunos)  Δ R$ 233.908.847,17 (10,461%)
+    Iguatu: Fundamental anos iniciais urbano → fundamental integral @ 100% (1.211 alunos)  Δ R$ 10.061.714,57 (6,129%)
+    Itapipoca: Pré-escola parcial → pré-escola integral (rede pública) @ 100% (1.243 alunos)  Δ R$ 7.711.356,28 (1,621%)
+    Juazeiro do Norte: Fundamental anos iniciais urbano → fundamental integral @ 100% (8.265 alunos)  Δ R$ 68.555.235,07 (20,896%)
+    Maracanaú: Fundamental anos iniciais urbano → fundamental integral @ 100% (9.123 alunos)  Δ R$ 75.461.207,51 (15,225%)
+    Maranguape: Fundamental anos iniciais urbano → fundamental integral @ 100% (2.947 alunos)  Δ R$ 24.605.297,09 (12,624%)
+    Quixadá: Fundamental anos iniciais urbano → fundamental integral @ 100% (2.157 alunos)  Δ R$ 18.079.766,77 (10,817%)
+    Sobral: Fundamental anos iniciais urbano → fundamental integral @ 100% (5.713 alunos)  Δ R$ 47.538.543,42 (11,727%)
+
+GANHO AGREGADO DOS 10:
+  2024 G10 factível 100%: R$ 690.777.777,87 (17,775% sobre a soma dos 10)
+  2025 G10 factível 100%: R$ 1.028.583.939,91 (21,299% sobre a soma dos 10)
+  2026 G10 factível 100%: R$ 1.072.516.103,54 (20,223% sobre a soma dos 10)
+
+PRINCIPAL RESULTADO CIENTÍFICO:
+A composição das matrículas altera os recursos simulados via fatores de ponderação e equalização VAAF/VAAT. A expansão contrafactual do tempo integral aumenta a participação relativa de alguns municípios, com magnitude dependente da estrutura da rede e com redistribuição intraestadual. Linearidade média (fração quase-linear R²≥0,995): 100,0% dos pares município×transição.
+
+LIMITAÇÕES:
+- Um snapshot por exercício (sem painel de matrículas longitudinais além dos três anos disponíveis).
+- Ótimo matemático é teórico e não educacionalmente factível.
+- Resultados não são recomendação para reclassificar alunos.
+- O efeito mede incentivos implícitos nos fatores de ponderação e na equalização, não o custo pedagógico da jornada integral.
