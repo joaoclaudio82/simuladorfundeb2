@@ -1,0 +1,680 @@
+ano,etapa,nome,peso_vaaf,peso_vaat,rank_vaaf,rank_vaat
+2024,creche_integral_rede_publica,Creche em Tempo Integral na Rede Pública,1.5,1.8,1.0,1.0
+2024,pre_escola_integral_rede_publica,Pré-Escola em Tempo Integral na Rede Pública,1.4,1.75,2.0,2.0
+2024,ed_ind_quil_creche,Creche na Educação Indígena e Quilombola na Rede Pública,1.4,1.6,2.0,3.0
+2024,ed_esp_creche,Creche na Educação Especial na Rede Pública,1.4,1.6,2.0,3.0
+2024,ed_ind_quil_pre_escola,Pré-Escola na Indígena e Quilombola na Rede Pública,1.4,1.5,2.0,6.0
+2024,ed_esp_pre_escola,Pré-Escola na Educação Especial na Rede Pública,1.4,1.5,2.0,6.0
+2024,ens_fundamental_integral_rede_publica,Ensino Fundamental em Tempo Integral na Rede Pública,1.4,1.4,2.0,11.0
+2024,ensino_medio_integral_rede_publica,Ensino Médio em Tempo Integral na Rede Pública,1.4,1.4,2.0,11.0
+2024,educacao_especial_rede_publica,Educação Especial na Rede Pública,1.4,1.4,2.0,11.0
+2024,atendimento_educacional_especializado_aee,Atendimento Educacional Especializado na Rede Pública,1.4,1.4,2.0,11.0
+2024,educacao_indigena_e_quilombola_rede_publica,Educação Indígena e Quilombola na Rede Pública,1.4,1.4,2.0,11.0
+2024,educacao_especial_rede_conveniada,Educação Especial na Rede Conveniada,1.4,1.4,2.0,11.0
+2024,ens_fundamental_series_finais_rural_rede_conveniada_de_formacao_por_alternancia,Anos Finais do Ensino Fundamental Rural de Formação por Alternância na Rede Conveniada,1.4,1.4,2.0,11.0
+2024,educacao_indigena_e_quilombola_rede_conveniada_de_formacao_por_alternancia,Educação Indigena e Quilombola de Formação por Alternância na Rede Conveniada,1.4,1.4,2.0,11.0
+2024,ensino_medio_rural_rede_publica,Ensino Médio no Campo na Rede Pública,1.3,1.3,15.0,19.0
+2024,ensino_medio_integrado_a_educacao_profissional_rede_publica,Ensino Médio Articulado à Educação Profissional na Rede Pública,1.3,1.3,15.0,19.0
+2024,itinerario_de_formacao_tecnica_e_profissional_rede_publica,Itinerário de Formação Técnica e Profissional na Rede Pública,1.3,1.3,15.0,19.0
+2024,educacao_profissional_concomitante_ao_ensino_medio_rede_publica,Ensino Médio Concomitante à Educação Profissional na Rede Pública,1.3,1.3,15.0,19.0
+2024,ens_medio_rural_rede_conveniada_de_formacao_por_alternancia,Ensino Médio de Formação por Alternância na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,ens_medio_integrado_a_ed_profisional_rede_conveniada_de_formacao_por_alternancia,Ensino Médio Integrado à Educação Profisional de Formação por Alternância na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,itinerario_de_formacao_tecnica_e_profissional_rede_conveniada_de_formacao_por_alternancia,Itinerário de Formação Técnica e Profissional de Formação por Alternância na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,educacao_profissional_concomitante_ao_ensino_medio_rede_conveniada_de_formacao_por_alternancia,Ensino Médio Concomitante à Educação Profissional de Formação por Alternância na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,ens_medio_integrado_a_ed_profisional_rede_conveniada_instituicoes_de_ed_profissional,Ensino Médio Integrado à Educação Profisional em Instituições de Educação Profissional na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,itinerario_de_formacao_tecnica_e_profissional_rede_conveniada_instituicoes_de_ed_profissional,Itinerário de Formação Técnica e Profissional em Instituições de Educação Profissional na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,educacao_profissional_concomitante_ao_ensino_medio_rede_conveniada_instituicoes_de_ed_profissional,Ensino Médio Concomitante à Educação Profissional em Instituições de Educação Profissional na Rede Conveniada,1.3,1.3,15.0,19.0
+2024,creche_parcial_rede_publica,Creche em Tempo Parcial na Rede Pública,1.25,1.6,26.0,3.0
+2024,ensino_medio_urbano_rede_publica,Ensino Médio Urbano na Rede Pública,1.25,1.25,26.0,30.0
+2024,creche_integral_rede_conveniada,Creche em Tempo Integral na Rede Conveniada,1.2,1.5,28.0,6.0
+2024,pre_escola_integral_rede_conveniada,Pré-Escola em Tempo Integral na Rede Conveniada,1.2,1.5,28.0,6.0
+2024,ens_fundamental_series_finais_rural_rede_publica,Anos Finais do Ensino Fundamental Rural na Rede Pública,1.2,1.2,28.0,31.0
+2024,educacao_de_jovens_e_adultos_integrada_a_ed_profissional_de_nivel_medio_rede_publica,"EJA Integrada à Educação Profissional de Nível Médio, com Avaliação no Processo, na Rede Pública",1.2,1.2,28.0,31.0
+2024,eja_integrada_a_ed_profissional_de_nivel_medio_rede_conveniada_de_formacao_por_alternancia,EJA Integrada à Educação Profissional de Nivel Médio de Formação por Alternância na Rede Conveniada,1.2,1.2,28.0,31.0
+2024,eja_integrada_a_ed_profissional_de_nivel_medio_rede_conveniada_instituicoes_de_ed_profissional,EJA Integrada à Educação Profissional de Nivel Médio em Instituições de Educação Profissional na Rede Conveniada,1.2,1.2,28.0,31.0
+2024,pre_escola_parcial_rede_publica,Pré-Escola em Tempo Parcial na Rede Pública,1.15,1.5,34.0,6.0
+2024,ens_fundamental_series_iniciais_rural_rede_publica,Anos Iniciais do Ensino Fundamental Rural na Rede Pública,1.15,1.15,34.0,35.0
+2024,ens_fundamental_series_finais_urbano_rede_publica,Anos Finais do Ensino Fundamental Urbano na Rede Pública,1.1,1.1,36.0,36.0
+2024,creche_parcial_rede_conveniada,Creche em Tempo Parcial na Rede Conveniada,1.0,1.1,37.0,36.0
+2024,pre_escola_parcial_rede_conveniada,Pré-Escola em Tempo Parcial na Rede Conveniada,1.0,1.1,37.0,36.0
+2024,ens_fundamental_series_iniciais_urbano_rede_publica,Anos Iniciais do Ensino Fundamental Urbano na Rede Pública,1.0,1.0,37.0,39.0
+2024,educacao_de_jovens_e_adultos_com_avaliacao_no_processo_rede_publica,Educação de Jovens e Adultos com Avaliação no Processo na Rede Pública,1.0,1.0,37.0,39.0
+2024,eja_com_avaliacao_no_processo_rede_conveniada_de_formacao_por_alternancia,EJA com Avaliação no Processo de Formação por Alternância na Rede Conveniada,1.0,1.0,37.0,39.0
+2025,creche_integral_publica_indigena,Creche Integral Pública Indígena,2.17,2.6599999999999997,1.0,1.0
+2025,creche_integral_publica_quilombola,Creche Integral Pública Quilombola,2.17,2.6599999999999997,1.0,1.0
+2025,creche_integral_publica_indigena_especial,Creche Integral Pública Indígena Especial,2.17,2.6599999999999997,1.0,1.0
+2025,creche_integral_publica_quilombola_especial,Creche Integral Pública Quilombola Especial,2.17,2.6599999999999997,1.0,1.0
+2025,creche_integral_publica_indigena_bilingue_de_surdos,Creche Integral Pública Indígena Bilíngue De Surdos,2.17,2.6599999999999997,1.0,1.0
+2025,creche_integral_publica_quilombola_bilingue_de_surdos,Creche Integral Pública Quilombola Bilíngue De Surdos,2.17,2.6599999999999997,1.0,1.0
+2025,ensino_medio_integral_indigena,Ensino Médio Integral Indígena,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola,Ensino Médio Integral Quilombola,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_alternancia,Ensino Médio Integral Indígena Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_alternancia,Ensino Médio Integral Quilombola Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_conveniada_especial,Ensino Médio Integral Quilombola Conveniada Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_conveniada_especial,Ensino Médio Integral Indígena Conveniada Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_especial,Ensino Médio Integral Indígena Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_especial,Ensino Médio Integral Quilombola Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_bilingue_de_surdos,Ensino Médio Integral Indígena Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_bilingue_de_surdos,Ensino Médio Integral Quilombola Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_publica_alternancia_especial,Ensino Médio Integral Indígena Pública Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_publica_alternancia_especial,Ensino Médio Integral Quilombola Pública Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Indígena Pública Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Quilombola Pública Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_conveniada_alternancia,Ensino Médio Integral Indígena Conveniada Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_conveniada_alternancia,Ensino Médio Integral Quilombola Conveniada Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_conveniada_alternancia_especial,Ensino Médio Integral Indígena Conveniada Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_conveniada_alternancia_especial,Ensino Médio Integral Quilombola Conveniada Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Indígena Conveniada Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Quilombola Conveniada Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_quilombola_conveniada_bilingue_de_surdos,Ensino Médio Integral Quilombola Conveniada Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,ensino_medio_integral_indigena_conveniada_bilingue_de_surdos,Ensino Médio Integral Indígena Conveniada Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2025,pre_escola_integral_publica_indigena,Pré-Escola Integral Pública Indígena,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,pre_escola_integral_publica_quilombola,Pré-Escola Integral Pública Quilombola,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,pre_escola_integral_publica_indigena_especial,Pré-Escola Integral Pública Indígena Especial,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,pre_escola_integral_publica_quilombola_especial,Pré-Escola Integral Pública Quilombola Especial,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,pre_escola_integral_publica_indigena_bilingue_de_surdos,Pré-Escola Integral Pública Indígena Bilíngue De Surdos,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,pre_escola_integral_publica_quilombola_bilingue_de_surdos,Pré-Escola Integral Pública Quilombola Bilíngue De Surdos,2.0999999999999996,2.6319999999999997,29.0,7.0
+2025,ensino_fundamental_integral_indigena,Ensino Fundamental Integral Indígena,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola,Ensino Fundamental Integral Quilombola,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_alternancia,Ensino Fundamental Integral Indígena Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_alternancia,Ensino Fundamental Integral Quilombola Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_especial,Ensino Fundamental Integral Indígena Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_especial,Ensino Fundamental Integral Quilombola Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_bilingue_de_surdos,Ensino Fundamental Integral Indígena Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_conveniada_especial,Ensino Fundamental Integral Indígena Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_conveniada_especial,Ensino Fundamental Integral Quilombola Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_alternancia_publica_especial,Ensino Fundamental Integral Indígena Alternância Pública Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_alternancia_publica_especial,Ensino Fundamental Integral Quilombola Alternância Pública Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Indígena Alternância Pública Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Alternância Pública Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_conveniada_alternancia,Ensino Fundamental Integral Indígena Conveniada Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_conveniada_alternancia,Ensino Fundamental Integral Quilombola Conveniada Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_alternancia_conveniada_especial,Ensino Fundamental Integral Indígena Alternância Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_alternancia_conveniada_especial,Ensino Fundamental Integral Quilombola Alternância Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Indígena Alternância Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Alternância Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_indigena_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Indígena Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,ensino_fundamental_integral_quilombola_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2025,creche_integral_conveniada_indigena,Creche Integral Conveniada Indígena,2.03,2.534,57.0,13.0
+2025,creche_integral_conveniada_quilombola,Creche Integral Conveniada Quilombola,2.03,2.534,57.0,13.0
+2025,creche_integral_conveniada_indigena_especial,Creche Integral Conveniada Indígena Especial,2.03,2.534,57.0,13.0
+2025,creche_integral_conveniada_quilombola_especial,Creche Integral Conveniada Quilombola Especial,2.03,2.534,57.0,13.0
+2025,creche_integral_conveniada_indigena_bilingue_de_surdos,Creche Integral Conveniada Indígena Bilíngue De Surdos,2.03,2.534,57.0,13.0
+2025,creche_integral_conveniada_quilombola_bilingue_de_surdos,Creche Integral Conveniada Quilombola Bilíngue De Surdos,2.03,2.534,57.0,13.0
+2025,pre_escola_integral_conveniada_indigena,Pré-Escola Integral Conveniada Indígena,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,pre_escola_integral_conveniada_quilombola,Pré-Escola Integral Conveniada Quilombola,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,pre_escola_integral_conveniada_indigena_especial,Pré-Escola Integral Conveniada Indígena Especial,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,pre_escola_integral_conveniada_quilombola_especial,Pré-Escola Integral Conveniada Quilombola Especial,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,pre_escola_integral_conveniada_indigena_bilingue_de_surdos,Pré-Escola Integral Conveniada Indígena Bilíngue De Surdos,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,pre_escola_integral_conveniada_quilombola_bilingue_de_surdos,Pré-Escola Integral Conveniada Quilombola Bilíngue De Surdos,1.9599999999999997,2.4499999999999997,63.0,19.0
+2025,educacao_especial_creche_indigena,Educação Especial - Creche Indígena,1.9599999999999997,2.2399999999999998,63.0,25.0
+2025,educacao_especial_creche_quilombola,Educação Especial - Creche Quilombola,1.9599999999999997,2.2399999999999998,63.0,25.0
+2025,educacao_bilingue_de_surdos_creche_indigena,Educação Bilíngue De Surdos - Creche Indígena,1.9599999999999997,2.2399999999999998,63.0,25.0
+2025,educacao_bilingue_de_surdos_creche_quilombola,Educação Bilíngue De Surdos - Creche Quilombola,1.9599999999999997,2.2399999999999998,63.0,25.0
+2025,educacao_especial_pre_escola_indigena,Educação Especial - Pré-Escola Indígena,1.9599999999999997,2.0999999999999996,63.0,59.0
+2025,educacao_especial_pre_escola_quilombola,Educação Especial - Pré-Escola Quilombola,1.9599999999999997,2.0999999999999996,63.0,59.0
+2025,educacao_bilingue_de_surdos_pre_escola_indigena,Educação Bilíngue De Surdos - Pré-Escola Indígena,1.9599999999999997,2.0999999999999996,63.0,59.0
+2025,educacao_bilingue_de_surdos_pre_escola_quilombola,Educação Bilíngue De Surdos - Pré-Escola Quilombola,1.9599999999999997,2.0999999999999996,63.0,59.0
+2025,educacao_especial_conveniada_creche_indigena,Educação Especial Conveniada - Creche Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_creche_quilombola,Educação Especial Conveniada - Creche Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_pre_escola_indigena,Educação Especial Conveniada - Pré-Escola Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_pre_escola_quilombola,Educação Especial Conveniada - Pré-Escola Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_fundamental_indigena,Educação Especial Conveniada - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_fundamental_quilombola,Educação Especial Conveniada - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_fundamental_indigena,Educação Especial - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_fundamental_quilombola,Educação Especial - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_medio_indigena,Educação Especial Conveniada - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_medio_quilombola,Educação Especial Conveniada - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_medio_indigena,Educação Especial - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_medio_quilombola,Educação Especial - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_fundamental_indigena,Educação Especial Conveniada - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_fundamental_quilombola,Educação Especial Conveniada - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_fundamental_indigena,Educação Especial - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_fundamental_quilombola,Educação Especial - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_medio_indigena,Educação Especial Conveniada - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_medio_quilombola,Educação Especial Conveniada - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_medio_indigena,Educação Especial - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_medio_quilombola,Educação Especial - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_fundamental_indigena,Educação Bilíngue De Surdos- Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_fundamental_quilombola,Educação Bilíngue De Surdos - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_medio_indigena,Educação Bilíngue De Surdos - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_medio_quilombola,Educação Bilíngue De Surdos - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_indigena,Educação Bilíngue De Surdos - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_quilombola,Educação Bilíngue De Surdos - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_medio_indigena,Educação Bilíngue De Surdos - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_medio_quilombola,Educação Bilíngue De Surdos - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_creche_indigena,Educação Bilígue De Surdos Conveniada - Creche Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_creche_quilombola,Educação Bilígue De Surdos Conveniada - Creche Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_pre_escola_indigena,Educação Bilígue De Surdos Conveniada - Pré-Escola Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_pre_escola_quilombola,Educação Bilígue De Surdos Conveniada - Pré-Escola Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_fundamental_indigena,Educação Bilígue De Surdos Conveniada - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_fundamental_quilombola,Educação Bilígue De Surdos Conveniada - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_medio_indigena,Educação Bilígue De Surdos Conveniada - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdosconveniada_medio_quilombola,Educação Bilígue De Surdosconveniada - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_eja_fundamental_indigena,Educação Bilígue De Surdos Conveniada - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_eja_fundamental_quilombola,Educação Bilígue De Surdos Conveniada - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_eja_medio_indigena,Educação Bilígue De Surdos Conveniada - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_biligue_de_surdos_conveniada_eja_medio_quilombola,Educação Bilígue De Surdos Conveniada - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_fundamental_indigena_alternancia,Educação Especial - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_fundamental_quilombola_alternancia,Educação Especial - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_medio_indigena_alternancia,Educação Especial - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_eja_medio_quilombola_alternancia,Educação Especial - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_fundamental_indigena_alternancia,Educação Especial Conveniada - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_fundamental_quilombola_alternancia,Educação Especial Conveniada - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_medio_indigena_alternancia,Educação Especial Conveniada - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_especial_conveniada_eja_medio_quilombola_alternancia,Educação Especial Conveniada - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_indigena_alternancia,Educação Bilíngue De Surdos - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_quilombola_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_medio_indigena_alternancia,Educação  Bilíngue De Surdos - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_eja_medio_quilombola_alternancia,Educação  Bilíngue De Surdos - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_fundamental_indigena_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_fundamental_quilombola_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_medio_indigena_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_medio_quilombola_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2025,creche_integral_publica_campo,Creche Integral Pública Campo,1.7825,2.1849999999999996,133.0,31.0
+2025,creche_integral_publica_campo_especial,Creche Integral Pública Campo Especial,1.7825,2.1849999999999996,133.0,31.0
+2025,creche_integral_publica_campo_bilingue_de_surdos,Creche Integral Pública Campo Bilíngue De Surdos,1.7825,2.1849999999999996,133.0,31.0
+2025,creche_parcial_publica_indigena,Creche Parcial Pública Indígena,1.75,2.2399999999999998,136.0,25.0
+2025,creche_parcial_publica_quilombola,Creche Parcial Pública Quilombola,1.75,2.2399999999999998,136.0,25.0
+2025,ensino_medio_parcial_indigena,Ensino Médio Parcial Indígena,1.75,1.75,136.0,163.0
+2025,ensino_medio_parcial_quilombola,Ensino Médio Parcial Quilombola,1.75,1.75,136.0,163.0
+2025,ensino_medio_integral_campo,Ensino Médio Integral Campo,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_alternancia,Ensino Médio Integral Campo Alternância,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_conveniada_especial,Ensino Médio Integral Campo Conveniada Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_especial,Ensino Médio Integral Campo Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_bilingue_de_surdos,Ensino Médio Integral Campo Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_publica_alternancia_especial,Ensino Médio Integral Campo Pública Alternância Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Campo Pública Alternância Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_conveniada_alternancia,Ensino Médio Integral Campo Conveniada Alternância,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_conveniada_alternancia_especial,Ensino Médio Integral Campo Conveniada Alternância Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Campo Conveniada Alternância Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,ensino_medio_integral_campo_conveniada_bilingue_de_surdos,Ensino Médio Integral Campo Conveniada Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2025,pre_escola_integral_publica_campo,Pré-Escola Integral Pública Campo,1.7249999999999999,2.162,151.0,34.0
+2025,pre_escola_integral_publica_campo_especial,Pré-Escola Integral Pública Campo Especial,1.7249999999999999,2.162,151.0,34.0
+2025,pre_escola_integral_publica_campo_bilingue_de_surdos,Pré-Escola Integral Pública Campo Bilíngue De Surdos,1.7249999999999999,2.162,151.0,34.0
+2025,ensino_fundamental_integral_campo,Ensino Fundamental Integral Campo,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_alternancia,Ensino Fundamental Integral Campo Alternância,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_especial,Ensino Fundamental Integral Campo Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_bilingue_de_surdos,Ensino Fundamental Integral Campo Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_conveniada_especial,Ensino Fundamental Integral Campo Conveniada Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_alternancia_publica_especial,Ensino Fundamental Integral Campo Alternância Pública Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Campo Alternância Pública Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_conveniada_alternancia,Ensino Fundamental Integral Campo Conveniada Alternância,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_alternancia_conveniada_especial,Ensino Fundamental Integral Campo Alternância Conveniada Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Campo Alternância Conveniada Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,ensino_fundamental_integral_campo_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Campo Conveniada Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2025,creche_integral_conveniada_campo,Creche Integral Conveniada Campo,1.6674999999999998,2.0814999999999997,165.0,87.0
+2025,creche_integral_conveniada_campo_especial,Creche Integral Conveniada Campo Especial,1.6674999999999998,2.0814999999999997,165.0,87.0
+2025,creche_integral_conveniada_campo_bilingue_de_surdos,Creche Integral Conveniada Campo Bilíngue De Surdos,1.6674999999999998,2.0814999999999997,165.0,87.0
+2025,pre_escola_parcial_publica_indigena,Pré-Escola Parcial Pública Indígena,1.6099999999999999,2.0999999999999996,168.0,59.0
+2025,pre_escola_parcial_publica_quilombola,Pré-Escola Parcial Pública Quilombola,1.6099999999999999,2.0999999999999996,168.0,59.0
+2025,pre_escola_integral_conveniada_campo,Pré-Escola Integral Conveniada Campo,1.6099999999999999,2.0124999999999997,168.0,90.0
+2025,pre_escola_integral_conveniada_campo_especial,Pré-Escola Integral Conveniada Campo Especial,1.6099999999999999,2.0124999999999997,168.0,90.0
+2025,pre_escola_integral_conveniada_campo_bilingue_de_surdos,Pré-Escola Integral Conveniada Campo Bilíngue De Surdos,1.6099999999999999,2.0124999999999997,168.0,90.0
+2025,educacao_especial_creche_campo,Educação Especial - Creche Campo,1.6099999999999999,1.8399999999999999,168.0,155.0
+2025,educacao_bilingue_de_surdos_creche_campo,Educação Bilíngue De Surdos - Creche Campo,1.6099999999999999,1.8399999999999999,168.0,155.0
+2025,creche_parcial_conveniada_indigena,Creche Parcial Conveniada Indígena,1.6099999999999999,1.7779999999999998,168.0,161.0
+2025,creche_parcial_conveniada_quilombola,Creche Parcial Conveniada Quilombola,1.6099999999999999,1.7779999999999998,168.0,161.0
+2025,educacao_especial_pre_escola_campo,Educação Especial - Pré-Escola Campo,1.6099999999999999,1.7249999999999999,168.0,179.0
+2025,educacao_bilingue_de_surdos_pre_escola_campo,Educação Bilíngue De Surdos - Pré-Escola Campo,1.6099999999999999,1.7249999999999999,168.0,179.0
+2025,educacao_especial_conveniada_creche_campo,Educação Especial Conveniada - Creche Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_pre_escola_campo,Educação Especial Conveniada - Pré-Escola Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_fundamental_campo,Educação Especial Conveniada - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_fundamental_campo,Educação Especial - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_medio_campo,Educação Especial Conveniada - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_medio_campo,Educação Especial - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_eja_fundamental_campo,Educação Especial Conveniada - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_eja_fundamental_campo,Educação Especial - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_eja_medio_campo,Educação Especial Conveniada - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_eja_medio_campo,Educação Especial - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_fundamental_campo,Educação Bilíngue De Surdos- Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_medio_campo,Educação Bilíngue De Surdos - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_campo,Educação Bilíngue De Surdos - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_eja_medio_campo,Educação Bilíngue De Surdos - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_creche_campo,Educação Bilígue De Surdos Conveniada - Creche Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_pre_escola_campo,Educação Bilígue De Surdos Conveniada - Pré-Escola Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_fundamental_campo,Educação Bilígue De Surdos Conveniada - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_medio_campo,Educação Bilígue De Surdos Conveniada - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_eja_fundamental_campo,Educação Bilígue De Surdos Conveniada - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_biligue_de_surdos_conveniada_eja_medio_campo,Educação Bilígue De Surdos Conveniada - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_eja_fundamental_campo_alternancia,Educação Especial - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_eja_medio_campo_alternancia,Educação Especial - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_eja_fundamental_campo_alternancia,Educação Especial Conveniada - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_especial_conveniada_eja_medio_campo_alternancia,Educação Especial Conveniada - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_campo_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_eja_medio_campo_alternancia,Educação  Bilíngue De Surdos - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_fundamental_campo_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,educacao_bilingue_de_surdos_conveniada_eja_medio_campo_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2025,creche_integral_publica,Creche Integral Pública,1.55,1.9,207.0,149.0
+2025,creche_integral_publica_especial,Creche Integral Pública Especial,1.55,1.9,207.0,149.0
+2025,creche_integral_publica_bilingue_de_surdos,Creche Integral Pública Bilíngue De Surdos,1.55,1.9,207.0,149.0
+2025,anos_finais_fundamental_indigena,Anos Finais Fundamental Indígena,1.54,1.54,210.0,226.0
+2025,anos_finais_fundamental_quilombola,Anos Finais Fundamental Quilombola,1.54,1.54,210.0,226.0
+2025,ensino_medio_integral,Ensino Médio Integral,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_publica_alternancia,Ensino Médio Integral Pública Alternância,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_conveniada_especial,Ensino Médio Integral Conveniada Especial,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_especial,Ensino Médio Integral Especial,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_bilingue_de_surdos,Ensino Médio Integral Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_publica_alternancia_especial,Ensino Médio Integral Pública Alternância Especial,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Pública Alternância Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2025,ensino_medio_integral_conveniada_bilingue_de_surdos,Ensino Médio Integral Conveniada Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2025,pre_escola_integral_publica,Pré-Escola Integral Pública,1.5,1.88,220.0,152.0
+2025,pre_escola_integral_publica_especial,Pré-Escola Integral Pública Especial,1.5,1.88,220.0,152.0
+2025,pre_escola_integral_publica_bilingue_de_surdos,Pré-Escola Integral Pública Bilíngue De Surdos,1.5,1.88,220.0,152.0
+2025,ensino_fundamental_integral,Ensino Fundamental Integral,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_publica_alternancia,Ensino Fundamental Integral Pública Alternância,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_especial,Ensino Fundamental Integral Especial,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_bilingue_de_surdos,Ensino Fundamental Integral Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_conveniada_especial,Ensino Fundamental Integral Conveniada Especial,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_alternancia_publica_especial,Ensino Fundamental Integral Alternância Pública Especial,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Alternância Pública Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2025,ensino_fundamental_integral_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Conveniada Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2025,pre_escola_parcial_conveniada_indigena,Pré-Escola Parcial Conveniada Indígena,1.47,1.6239999999999999,231.0,193.0
+2025,pre_escola_parcial_conveniada_quilombola,Pré-Escola Parcial Conveniada Quilombola,1.47,1.6239999999999999,231.0,193.0
+2025,creche_integral_conveniada,Creche Integral Conveniada,1.45,1.81,233.0,158.0
+2025,creche_integral_conveniada_especial,Creche Integral Conveniada Especial,1.45,1.81,233.0,158.0
+2025,creche_integral_conveniada_bilingue_de_surdos,Creche Integral Conveniada Bilíngue De Surdos,1.45,1.81,233.0,158.0
+2025,creche_parcial_publica_campo,Creche Parcial Pública Campo,1.4375,1.8399999999999999,236.0,155.0
+2025,ensino_medio_parcial_campo,Ensino Médio Parcial Campo,1.4375,1.4375,236.0,248.0
+2025,pre_escola_integral_conveniada,Pré-Escola Integral Conveniada,1.4,1.75,238.0,163.0
+2025,pre_escola_integral_conveniada_especial,Pré-Escola Integral Conveniada Especial,1.4,1.75,238.0,163.0
+2025,pre_escola_integral_conveniada_bilingue_de_surdos,Pré-Escola Integral Conveniada Bilíngue De Surdos,1.4,1.75,238.0,163.0
+2025,educacao_especial_creche,Educação Especial - Creche ,1.4,1.6,238.0,223.0
+2025,educacao_bilingue_de_surdos_creche,Educação Bilíngue De Surdos - Creche,1.4,1.6,238.0,223.0
+2025,educacao_especial_pre_escola,Educação Especial - Pré-Escola ,1.4,1.5,238.0,236.0
+2025,educacao_bilingue_de_surdos_pre_escola,Educação Bilíngue De Surdos - Pré-Escola,1.4,1.5,238.0,236.0
+2025,anos_iniciais_fundamental_indigena,Anos Iniciais Fundamental Indígena,1.4,1.4,238.0,249.0
+2025,anos_iniciais_fundamental_quilombola,Anos Iniciais Fundamental Quilombola,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_creche,Educação Especial Conveniada - Creche ,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_pre_escola,Educação Especial Conveniada - Pré-Escola ,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_fundamental,Educação Especial Conveniada - Fundamental ,1.4,1.4,238.0,249.0
+2025,educacao_especial_fundamental,Educação Especial - Fundamental ,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_medio,Educação Especial Conveniada - Médio ,1.4,1.4,238.0,249.0
+2025,educacao_especial_medio,Educação Especial - Médio ,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_eja_fundamental,Educação Especial Conveniada - Eja Fundamental ,1.4,1.4,238.0,249.0
+2025,educacao_especial_eja_fundamental,Educação Especial - Eja Fundamental ,1.4,1.4,238.0,249.0
+2025,educacao_especial_conveniada_eja_medio,Educação Especial Conveniada - Eja Médio ,1.4,1.4,238.0,249.0
+2025,educacao_especial_eja_medio,Educação Especial - Eja Médio ,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_fundamental,Educação Bilíngue De Surdos - Fundamental,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_medio,Educação Bilíngue De Surdos - Médio,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_eja_fundamental,Educação Bilíngue De Surdos - Eja Fundamental,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_eja_medio,Educação Bilíngue De Surdos - Eja Médio,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_creche,Educação Bilígue De Surdos Conveniada - Creche,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_pre_escola,Educação Bilígue De Surdos Conveniada - Pré-Escola ,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_fundamental,Educação Bilígue De Surdos Conveniada - Fundamental,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_medio,Educação Bilígue De Surdos Conveniada - Médio,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_eja_fundamental,Educação Bilígue De Surdos Conveniada - Eja Fundamental,1.4,1.4,238.0,249.0
+2025,educacao_biligue_de_surdos_conveniada_eja_medio,Educação Bilígue De Surdos Conveniada - Eja Médio ,1.4,1.4,238.0,249.0
+2025,educacao_especial_eja_fundamental_alternancia,Educação Especial - Eja Fundamental Alternância,1.4,1.4,238.0,249.0
+2025,educacao_especial_eja_medio_alternancia,Educação Especial - Eja Médio Alternância,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_eja_fundamental_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Alternância,1.4,1.4,238.0,249.0
+2025,educacao_bilingue_de_surdos_eja_medio_alternancia,Educação  Bilíngue De Surdos - Eja Médio Alternância,1.4,1.4,238.0,249.0
+2025,aee_infantil,Aee - Infantil,1.4,1.4,238.0,249.0
+2025,aee_fundamental,Aee - Fundamental,1.4,1.4,238.0,249.0
+2025,aee_medio,Aee - Médio,1.4,1.4,238.0,249.0
+2025,aee_diferentes_etapas,Aee - Diferentes Etapas,1.4,1.4,238.0,249.0
+2025,eja_fundamental_indigena,Eja Fundamental Indígena,1.4,1.4,238.0,249.0
+2025,eja_fundamental_quilombola,Eja Fundamental Quilombola,1.4,1.4,238.0,249.0
+2025,eja_fundamental_indigena_alternancia,Eja Fundamental Indígena Alternância,1.4,1.4,238.0,249.0
+2025,eja_fundamental_quilombola_alternancia,Eja Fundamental Quilombola Alternância,1.4,1.4,238.0,249.0
+2025,eja_medio_indigena,Eja Médio Indígena,1.4,1.4,238.0,249.0
+2025,eja_medio_quilombola,Eja Médio Quilombola,1.4,1.4,238.0,249.0
+2025,eja_medio_indigena_alternancia,Eja Médio Indígena Alternância,1.4,1.4,238.0,249.0
+2025,eja_medio_quilombola_alternancia,Eja Médio Quilombola Alternância,1.4,1.4,238.0,249.0
+2025,ensino_medio_integrado_a_ed_profissional,Ensino Médio Integrado À Ed. Profissional,1.35,1.35,283.0,287.0
+2025,ensino_medio_integrado_a_ed_profissional_publica_alternancia,Ensino Médio Integrado À Ed. Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2025,ensino_medio_integrado_a_ed_profissional_alternancia,Ensino Médio Integrado À Ed. Profissional Alternância,1.35,1.35,283.0,287.0
+2025,eja_medio_integrado_a_ed_profissional,Eja Médio Integrado À Ed. Profissional,1.35,1.35,283.0,287.0
+2025,eja_medio_integrado_a_ed_profissional_publica_alternancia,Eja Médio Integrado À Ed. Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2025,eja_medio_integrado_a_ed_profissional_alternancia,Eja Médio Integrado À Ed. Profissional Alternância,1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_matricula_unica_itinerario_fgb,Itinerário De Formação Técnica E Profissional (Matrícula Única Itinerário+Fgb),1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_publica_alternancia,Itinerário De Formação Técnica E Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_alternancia,Itinerário De Formação Técnica E Profissional Alternância,1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_segunda_matricula,Itinerário De Formação Técnica E Profissional (Segunda Matrícula),1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_sistema_s,Itinerário De Formação Técnica E Profissional Sistema S,1.35,1.35,283.0,287.0
+2025,itinerario_de_formacao_tecnica_e_profissional_publicas,Itinerário De Formação Técnica E Profissional Públicas,1.35,1.35,283.0,287.0
+2025,concomitante_ao_ens_medio,Concomitante Ao Ens. Médio,1.35,1.35,283.0,287.0
+2025,concomitante_ao_ens_medio_publica_alternancia,Concomitante Ao Ens. Médio Pública Alternância,1.35,1.35,283.0,287.0
+2025,concomitante_ao_ens_medio_alternancia,Concomitante Ao Ens. Médio Alternância,1.35,1.35,283.0,287.0
+2025,concomitante_ao_ens_medio_sistema_s,Concomitante Ao Ens. Médio Sistema S,1.35,1.35,283.0,287.0
+2025,concomitante_ao_ens_medio_publicas,Concomitante Ao Ens. Médio Públicas,1.35,1.35,283.0,287.0
+2025,pre_escola_parcial_publica_campo,Pré-Escola Parcial Pública Campo,1.3224999999999998,1.7249999999999999,300.0,179.0
+2025,creche_parcial_conveniada_campo,Creche Parcial Conveniada Campo,1.3224999999999998,1.4605,300.0,247.0
+2025,anos_finais_fundamental_campo,Anos Finais Fundamental Campo,1.265,1.265,302.0,306.0
+2025,creche_parcial_publica,Creche Parcial Pública,1.25,1.6,303.0,223.0
+2025,ensino_medio_parcial,Ensino Médio Parcial,1.25,1.25,303.0,307.0
+2025,pre_escola_parcial_conveniada_campo,Pré-Escola Parcial Conveniada Campo,1.2075,1.3339999999999999,305.0,304.0
+2025,pre_escola_parcial_publica,Pré-Escola Parcial Pública,1.15,1.5,306.0,236.0
+2025,creche_parcial_conveniada,Creche Parcial Conveniada,1.15,1.27,306.0,305.0
+2025,anos_iniciais_fundamental_campo,Anos Iniciais Fundamental Campo,1.15,1.15,306.0,309.0
+2025,eja_fundamental_campo,Eja Fundamental Campo,1.15,1.15,306.0,309.0
+2025,eja_fundamental_campo_alternancia,Eja Fundamental Campo Alternância,1.15,1.15,306.0,309.0
+2025,eja_medio_campo,Eja Médio Campo,1.15,1.15,306.0,309.0
+2025,eja_medio_campo_alternancia,Eja Médio Campo Alternância,1.15,1.15,306.0,309.0
+2025,anos_finais_fundamental,Anos Finais Fundamental,1.1,1.1,313.0,314.0
+2025,pre_escola_parcial_conveniada,Pré-Escola Parcial Conveniada,1.05,1.16,314.0,308.0
+2025,anos_iniciais_fundamental,Anos Iniciais Fundamental,1.0,1.0,315.0,315.0
+2025,eja_fundamental,Eja Fundamental,1.0,1.0,315.0,315.0
+2025,eja_medio,Eja Médio,1.0,1.0,315.0,315.0
+2025,eja_fundamental_alternancia,Eja Fundamental Alternância,1.0,1.0,315.0,315.0
+2025,eja_medio_alternancia,Eja Médio Alternância,1.0,1.0,315.0,315.0
+2026,creche_integral_publica_indigena,Creche Integral Pública Indígena,2.17,2.6599999999999997,1.0,1.0
+2026,creche_integral_publica_quilombola,Creche Integral Pública Quilombola,2.17,2.6599999999999997,1.0,1.0
+2026,creche_integral_publica_indigena_especial,Creche Integral Pública Indígena Especial,2.17,2.6599999999999997,1.0,1.0
+2026,creche_integral_publica_quilombola_especial,Creche Integral Pública Quilombola Especial,2.17,2.6599999999999997,1.0,1.0
+2026,creche_integral_publica_indigena_bilingue_de_surdos,Creche Integral Pública Indígena Bilíngue De Surdos,2.17,2.6599999999999997,1.0,1.0
+2026,creche_integral_publica_quilombola_bilingue_de_surdos,Creche Integral Pública Quilombola Bilíngue De Surdos,2.17,2.6599999999999997,1.0,1.0
+2026,ensino_medio_integral_indigena,Ensino Médio Integral Indígena,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola,Ensino Médio Integral Quilombola,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_alternancia,Ensino Médio Integral Indígena Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_alternancia,Ensino Médio Integral Quilombola Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_conveniada_especial,Ensino Médio Integral Quilombola Conveniada Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_conveniada_especial,Ensino Médio Integral Indígena Conveniada Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_especial,Ensino Médio Integral Indígena Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_especial,Ensino Médio Integral Quilombola Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_bilingue_de_surdos,Ensino Médio Integral Indígena Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_bilingue_de_surdos,Ensino Médio Integral Quilombola Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_publica_alternancia_especial,Ensino Médio Integral Indígena Pública Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_publica_alternancia_especial,Ensino Médio Integral Quilombola Pública Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Indígena Pública Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Quilombola Pública Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_conveniada_alternancia,Ensino Médio Integral Indígena Conveniada Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_conveniada_alternancia,Ensino Médio Integral Quilombola Conveniada Alternância,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_conveniada_alternancia_especial,Ensino Médio Integral Indígena Conveniada Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_conveniada_alternancia_especial,Ensino Médio Integral Quilombola Conveniada Alternância Especial,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Indígena Conveniada Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Quilombola Conveniada Alternância Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_quilombola_conveniada_bilingue_de_surdos,Ensino Médio Integral Quilombola Conveniada Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,ensino_medio_integral_indigena_conveniada_bilingue_de_surdos,Ensino Médio Integral Indígena Conveniada Bilíngue De Surdos,2.1279999999999997,2.1279999999999997,7.0,37.0
+2026,pre_escola_integral_publica_indigena,Pré-Escola Integral Pública Indígena,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,pre_escola_integral_publica_quilombola,Pré-Escola Integral Pública Quilombola,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,pre_escola_integral_publica_indigena_especial,Pré-Escola Integral Pública Indígena Especial,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,pre_escola_integral_publica_quilombola_especial,Pré-Escola Integral Pública Quilombola Especial,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,pre_escola_integral_publica_indigena_bilingue_de_surdos,Pré-Escola Integral Pública Indígena Bilíngue De Surdos,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,pre_escola_integral_publica_quilombola_bilingue_de_surdos,Pré-Escola Integral Pública Quilombola Bilíngue De Surdos,2.0999999999999996,2.6319999999999997,29.0,7.0
+2026,ensino_fundamental_integral_indigena,Ensino Fundamental Integral Indígena,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola,Ensino Fundamental Integral Quilombola,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_alternancia,Ensino Fundamental Integral Indígena Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_alternancia,Ensino Fundamental Integral Quilombola Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_especial,Ensino Fundamental Integral Indígena Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_especial,Ensino Fundamental Integral Quilombola Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_bilingue_de_surdos,Ensino Fundamental Integral Indígena Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_conveniada_especial,Ensino Fundamental Integral Indígena Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_conveniada_especial,Ensino Fundamental Integral Quilombola Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_alternancia_publica_especial,Ensino Fundamental Integral Indígena Alternância Pública Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_alternancia_publica_especial,Ensino Fundamental Integral Quilombola Alternância Pública Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Indígena Alternância Pública Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Alternância Pública Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_conveniada_alternancia,Ensino Fundamental Integral Indígena Conveniada Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_conveniada_alternancia,Ensino Fundamental Integral Quilombola Conveniada Alternância,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_alternancia_conveniada_especial,Ensino Fundamental Integral Indígena Alternância Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_alternancia_conveniada_especial,Ensino Fundamental Integral Quilombola Alternância Conveniada Especial,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Indígena Alternância Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Alternância Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_indigena_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Indígena Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,ensino_fundamental_integral_quilombola_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Quilombola Conveniada Bilíngue De Surdos,2.0999999999999996,2.0999999999999996,29.0,59.0
+2026,creche_integral_conveniada_indigena,Creche Integral Conveniada Indígena,2.03,2.534,57.0,13.0
+2026,creche_integral_conveniada_quilombola,Creche Integral Conveniada Quilombola,2.03,2.534,57.0,13.0
+2026,creche_integral_conveniada_indigena_especial,Creche Integral Conveniada Indígena Especial,2.03,2.534,57.0,13.0
+2026,creche_integral_conveniada_quilombola_especial,Creche Integral Conveniada Quilombola Especial,2.03,2.534,57.0,13.0
+2026,creche_integral_conveniada_indigena_bilingue_de_surdos,Creche Integral Conveniada Indígena Bilíngue De Surdos,2.03,2.534,57.0,13.0
+2026,creche_integral_conveniada_quilombola_bilingue_de_surdos,Creche Integral Conveniada Quilombola Bilíngue De Surdos,2.03,2.534,57.0,13.0
+2026,pre_escola_integral_conveniada_indigena,Pré-Escola Integral Conveniada Indígena,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,pre_escola_integral_conveniada_quilombola,Pré-Escola Integral Conveniada Quilombola,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,pre_escola_integral_conveniada_indigena_especial,Pré-Escola Integral Conveniada Indígena Especial,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,pre_escola_integral_conveniada_quilombola_especial,Pré-Escola Integral Conveniada Quilombola Especial,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,pre_escola_integral_conveniada_indigena_bilingue_de_surdos,Pré-Escola Integral Conveniada Indígena Bilíngue De Surdos,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,pre_escola_integral_conveniada_quilombola_bilingue_de_surdos,Pré-Escola Integral Conveniada Quilombola Bilíngue De Surdos,1.9599999999999997,2.4499999999999997,63.0,19.0
+2026,educacao_especial_creche_indigena,Educação Especial - Creche Indígena,1.9599999999999997,2.2399999999999998,63.0,25.0
+2026,educacao_especial_creche_quilombola,Educação Especial - Creche Quilombola,1.9599999999999997,2.2399999999999998,63.0,25.0
+2026,educacao_bilingue_de_surdos_creche_indigena,Educação Bilíngue De Surdos - Creche Indígena,1.9599999999999997,2.2399999999999998,63.0,25.0
+2026,educacao_bilingue_de_surdos_creche_quilombola,Educação Bilíngue De Surdos - Creche Quilombola,1.9599999999999997,2.2399999999999998,63.0,25.0
+2026,educacao_especial_pre_escola_indigena,Educação Especial - Pré-Escola Indígena,1.9599999999999997,2.0999999999999996,63.0,59.0
+2026,educacao_especial_pre_escola_quilombola,Educação Especial - Pré-Escola Quilombola,1.9599999999999997,2.0999999999999996,63.0,59.0
+2026,educacao_bilingue_de_surdos_pre_escola_indigena,Educação Bilíngue De Surdos - Pré-Escola Indígena,1.9599999999999997,2.0999999999999996,63.0,59.0
+2026,educacao_bilingue_de_surdos_pre_escola_quilombola,Educação Bilíngue De Surdos - Pré-Escola Quilombola,1.9599999999999997,2.0999999999999996,63.0,59.0
+2026,educacao_especial_conveniada_creche_indigena,Educação Especial Conveniada - Creche Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_creche_quilombola,Educação Especial Conveniada - Creche Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_pre_escola_indigena,Educação Especial Conveniada - Pré-Escola Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_pre_escola_quilombola,Educação Especial Conveniada - Pré-Escola Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_fundamental_indigena,Educação Especial Conveniada - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_fundamental_quilombola,Educação Especial Conveniada - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_fundamental_indigena,Educação Especial - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_fundamental_quilombola,Educação Especial - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_medio_indigena,Educação Especial Conveniada - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_medio_quilombola,Educação Especial Conveniada - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_medio_indigena,Educação Especial - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_medio_quilombola,Educação Especial - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_fundamental_indigena,Educação Especial Conveniada - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_fundamental_quilombola,Educação Especial Conveniada - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_fundamental_indigena,Educação Especial - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_fundamental_quilombola,Educação Especial - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_medio_indigena,Educação Especial Conveniada - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_medio_quilombola,Educação Especial Conveniada - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_medio_indigena,Educação Especial - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_medio_quilombola,Educação Especial - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_fundamental_indigena,Educação Bilíngue De Surdos- Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_fundamental_quilombola,Educação Bilíngue De Surdos - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_medio_indigena,Educação Bilíngue De Surdos - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_medio_quilombola,Educação Bilíngue De Surdos - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_indigena,Educação Bilíngue De Surdos - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_quilombola,Educação Bilíngue De Surdos - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_medio_indigena,Educação Bilíngue De Surdos - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_medio_quilombola,Educação Bilíngue De Surdos - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_creche_indigena,Educação Bilígue De Surdos Conveniada - Creche Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_creche_quilombola,Educação Bilígue De Surdos Conveniada - Creche Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_pre_escola_indigena,Educação Bilígue De Surdos Conveniada - Pré-Escola Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_pre_escola_quilombola,Educação Bilígue De Surdos Conveniada - Pré-Escola Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_fundamental_indigena,Educação Bilígue De Surdos Conveniada - Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_fundamental_quilombola,Educação Bilígue De Surdos Conveniada - Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_medio_indigena,Educação Bilígue De Surdos Conveniada - Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdosconveniada_medio_quilombola,Educação Bilígue De Surdosconveniada - Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_eja_fundamental_indigena,Educação Bilígue De Surdos Conveniada - Eja Fundamental Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_eja_fundamental_quilombola,Educação Bilígue De Surdos Conveniada - Eja Fundamental Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_eja_medio_indigena,Educação Bilígue De Surdos Conveniada - Eja Médio Indígena,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_biligue_de_surdos_conveniada_eja_medio_quilombola,Educação Bilígue De Surdos Conveniada - Eja Médio Quilombola,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_fundamental_indigena_alternancia,Educação Especial - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_fundamental_quilombola_alternancia,Educação Especial - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_medio_indigena_alternancia,Educação Especial - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_eja_medio_quilombola_alternancia,Educação Especial - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_fundamental_indigena_alternancia,Educação Especial Conveniada - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_fundamental_quilombola_alternancia,Educação Especial Conveniada - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_medio_indigena_alternancia,Educação Especial Conveniada - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_especial_conveniada_eja_medio_quilombola_alternancia,Educação Especial Conveniada - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_indigena_alternancia,Educação Bilíngue De Surdos - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_quilombola_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_medio_indigena_alternancia,Educação  Bilíngue De Surdos - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_eja_medio_quilombola_alternancia,Educação  Bilíngue De Surdos - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_fundamental_indigena_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_fundamental_quilombola_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_medio_indigena_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Indígena Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_medio_quilombola_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Quilombola Alternância,1.9599999999999997,1.9599999999999997,63.0,93.0
+2026,creche_integral_publica_campo,Creche Integral Pública Campo,1.7825,2.1849999999999996,133.0,31.0
+2026,creche_integral_publica_campo_especial,Creche Integral Pública Campo Especial,1.7825,2.1849999999999996,133.0,31.0
+2026,creche_integral_publica_campo_bilingue_de_surdos,Creche Integral Pública Campo Bilíngue De Surdos,1.7825,2.1849999999999996,133.0,31.0
+2026,creche_parcial_publica_indigena,Creche Parcial Pública Indígena,1.75,2.2399999999999998,136.0,25.0
+2026,creche_parcial_publica_quilombola,Creche Parcial Pública Quilombola,1.75,2.2399999999999998,136.0,25.0
+2026,ensino_medio_parcial_indigena,Ensino Médio Parcial Indígena,1.75,1.75,136.0,163.0
+2026,ensino_medio_parcial_quilombola,Ensino Médio Parcial Quilombola,1.75,1.75,136.0,163.0
+2026,ensino_medio_integral_campo,Ensino Médio Integral Campo,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_alternancia,Ensino Médio Integral Campo Alternância,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_conveniada_especial,Ensino Médio Integral Campo Conveniada Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_especial,Ensino Médio Integral Campo Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_bilingue_de_surdos,Ensino Médio Integral Campo Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_publica_alternancia_especial,Ensino Médio Integral Campo Pública Alternância Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Campo Pública Alternância Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_conveniada_alternancia,Ensino Médio Integral Campo Conveniada Alternância,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_conveniada_alternancia_especial,Ensino Médio Integral Campo Conveniada Alternância Especial,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_conveniada_alternancia_bilingue_de_surdos,Ensino Médio Integral Campo Conveniada Alternância Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,ensino_medio_integral_campo_conveniada_bilingue_de_surdos,Ensino Médio Integral Campo Conveniada Bilíngue De Surdos,1.7479999999999998,1.7479999999999998,140.0,168.0
+2026,pre_escola_integral_publica_campo,Pré-Escola Integral Pública Campo,1.7249999999999999,2.162,151.0,34.0
+2026,pre_escola_integral_publica_campo_especial,Pré-Escola Integral Pública Campo Especial,1.7249999999999999,2.162,151.0,34.0
+2026,pre_escola_integral_publica_campo_bilingue_de_surdos,Pré-Escola Integral Pública Campo Bilíngue De Surdos,1.7249999999999999,2.162,151.0,34.0
+2026,ensino_fundamental_integral_campo,Ensino Fundamental Integral Campo,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_alternancia,Ensino Fundamental Integral Campo Alternância,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_especial,Ensino Fundamental Integral Campo Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_bilingue_de_surdos,Ensino Fundamental Integral Campo Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_conveniada_especial,Ensino Fundamental Integral Campo Conveniada Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_alternancia_publica_especial,Ensino Fundamental Integral Campo Alternância Pública Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Campo Alternância Pública Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_conveniada_alternancia,Ensino Fundamental Integral Campo Conveniada Alternância,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_alternancia_conveniada_especial,Ensino Fundamental Integral Campo Alternância Conveniada Especial,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_alternancia_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Campo Alternância Conveniada Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,ensino_fundamental_integral_campo_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Campo Conveniada Bilíngue De Surdos,1.7249999999999999,1.7249999999999999,151.0,179.0
+2026,creche_integral_conveniada_campo,Creche Integral Conveniada Campo,1.6674999999999998,2.0814999999999997,165.0,87.0
+2026,creche_integral_conveniada_campo_especial,Creche Integral Conveniada Campo Especial,1.6674999999999998,2.0814999999999997,165.0,87.0
+2026,creche_integral_conveniada_campo_bilingue_de_surdos,Creche Integral Conveniada Campo Bilíngue De Surdos,1.6674999999999998,2.0814999999999997,165.0,87.0
+2026,pre_escola_parcial_publica_indigena,Pré-Escola Parcial Pública Indígena,1.6099999999999999,2.0999999999999996,168.0,59.0
+2026,pre_escola_parcial_publica_quilombola,Pré-Escola Parcial Pública Quilombola,1.6099999999999999,2.0999999999999996,168.0,59.0
+2026,pre_escola_integral_conveniada_campo,Pré-Escola Integral Conveniada Campo,1.6099999999999999,2.0124999999999997,168.0,90.0
+2026,pre_escola_integral_conveniada_campo_especial,Pré-Escola Integral Conveniada Campo Especial,1.6099999999999999,2.0124999999999997,168.0,90.0
+2026,pre_escola_integral_conveniada_campo_bilingue_de_surdos,Pré-Escola Integral Conveniada Campo Bilíngue De Surdos,1.6099999999999999,2.0124999999999997,168.0,90.0
+2026,educacao_especial_creche_campo,Educação Especial - Creche Campo,1.6099999999999999,1.8399999999999999,168.0,155.0
+2026,educacao_bilingue_de_surdos_creche_campo,Educação Bilíngue De Surdos - Creche Campo,1.6099999999999999,1.8399999999999999,168.0,155.0
+2026,creche_parcial_conveniada_indigena,Creche Parcial Conveniada Indígena,1.6099999999999999,1.7779999999999998,168.0,161.0
+2026,creche_parcial_conveniada_quilombola,Creche Parcial Conveniada Quilombola,1.6099999999999999,1.7779999999999998,168.0,161.0
+2026,educacao_especial_pre_escola_campo,Educação Especial - Pré-Escola Campo,1.6099999999999999,1.7249999999999999,168.0,179.0
+2026,educacao_bilingue_de_surdos_pre_escola_campo,Educação Bilíngue De Surdos - Pré-Escola Campo,1.6099999999999999,1.7249999999999999,168.0,179.0
+2026,educacao_especial_conveniada_creche_campo,Educação Especial Conveniada - Creche Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_pre_escola_campo,Educação Especial Conveniada - Pré-Escola Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_fundamental_campo,Educação Especial Conveniada - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_fundamental_campo,Educação Especial - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_medio_campo,Educação Especial Conveniada - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_medio_campo,Educação Especial - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_eja_fundamental_campo,Educação Especial Conveniada - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_eja_fundamental_campo,Educação Especial - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_eja_medio_campo,Educação Especial Conveniada - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_eja_medio_campo,Educação Especial - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_fundamental_campo,Educação Bilíngue De Surdos- Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_medio_campo,Educação Bilíngue De Surdos - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_campo,Educação Bilíngue De Surdos - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_eja_medio_campo,Educação Bilíngue De Surdos - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_creche_campo,Educação Bilígue De Surdos Conveniada - Creche Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_pre_escola_campo,Educação Bilígue De Surdos Conveniada - Pré-Escola Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_fundamental_campo,Educação Bilígue De Surdos Conveniada - Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_medio_campo,Educação Bilígue De Surdos Conveniada - Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_eja_fundamental_campo,Educação Bilígue De Surdos Conveniada - Eja Fundamental Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_biligue_de_surdos_conveniada_eja_medio_campo,Educação Bilígue De Surdos Conveniada - Eja Médio Campo,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_eja_fundamental_campo_alternancia,Educação Especial - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_eja_medio_campo_alternancia,Educação Especial - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_eja_fundamental_campo_alternancia,Educação Especial Conveniada - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_especial_conveniada_eja_medio_campo_alternancia,Educação Especial Conveniada - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_campo_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_eja_medio_campo_alternancia,Educação  Bilíngue De Surdos - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_fundamental_campo_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Fundamental Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,educacao_bilingue_de_surdos_conveniada_eja_medio_campo_alternancia,Educação  Bilíngue De Surdos Conveniada - Eja Médio Campo Alternância,1.6099999999999999,1.6099999999999999,168.0,195.0
+2026,creche_integral_publica,Creche Integral Pública,1.55,1.9,207.0,149.0
+2026,creche_integral_publica_especial,Creche Integral Pública Especial,1.55,1.9,207.0,149.0
+2026,creche_integral_publica_bilingue_de_surdos,Creche Integral Pública Bilíngue De Surdos,1.55,1.9,207.0,149.0
+2026,anos_finais_fundamental_indigena,Anos Finais Fundamental Indígena,1.54,1.54,210.0,226.0
+2026,anos_finais_fundamental_quilombola,Anos Finais Fundamental Quilombola,1.54,1.54,210.0,226.0
+2026,ensino_medio_integral,Ensino Médio Integral,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_publica_alternancia,Ensino Médio Integral Pública Alternância,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_conveniada_especial,Ensino Médio Integral Conveniada Especial,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_especial,Ensino Médio Integral Especial,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_bilingue_de_surdos,Ensino Médio Integral Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_publica_alternancia_especial,Ensino Médio Integral Pública Alternância Especial,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_publica_alternancia_bilingue_de_surdos,Ensino Médio Integral Pública Alternância Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2026,ensino_medio_integral_conveniada_bilingue_de_surdos,Ensino Médio Integral Conveniada Bilíngue De Surdos,1.52,1.52,212.0,228.0
+2026,pre_escola_integral_publica,Pré-Escola Integral Pública,1.5,1.88,220.0,152.0
+2026,pre_escola_integral_publica_especial,Pré-Escola Integral Pública Especial,1.5,1.88,220.0,152.0
+2026,pre_escola_integral_publica_bilingue_de_surdos,Pré-Escola Integral Pública Bilíngue De Surdos,1.5,1.88,220.0,152.0
+2026,ensino_fundamental_integral,Ensino Fundamental Integral,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_publica_alternancia,Ensino Fundamental Integral Pública Alternância,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_especial,Ensino Fundamental Integral Especial,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_bilingue_de_surdos,Ensino Fundamental Integral Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_conveniada_especial,Ensino Fundamental Integral Conveniada Especial,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_alternancia_publica_especial,Ensino Fundamental Integral Alternância Pública Especial,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_alternancia_publica_bilingue_de_surdos,Ensino Fundamental Integral Alternância Pública Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2026,ensino_fundamental_integral_conveniada_bilingue_de_surdos,Ensino Fundamental Integral Conveniada Bilíngue De Surdos,1.5,1.5,220.0,236.0
+2026,pre_escola_parcial_conveniada_indigena,Pré-Escola Parcial Conveniada Indígena,1.47,1.6239999999999999,231.0,193.0
+2026,pre_escola_parcial_conveniada_quilombola,Pré-Escola Parcial Conveniada Quilombola,1.47,1.6239999999999999,231.0,193.0
+2026,creche_integral_conveniada,Creche Integral Conveniada,1.45,1.81,233.0,158.0
+2026,creche_integral_conveniada_especial,Creche Integral Conveniada Especial,1.45,1.81,233.0,158.0
+2026,creche_integral_conveniada_bilingue_de_surdos,Creche Integral Conveniada Bilíngue De Surdos,1.45,1.81,233.0,158.0
+2026,creche_parcial_publica_campo,Creche Parcial Pública Campo,1.4375,1.8399999999999999,236.0,155.0
+2026,ensino_medio_parcial_campo,Ensino Médio Parcial Campo,1.4375,1.4375,236.0,248.0
+2026,pre_escola_integral_conveniada,Pré-Escola Integral Conveniada,1.4,1.75,238.0,163.0
+2026,pre_escola_integral_conveniada_especial,Pré-Escola Integral Conveniada Especial,1.4,1.75,238.0,163.0
+2026,pre_escola_integral_conveniada_bilingue_de_surdos,Pré-Escola Integral Conveniada Bilíngue De Surdos,1.4,1.75,238.0,163.0
+2026,educacao_especial_creche,Educação Especial - Creche ,1.4,1.6,238.0,223.0
+2026,educacao_bilingue_de_surdos_creche,Educação Bilíngue De Surdos - Creche,1.4,1.6,238.0,223.0
+2026,educacao_especial_pre_escola,Educação Especial - Pré-Escola ,1.4,1.5,238.0,236.0
+2026,educacao_bilingue_de_surdos_pre_escola,Educação Bilíngue De Surdos - Pré-Escola,1.4,1.5,238.0,236.0
+2026,anos_iniciais_fundamental_indigena,Anos Iniciais Fundamental Indígena,1.4,1.4,238.0,249.0
+2026,anos_iniciais_fundamental_quilombola,Anos Iniciais Fundamental Quilombola,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_creche,Educação Especial Conveniada - Creche ,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_pre_escola,Educação Especial Conveniada - Pré-Escola ,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_fundamental,Educação Especial Conveniada - Fundamental ,1.4,1.4,238.0,249.0
+2026,educacao_especial_fundamental,Educação Especial - Fundamental ,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_medio,Educação Especial Conveniada - Médio ,1.4,1.4,238.0,249.0
+2026,educacao_especial_medio,Educação Especial - Médio ,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_eja_fundamental,Educação Especial Conveniada - Eja Fundamental ,1.4,1.4,238.0,249.0
+2026,educacao_especial_eja_fundamental,Educação Especial - Eja Fundamental ,1.4,1.4,238.0,249.0
+2026,educacao_especial_conveniada_eja_medio,Educação Especial Conveniada - Eja Médio ,1.4,1.4,238.0,249.0
+2026,educacao_especial_eja_medio,Educação Especial - Eja Médio ,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_fundamental,Educação Bilíngue De Surdos - Fundamental,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_medio,Educação Bilíngue De Surdos - Médio,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_eja_fundamental,Educação Bilíngue De Surdos - Eja Fundamental,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_eja_medio,Educação Bilíngue De Surdos - Eja Médio,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_creche,Educação Bilígue De Surdos Conveniada - Creche,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_pre_escola,Educação Bilígue De Surdos Conveniada - Pré-Escola ,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_fundamental,Educação Bilígue De Surdos Conveniada - Fundamental,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_medio,Educação Bilígue De Surdos Conveniada - Médio,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_eja_fundamental,Educação Bilígue De Surdos Conveniada - Eja Fundamental,1.4,1.4,238.0,249.0
+2026,educacao_biligue_de_surdos_conveniada_eja_medio,Educação Bilígue De Surdos Conveniada - Eja Médio ,1.4,1.4,238.0,249.0
+2026,educacao_especial_eja_fundamental_alternancia,Educação Especial - Eja Fundamental Alternância,1.4,1.4,238.0,249.0
+2026,educacao_especial_eja_medio_alternancia,Educação Especial - Eja Médio Alternância,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_eja_fundamental_alternancia,Educação  Bilíngue De Surdos - Eja Fundamental Alternância,1.4,1.4,238.0,249.0
+2026,educacao_bilingue_de_surdos_eja_medio_alternancia,Educação  Bilíngue De Surdos - Eja Médio Alternância,1.4,1.4,238.0,249.0
+2026,aee_infantil,Aee - Infantil,1.4,1.4,238.0,249.0
+2026,aee_fundamental,Aee - Fundamental,1.4,1.4,238.0,249.0
+2026,aee_medio,Aee - Médio,1.4,1.4,238.0,249.0
+2026,aee_diferentes_etapas,Aee - Diferentes Etapas,1.4,1.4,238.0,249.0
+2026,eja_fundamental_indigena,Eja Fundamental Indígena,1.4,1.4,238.0,249.0
+2026,eja_fundamental_quilombola,Eja Fundamental Quilombola,1.4,1.4,238.0,249.0
+2026,eja_fundamental_indigena_alternancia,Eja Fundamental Indígena Alternância,1.4,1.4,238.0,249.0
+2026,eja_fundamental_quilombola_alternancia,Eja Fundamental Quilombola Alternância,1.4,1.4,238.0,249.0
+2026,eja_medio_indigena,Eja Médio Indígena,1.4,1.4,238.0,249.0
+2026,eja_medio_quilombola,Eja Médio Quilombola,1.4,1.4,238.0,249.0
+2026,eja_medio_indigena_alternancia,Eja Médio Indígena Alternância,1.4,1.4,238.0,249.0
+2026,eja_medio_quilombola_alternancia,Eja Médio Quilombola Alternância,1.4,1.4,238.0,249.0
+2026,ensino_medio_integrado_a_ed_profissional,Ensino Médio Integrado À Ed. Profissional,1.35,1.35,283.0,287.0
+2026,ensino_medio_integrado_a_ed_profissional_publica_alternancia,Ensino Médio Integrado À Ed. Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2026,ensino_medio_integrado_a_ed_profissional_alternancia,Ensino Médio Integrado À Ed. Profissional Alternância,1.35,1.35,283.0,287.0
+2026,eja_medio_integrado_a_ed_profissional,Eja Médio Integrado À Ed. Profissional,1.35,1.35,283.0,287.0
+2026,eja_medio_integrado_a_ed_profissional_publica_alternancia,Eja Médio Integrado À Ed. Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2026,eja_medio_integrado_a_ed_profissional_alternancia,Eja Médio Integrado À Ed. Profissional Alternância,1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_matricula_unica_itinerario_fgb,Itinerário De Formação Técnica E Profissional (Matrícula Única Itinerário+Fgb),1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_publica_alternancia,Itinerário De Formação Técnica E Profissional Pública Alternância,1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_alternancia,Itinerário De Formação Técnica E Profissional Alternância,1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_segunda_matricula,Itinerário De Formação Técnica E Profissional (Segunda Matrícula),1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_sistema_s,Itinerário De Formação Técnica E Profissional Sistema S,1.35,1.35,283.0,287.0
+2026,itinerario_de_formacao_tecnica_e_profissional_publicas,Itinerário De Formação Técnica E Profissional Públicas,1.35,1.35,283.0,287.0
+2026,concomitante_ao_ens_medio,Concomitante Ao Ens. Médio,1.35,1.35,283.0,287.0
+2026,concomitante_ao_ens_medio_publica_alternancia,Concomitante Ao Ens. Médio Pública Alternância,1.35,1.35,283.0,287.0
+2026,concomitante_ao_ens_medio_alternancia,Concomitante Ao Ens. Médio Alternância,1.35,1.35,283.0,287.0
+2026,concomitante_ao_ens_medio_sistema_s,Concomitante Ao Ens. Médio Sistema S,1.35,1.35,283.0,287.0
+2026,concomitante_ao_ens_medio_publicas,Concomitante Ao Ens. Médio Públicas,1.35,1.35,283.0,287.0
+2026,pre_escola_parcial_publica_campo,Pré-Escola Parcial Pública Campo,1.3224999999999998,1.7249999999999999,300.0,179.0
+2026,creche_parcial_conveniada_campo,Creche Parcial Conveniada Campo,1.3224999999999998,1.4605,300.0,247.0
+2026,anos_finais_fundamental_campo,Anos Finais Fundamental Campo,1.265,1.265,302.0,306.0
+2026,creche_parcial_publica,Creche Parcial Pública,1.25,1.6,303.0,223.0
+2026,ensino_medio_parcial,Ensino Médio Parcial,1.25,1.25,303.0,307.0
+2026,pre_escola_parcial_conveniada_campo,Pré-Escola Parcial Conveniada Campo,1.2075,1.3339999999999999,305.0,304.0
+2026,pre_escola_parcial_publica,Pré-Escola Parcial Pública,1.15,1.5,306.0,236.0
+2026,creche_parcial_conveniada,Creche Parcial Conveniada,1.15,1.27,306.0,305.0
+2026,anos_iniciais_fundamental_campo,Anos Iniciais Fundamental Campo,1.15,1.15,306.0,309.0
+2026,eja_fundamental_campo,Eja Fundamental Campo,1.15,1.15,306.0,309.0
+2026,eja_fundamental_campo_alternancia,Eja Fundamental Campo Alternância,1.15,1.15,306.0,309.0
+2026,eja_medio_campo,Eja Médio Campo,1.15,1.15,306.0,309.0
+2026,eja_medio_campo_alternancia,Eja Médio Campo Alternância,1.15,1.15,306.0,309.0
+2026,anos_finais_fundamental,Anos Finais Fundamental,1.1,1.1,313.0,314.0
+2026,pre_escola_parcial_conveniada,Pré-Escola Parcial Conveniada,1.05,1.16,314.0,308.0
+2026,anos_iniciais_fundamental,Anos Iniciais Fundamental,1.0,1.0,315.0,315.0
+2026,eja_fundamental,Eja Fundamental,1.0,1.0,315.0,315.0
+2026,eja_medio,Eja Médio,1.0,1.0,315.0,315.0
+2026,eja_fundamental_alternancia,Eja Fundamental Alternância,1.0,1.0,315.0,315.0
+2026,eja_medio_alternancia,Eja Médio Alternância,1.0,1.0,315.0,315.0
