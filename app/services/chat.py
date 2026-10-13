@@ -20,7 +20,8 @@ Não escolha ano, rede ou indicador quando a consulta vier ambígua. Se faltar o
 Separe três coisas: valor oficial importado, resultado simulado e a sua interpretação.
 Uma base não homologada não é repasse oficial. Simulação não é previsão de repasse.
 Diferença observada não é causa. Se causa_demonstravel for falso, não invente o motivo da mudança.
-Para transferência de matrículas entre etapas, chame consultar_ponderacoes uma única vez. Compare os pesos. Peso maior aumenta a matrícula ponderada e pode alterar a participação no fundo, mas não prova que o repasse sobe. Não execute simulação e não ofereça criar um cenário. Oriente a tela Município para ver o número.
+Quando a pergunta for o valor de matrículas VAAF ponderadas, VAAF por aluno ou recursos VAAF de um município, chame consultar_municipio uma vez e copie resultado_tela. Matrículas VAAF (ponderadas) é matriculas_vaaf. VAAF por aluno é vaaf_final. Recursos VAAF totais é recursos_vaaf_final. Use o campo exibicao. valores_oficiais são insumos importados e não substituem esses indicadores. Não calcule nem invente o número.
+Quando a pergunta for quanto muda o VAAF, o repasse ou os recursos se alunos passarem de uma etapa para outra, chame simular_transferencia uma única vez, com nome, ano, origem, destino e alunos. Responda só com os números dessa ferramenta: rede, etapas, pesos, alunos movidos, variação de vaaf_final, de recursos_vaaf e de recursos_fundeb. Se houver aviso, reproduza-o: a rede pedida pode não ter essas matrículas e o cálculo ter sido feito na rede estadual. Não troque a etapa escolhida pela ferramenta e não invente valor. Use consultar_ponderacoes apenas quando pedirem os pesos, sem quantidade de alunos.
 Se a ferramenta devolver ambiguo ou nao_encontrado, pare e pergunte. Não repita a mesma consulta.
 Cite exercício, versão da base, cenário e documento quando a ferramenta os devolver.
 Não peça nem repita CPF, senha ou chave."""
@@ -64,6 +65,73 @@ def extrair_chamadas_texto(conteudo: str) -> tuple[str, list[dict]]:
     return limpo, chamadas
 
 
+_MOVIMENTO = re.compile(r"transfer|tirar|mover|passar|aument|reduz", re.IGNORECASE)
+_CIDADE_ANO = re.compile(
+    r"(?:cidade|munic[ií]pio)\s+de\s+(.+?)\s+(?:no\s+ano(?:\s+de)?|em)\s+(20\d{2})",
+    re.IGNORECASE,
+)
+_INDICADOR = re.compile(r"valor|quanto|matr[ií]cula|vaaf|vaat|recursos", re.IGNORECASE)
+_ORDEM_TELA = (
+    "matriculas_vaaf",
+    "matriculas_vaat",
+    "vaaf_final",
+    "recursos_vaaf_final",
+    "complemento_vaaf",
+)
+
+
+def pergunta_de_indicador(mensagem: str) -> tuple[str, int] | None:
+    """Pergunta pelo número atual de uma rede. Transferência de alunos fica com o modelo."""
+    if not mensagem or _MOVIMENTO.search(mensagem) or not _INDICADOR.search(mensagem):
+        return None
+    achado = _CIDADE_ANO.search(mensagem)
+    if not achado:
+        return None
+    nome = achado.group(1).strip(" .?")
+    if len(nome) < 3:
+        return None
+    return nome, int(achado.group(2))
+
+
+def texto_da_consulta_municipal(resultado: dict) -> str | None:
+    if not resultado:
+        return None
+    if resultado.get("motivo") == "ambiguo":
+        linhas = ["Há mais de uma rede com esse nome. Informe qual delas:"]
+        for candidato in resultado.get("candidatos") or []:
+            linhas.append(
+                f"- {candidato.get('name') or candidato.get('nome')} "
+                f"({candidato.get('uf')}), rede {candidato.get('network') or 'não informada'}, "
+                f"IBGE {candidato.get('ibge')}"
+            )
+        return "\n".join(linhas)
+    if resultado.get("motivo") == "nao_encontrado":
+        return "Não encontrei essa rede nesse exercício."
+    tela = resultado.get("resultado_tela") or {}
+    indicadores = tela.get("indicadores") or {}
+    if not indicadores:
+        return None
+    ente = resultado.get("ente") or {}
+    nome = ente.get("name") or ente.get("nome") or "Rede"
+    linhas = [
+        f"{nome} ({ente.get('uf') or ''}), {ente.get('network') or 'rede municipal'}, exercício {resultado.get('ano_exercicio')}.",
+        "Números da tela Simular, sem alteração de matrículas.",
+        "",
+    ]
+    for chave in _ORDEM_TELA:
+        item = indicadores.get(chave)
+        if not item:
+            continue
+        linhas.append(f"- {item['rotulo']}: {item['exibicao']}")
+    if resultado.get("homologada") is False:
+        linhas.append("")
+        linhas.append(
+            f"A base {resultado.get('base_id')} não está homologada. "
+            "Estes números são o resultado do simulador, não o repasse oficial publicado."
+        )
+    return "\n".join(linhas)
+
+
 def _referencias(resultados: list[dict]) -> list[dict]:
     saida = []
     for item in resultados:
@@ -86,6 +154,26 @@ def _referencias(resultados: list[dict]) -> list[dict]:
                 "referencia": {"caminho": trecho.get("caminho"), "versao": trecho.get("versao")},
             })
     return saida
+
+
+def _entregar(conversa_id, texto, evidencias, modelo, uso, inicio, situacao="ok", erro=None) -> dict:
+    duracao = int((time.perf_counter() - inicio) * 1000)
+    mensagem_id = repositorio.acrescentar_mensagem(conversa_id, "assistant", texto)
+    repositorio.registrar_evidencias(mensagem_id, evidencias)
+    repositorio.registrar_chamada(
+        mensagem_id,
+        modelo=modelo,
+        uso=uso,
+        duracao_ms=duracao,
+        situacao=situacao,
+        erro=erro,
+    )
+    return {
+        "conversa_id": conversa_id,
+        "resposta": texto,
+        "referencias": evidencias,
+        "situacao": situacao,
+    }
 
 
 def responder(usuario: UserRecord, pedido: PedidoChat) -> dict:
@@ -115,6 +203,24 @@ def responder(usuario: UserRecord, pedido: PedidoChat) -> dict:
         if item["role"] in ("user", "assistant")
     ]
     repositorio.acrescentar_mensagem(conversa_id, "user", pedido.mensagem)
+    inicio = time.perf_counter()
+    consulta = pergunta_de_indicador(pedido.mensagem)
+    if consulta:
+        nome, ano = consulta
+        argumentos = {"nome": nome, "ano": ano}
+        if contexto.get("uf"):
+            argumentos["uf"] = contexto["uf"]
+        resultado = executar("consultar_municipio", argumentos, usuario)
+        texto = texto_da_consulta_municipal(resultado)
+        if texto:
+            return _entregar(
+                conversa_id,
+                texto,
+                _referencias([resultado]),
+                modelo,
+                {},
+                inicio,
+            )
     mensagens = [
         {"role": "system", "content": SISTEMA},
         {"role": "system", "content": "Contexto selecionado pelo usuário, ainda não verificado: " + json.dumps(contexto, ensure_ascii=False)},
@@ -122,7 +228,6 @@ def responder(usuario: UserRecord, pedido: PedidoChat) -> dict:
         {"role": "user", "content": pedido.mensagem},
     ]
     evidencias = []
-    inicio = time.perf_counter()
     situacao = "ok"
     erro = None
     uso = {}
@@ -182,20 +287,4 @@ def responder(usuario: UserRecord, pedido: PedidoChat) -> dict:
         situacao = exc.situacao
         erro = exc.mensagem
         texto = exc.mensagem
-    duracao = int((time.perf_counter() - inicio) * 1000)
-    mensagem_id = repositorio.acrescentar_mensagem(conversa_id, "assistant", texto)
-    repositorio.registrar_evidencias(mensagem_id, evidencias)
-    repositorio.registrar_chamada(
-        mensagem_id,
-        modelo=modelo_efetivo,
-        uso=uso,
-        duracao_ms=duracao,
-        situacao=situacao,
-        erro=erro,
-    )
-    return {
-        "conversa_id": conversa_id,
-        "resposta": texto,
-        "referencias": evidencias,
-        "situacao": situacao,
-    }
+    return _entregar(conversa_id, texto, evidencias, modelo_efetivo, uso, inicio, situacao, erro)

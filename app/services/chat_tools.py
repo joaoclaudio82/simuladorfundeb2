@@ -155,7 +155,69 @@ def consultar_base(argumentos: dict, _usuario: UserRecord, *, engine=None) -> di
     })
 
 
-def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None) -> dict:
+_ROTULOS_TELA = (
+    ("matriculas_vaaf", "Matrículas VAAF (ponderadas)", False),
+    ("matriculas_vaat", "Matrículas VAAT (ponderadas)", False),
+    ("vaaf_final", "VAAF por aluno", False),
+    ("recursos_vaaf_final", "Recursos VAAF totais", True),
+    ("complemento_vaaf", "Complementação VAAF", True),
+    ("recursos_vaaf", "Receita da contribuição de estados e municípios ao Fundeb", True),
+    ("recursos_fundeb", "Receita Total do Fundeb", True),
+)
+
+
+def _exibir_como_tela(valor: float, dinheiro: bool) -> str:
+    if dinheiro:
+        texto = f"{int(round(valor)):,}".replace(",", ".")
+        return f"R$ {texto}"
+    numero = round(float(valor), 2)
+    inteiro, frac = f"{numero:.2f}".split(".")
+    sinal = "-" if inteiro.startswith("-") else ""
+    inteiro = f"{abs(int(inteiro)):,}".replace(",", ".")
+    if frac == "00":
+        return f"{sinal}{inteiro}"
+    return f"{sinal}{inteiro},{frac}"
+
+
+def _resultado_da_tela(ano, ibge: int, dataset) -> dict | None:
+    if dataset is None:
+        from app.ingestion.fundeb_dataset import carregar_dataset
+
+        dataset = carregar_dataset(int(ano))
+    tabela = getattr(dataset, "cenario_atual", None)
+    if tabela is None or not len(tabela) or "ibge" not in getattr(tabela, "columns", []):
+        return None
+    linha = tabela.loc[tabela["ibge"] == int(ibge)]
+    if linha.empty:
+        return None
+    registro = linha.iloc[0]
+    indicadores = {}
+    for chave, rotulo, dinheiro in _ROTULOS_TELA:
+        if chave not in tabela.columns or registro.get(chave) is None:
+            continue
+        valor = float(registro[chave])
+        indicadores[chave] = {
+            "rotulo": rotulo,
+            "valor": round(valor, 2),
+            "exibicao": _exibir_como_tela(valor, dinheiro),
+        }
+    if not indicadores:
+        return None
+    return {
+        "tipo_dado": "resultado_simulador",
+        "sem_alteracao_de_matriculas": True,
+        "indicadores": indicadores,
+        "leitura": (
+            "Estes são os números da tela municipal no botão Simular, sem alterar matrículas. "
+            "Matrículas VAAF (ponderadas) é matriculas_vaaf. "
+            "VAAF por aluno é vaaf_final. "
+            "Recursos VAAF totais é recursos_vaaf_final. "
+            "valores_oficiais.recursos_vaaf é a receita de contribuição do ente e não é esse total."
+        ),
+    }
+
+
+def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None, dataset=None) -> dict:
     nome = (argumentos.get("nome") or argumentos.get("municipio") or "").strip()
     ano = argumentos.get("ano")
     if not nome or ano is None:
@@ -181,9 +243,10 @@ def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None) 
         exatas = list(conn.execute(
             consulta.where(entities.c.name.ilike(seguro, escape="\\")).limit(8)
         ).mappings())
-        linhas = exatas or list(conn.execute(
+        parciais = [] if exatas else list(conn.execute(
             consulta.where(entities.c.name.ilike(f"%{seguro}%", escape="\\")).limit(8)
         ).mappings())
+        linhas = exatas or parciais or _candidatos_sem_acento(conn, consulta, nome)
         if len(linhas) != 1:
             return {
                 "encontrado": False,
@@ -200,7 +263,13 @@ def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None) 
             )
         ).scalar()
     valores = json.loads(financeiro) if financeiro else {}
-    return limpar({
+    tela = None
+    if dataset is not None or engine is None:
+        try:
+            tela = _resultado_da_tela(ano, ente["ibge"], dataset)
+        except Exception:
+            tela = None
+    resposta = {
         "encontrado": True,
         "tipo_dado": "oficial_importado",
         "ano_exercicio": ano,
@@ -209,7 +278,10 @@ def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None) 
         "situacao": base.get("situacao"),
         "ente": ente,
         "valores_oficiais": _numeros(valores),
-    })
+    }
+    if tela:
+        resposta["resultado_tela"] = tela
+    return limpar(resposta)
 
 
 def _cenario_visivel(conn, cenario_id: str, usuario: UserRecord):
@@ -302,6 +374,17 @@ def comparar_simulacoes(argumentos: dict, usuario: UserRecord, *, engine=None) -
     })
 
 
+def _candidatos_sem_acento(conn, consulta, nome: str) -> list:
+    alvo = _sem_acento(nome)
+    if len(alvo) < 3:
+        return []
+    linhas = list(conn.execute(consulta).mappings())
+    exatas = [linha for linha in linhas if _sem_acento(linha["name"]) == alvo]
+    if exatas:
+        return exatas[:8]
+    return [linha for linha in linhas if alvo in _sem_acento(linha["name"])][:8]
+
+
 def _sem_acento(texto: str) -> str:
     return "".join(
         c for c in unicodedata.normalize("NFD", texto.lower()) if unicodedata.category(c) != "Mn"
@@ -379,6 +462,236 @@ def consultar_ponderacoes(argumentos: dict, _usuario: UserRecord, *, engine=None
     })
 
 
+_EXTRAS_ETAPA = (
+    "campo", "indigena", "quilombola", "especial", "eja", "aee",
+    "bilingue", "surdos", "conveniada", "alternancia", "concomitante",
+    "itinerario", "sistema",
+)
+_SINONIMOS_ETAPA = {
+    "tecnico": ("tecnico", "tecnica", "profissional"),
+    "tecnica": ("tecnico", "tecnica", "profissional"),
+    "profissional": ("tecnico", "tecnica", "profissional"),
+}
+_METRICAS_TRANSFERENCIA = (
+    "vaaf_final",
+    "matriculas_vaaf",
+    "recursos_vaaf",
+    "recursos_vaaf_final",
+    "complemento_vaaf",
+    "recursos_fundeb",
+)
+
+
+def _grupos_termo(termo: str) -> list[set[str]]:
+    grupos = []
+    for palavra in _sem_acento(termo).split():
+        if len(palavra) < 3:
+            continue
+        grupos.append(set(_SINONIMOS_ETAPA.get(palavra, (palavra,))))
+    return grupos
+
+
+def escolher_etapa(termo: str, opcoes: list[dict]) -> dict | None:
+    """Escolhe a etapa real mais próxima. 'Médio' sem o adjetivo integral fica no parcial."""
+    grupos = _grupos_termo(termo)
+    if not grupos:
+        return None
+    consulta = " ".join(palavra for grupo in grupos for palavra in grupo)
+    melhor = None
+    for opcao in opcoes:
+        nome = _sem_acento(opcao["nome"])
+        acertos = sum(1 for grupo in grupos if any(token in nome for token in grupo))
+        if not acertos:
+            continue
+        penalidade = 0
+        for extra in _EXTRAS_ETAPA:
+            if extra in nome and extra not in consulta:
+                penalidade += 8
+        if "integral" in nome and "integral" not in consulta:
+            penalidade += 12
+        if "parcial" in nome and "integral" in consulta and "parcial" not in consulta:
+            penalidade += 12
+        chave = (acertos, -penalidade, float(opcao.get("alunos") or 0))
+        if melhor is None or chave > melhor[0]:
+            melhor = (chave, opcao)
+    return dict(melhor[1]) if melhor else None
+
+
+def _opcoes_com_estoque(ds, ibge: int) -> list[dict]:
+    linha = ds.matriculas.loc[ds.matriculas["ibge"] == ibge]
+    if linha.empty:
+        return []
+    registro = linha.iloc[0]
+    pesos = ds.pesos.set_index("etapa")
+    opcoes = []
+    for etapa in ds.etapas:
+        if etapa not in ds.matriculas.columns:
+            continue
+        alunos = float(registro.get(etapa) or 0)
+        if alunos <= 0:
+            continue
+        peso = pesos.loc[etapa] if etapa in pesos.index else None
+        opcoes.append({
+            "codigo": etapa,
+            "nome": ds.etapas_nomes.get(etapa, etapa),
+            "alunos": alunos,
+            "peso_vaaf": None if peso is None else round(float(peso["peso_vaaf"]), 4),
+            "peso_vaat": None if peso is None else round(float(peso["peso_vaat"]), 4),
+        })
+    return opcoes
+
+
+def _entes_por_nome(ds, nome: str, uf: str | None, ibge):
+    tabela = ds.complementar
+    if ibge:
+        return tabela[tabela["ibge"] == int(ibge)]
+    alvo = _sem_acento(nome)
+    nomes = tabela["nome"].map(lambda valor: _sem_acento(str(valor)))
+    achados = tabela[nomes == alvo]
+    if uf:
+        achados = achados[achados["uf"].astype(str).str.upper() == str(uf).upper()]
+    return achados
+
+
+def _ente_estadual(ds, uf: str):
+    tabela = ds.complementar
+    estaduais = tabela[(tabela["uf"] == uf) & (tabela["ibge"] < 100)]
+    if estaduais.empty:
+        return None
+    return estaduais.iloc[0]
+
+
+def _simular_matriz(ds, matriculas, simulador):
+    if simulador is not None:
+        return simulador(matriculas)
+    from app.domain.calculo.motor import simula_fundeb
+
+    padroes = ds.defaults_complementacao or {}
+    return simula_fundeb(
+        dados_matriculas=matriculas,
+        dados_complementar=ds.complementar,
+        dados_peso=ds.pesos,
+        complementacao_vaaf=float(padroes.get("vaaf") or 0),
+        complementacao_vaat=float(padroes.get("vaat") or 0),
+        complementacao_vaar=float(padroes.get("vaar") or 0),
+        max_nse=1.1,
+        min_nse=1.0,
+        max_nf=1.0,
+        min_nf=1.0,
+        modo_ponderador=ds.modo_ponderador,
+    )
+
+
+def _recortar(resultado, ibge: int) -> dict:
+    linha = resultado.loc[resultado["ibge"] == ibge]
+    if linha.empty:
+        return {}
+    registro = linha.iloc[0]
+    return {
+        chave: round(float(registro[chave]), 2)
+        for chave in _METRICAS_TRANSFERENCIA
+        if chave in resultado.columns and registro.get(chave) is not None
+    }
+
+
+def simular_transferencia(argumentos: dict, _usuario: UserRecord, *, engine=None, dataset=None, simulador=None) -> dict:
+    nome = (argumentos.get("nome") or argumentos.get("municipio") or "").strip()
+    origem_termo = (argumentos.get("origem") or "").strip()
+    destino_termo = (argumentos.get("destino") or "").strip()
+    try:
+        ano = _inteiro(argumentos.get("ano"))
+        alunos = float(argumentos.get("alunos"))
+    except (TypeError, ValueError):
+        ano, alunos = None, 0
+    if not nome or ano is None or not origem_termo or not destino_termo or alunos <= 0:
+        return {
+            "encontrado": False,
+            "motivo": "Informe o município, o exercício, a etapa de origem, a etapa de destino e a quantidade de alunos.",
+        }
+    if dataset is None:
+        from app.ingestion.fundeb_dataset import carregar_dataset
+
+        try:
+            dataset = carregar_dataset(ano)
+        except ValueError as exc:
+            return {"encontrado": False, "motivo": str(exc)}
+    if not getattr(dataset, "simulacao_habilitada", True):
+        return {"encontrado": False, "motivo": f"A simulação de {ano} não está habilitada nesta base."}
+    entes = _entes_por_nome(dataset, nome, argumentos.get("uf"), argumentos.get("ibge"))
+    if len(entes) != 1:
+        return {
+            "encontrado": False,
+            "motivo": "ambiguo" if len(entes) > 1 else "nao_encontrado",
+            "candidatos": [
+                {"ibge": int(linha.ibge), "uf": linha.uf, "nome": linha.nome}
+                for linha in entes.head(8).itertuples()
+            ],
+        }
+    pedido = entes.iloc[0]
+    aviso = None
+    ente = pedido
+    origem = escolher_etapa(origem_termo, _opcoes_com_estoque(dataset, int(pedido.ibge)))
+    destino = escolher_etapa(destino_termo, _opcoes_com_estoque(dataset, int(pedido.ibge)))
+    if origem is None or destino is None or origem["codigo"] == destino["codigo"]:
+        estadual = _ente_estadual(dataset, str(pedido.uf))
+        if estadual is not None and int(estadual.ibge) != int(pedido.ibge):
+            origem_estado = escolher_etapa(origem_termo, _opcoes_com_estoque(dataset, int(estadual.ibge)))
+            destino_estado = escolher_etapa(destino_termo, _opcoes_com_estoque(dataset, int(estadual.ibge)))
+            if origem_estado and destino_estado and origem_estado["codigo"] != destino_estado["codigo"]:
+                aviso = (
+                    f"A rede de {pedido.nome} (IBGE {int(pedido.ibge)}) não tem matrícula suficiente "
+                    f"em '{origem_termo}' e '{destino_termo}' em {ano}. "
+                    f"O cálculo usou a rede estadual de {estadual.nome} (IBGE {int(estadual.ibge)}), "
+                    "onde essas etapas estão registradas."
+                )
+                ente = estadual
+                origem, destino = origem_estado, destino_estado
+    if origem is None or destino is None or origem["codigo"] == destino["codigo"]:
+        return {
+            "encontrado": False,
+            "motivo": "nao_encontrado",
+            "ano_exercicio": ano,
+            "ente": {"ibge": int(pedido.ibge), "uf": pedido.uf, "nome": pedido.nome},
+            "leitura": "Nenhuma etapa com matrícula corresponde à origem e ao destino informados.",
+        }
+    movimentar = min(float(alunos), float(origem["alunos"]))
+    base = dataset.matriculas.copy()
+    etapas = [c for c in dataset.etapas if c in base.columns]
+    base[etapas] = base[etapas].astype("float64")
+    ajustada = base.copy()
+    indice = ajustada.index[ajustada["ibge"] == int(ente.ibge)][0]
+    ajustada.at[indice, origem["codigo"]] -= movimentar
+    ajustada.at[indice, destino["codigo"]] += movimentar
+    antes = _recortar(_simular_matriz(dataset, base, simulador), int(ente.ibge))
+    depois = _recortar(_simular_matriz(dataset, ajustada, simulador), int(ente.ibge))
+    variacao = {
+        chave: round(depois[chave] - antes[chave], 2)
+        for chave in antes
+        if chave in depois
+    }
+    return limpar({
+        "encontrado": True,
+        "tipo_dado": "resultado_simulado",
+        "causa_demonstravel": True,
+        "ano_exercicio": ano,
+        "aviso": aviso,
+        "ente": {"ibge": int(ente.ibge), "uf": ente.uf, "nome": ente.nome},
+        "origem": origem,
+        "destino": destino,
+        "alunos_pedidos": alunos,
+        "alunos_movidos": movimentar,
+        "total_de_alunos_conservado": True,
+        "antes": antes,
+        "depois": depois,
+        "variacao": variacao,
+        "leitura": (
+            "O motor completo foi reexecutado depois de mover os alunos, com o total da rede constante. "
+            "vaaf_final é o valor aluno-ano. recursos_vaaf é a receita do fundo antes do complemento da União. "
+            "recursos_fundeb é o total da rede."
+        ),
+    })
+
+
 def executar(nome: str, argumentos: dict, usuario: UserRecord, *, engine=None) -> dict:
     if nome == "consultar_base":
         resultado = consultar_base(argumentos or {}, usuario, engine=engine)
@@ -390,6 +703,8 @@ def executar(nome: str, argumentos: dict, usuario: UserRecord, *, engine=None) -
         resultado = comparar_simulacoes(argumentos or {}, usuario, engine=engine)
     elif nome == "consultar_ponderacoes":
         resultado = consultar_ponderacoes(argumentos or {}, usuario, engine=engine)
+    elif nome == "simular_transferencia":
+        resultado = simular_transferencia(argumentos or {}, usuario, engine=engine)
     elif nome == "buscar_documentacao":
         consulta = (argumentos or {}).get("consulta") or ""
         if len(consulta.strip()) < 3:
@@ -433,7 +748,12 @@ FERRAMENTAS = [
         "type": "function",
         "function": {
             "name": "consultar_municipio",
-            "description": "Ente e rede numa base, com valores oficiais importados. Não escolhe sozinho se houver mais de uma rede.",
+            "description": (
+                "Ente e rede numa base. resultado_tela traz os mesmos números do botão Simular "
+                "sem alterar matrículas: matrículas VAAF ponderadas, VAAF por aluno e recursos VAAF totais. "
+                "valores_oficiais são insumos importados e não substituem resultado_tela. "
+                "Não escolhe sozinho se houver mais de uma rede."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -490,6 +810,29 @@ FERRAMENTAS = [
                     "etapas": {"type": "array", "items": {"type": "string"}},
                 },
                 "required": ["ano", "etapas"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "simular_transferencia",
+            "description": (
+                "Move alunos de uma etapa para outra na base real e recalcula o FUNDEB. "
+                "Use para dizer quanto muda o VAAF ou o repasse. "
+                "Exemplo: 100 alunos de Fortaleza, do médio para o técnico, em 2025."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nome": {"type": "string"},
+                    "uf": {"type": "string"},
+                    "ano": {"type": "integer"},
+                    "origem": {"type": "string"},
+                    "destino": {"type": "string"},
+                    "alunos": {"type": "number"},
+                },
+                "required": ["nome", "ano", "origem", "destino", "alunos"],
             },
         },
     },

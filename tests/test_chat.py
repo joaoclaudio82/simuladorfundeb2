@@ -22,8 +22,18 @@ from app.db.schema import (
 )
 from app.integrations.openrouter import completar
 from app.services import chat as servico
-from app.services.chat import extrair_chamadas_texto
-from app.services.chat_tools import comparar_simulacoes, consultar_municipio, consultar_ponderacoes, consultar_simulacao, limpar
+from app.services.chat import extrair_chamadas_texto, pergunta_de_indicador, texto_da_consulta_municipal
+import pandas as pd
+
+from app.services.chat_tools import (
+    comparar_simulacoes,
+    consultar_municipio,
+    consultar_ponderacoes,
+    consultar_simulacao,
+    escolher_etapa,
+    limpar,
+    simular_transferencia,
+)
 
 
 def test_chamada_escrita_no_texto_nao_vai_para_o_usuario():
@@ -191,7 +201,55 @@ def test_municipio_ausente_e_ambiguo():
     )
     assert escolhido["encontrado"] is True
     assert escolhido["tipo_dado"] == "oficial_importado"
+    assert "resultado_tela" not in escolhido
     assert "senha" not in json.dumps(escolhido)
+
+
+def test_consulta_municipal_devolve_os_numeros_da_tela():
+    motor = _banco()
+    with motor.begin() as conn:
+        conn.execute(base_versions.insert().values(
+            version_id="v1",
+            base_id="fundeb-2024",
+            year=2024,
+            created_at="2024-01-01",
+            manifest=json.dumps({"homologada": False, "base_id": "fundeb-2024", "ano_exercicio": 2024}),
+            snapshot=b"x",
+            snapshot_sha256="d" * 64,
+            etl_sha256="e" * 64,
+            source_commit="abc",
+        ))
+        conn.execute(base_aliases.insert().values(base_id="fundeb-2024", version_id="v1"))
+        conn.execute(entities.insert().values(
+            version_id="v1", ibge=2307304, position=0, uf="CE", name="Juazeiro do Norte", network="municipal",
+        ))
+        conn.execute(financial_inputs.insert().values(
+            version_id="v1",
+            ibge=2307304,
+            values_json=json.dumps({"recursos_vaaf": 150612916.19, "nse": 1.01}),
+        ))
+    dataset = type("Base", (), {})()
+    dataset.cenario_atual = pd.DataFrame([{
+        "ibge": 2307304,
+        "matriculas_vaaf": 40297.27,
+        "matriculas_vaat": 42934.98,
+        "vaaf_final": 5361.43,
+        "recursos_vaaf_final": 216050955.87,
+        "recursos_vaaf": 150612916.2,
+    }])
+    saida = consultar_municipio(
+        {"nome": "Juazeiro do Norte", "ano": 2024},
+        _usuario(),
+        engine=motor,
+        dataset=dataset,
+    )
+    tela = saida["resultado_tela"]["indicadores"]
+    assert tela["matriculas_vaaf"]["exibicao"] == "40.297,27"
+    assert tela["vaaf_final"]["exibicao"] == "5.361,43"
+    assert tela["recursos_vaaf_final"]["exibicao"] == "R$ 216.050.956"
+    assert tela["recursos_vaaf_final"]["rotulo"] == "Recursos VAAF totais"
+    assert saida["valores_oficiais"]["recursos_vaaf"] == 150612916.19
+    assert "matriculas_vaaf" not in saida["valores_oficiais"]
 
 
 def test_ponderacoes_comparam_etapas_sem_afirmar_aumento_de_repasse():
@@ -227,6 +285,129 @@ def test_ponderacoes_comparam_etapas_sem_afirmar_aumento_de_repasse():
     primeiro = saida["grupos"][0]["etapas"][0]["nome"]
     assert primeiro == "Eja Médio"
     assert saida["grupos"][1]["etapas"][0]["peso_vaaf"] == 1.35
+
+
+def test_consulta_encontra_capital_com_acento():
+    motor = _banco()
+    with motor.begin() as conn:
+        conn.execute(base_versions.insert().values(
+            version_id="v1",
+            base_id="fundeb-2024",
+            year=2024,
+            created_at="2024-01-01",
+            manifest="{}",
+            snapshot=b"x",
+            snapshot_sha256="d" * 64,
+            etl_sha256="e" * 64,
+            source_commit="abc",
+        ))
+        conn.execute(base_aliases.insert().values(base_id="fundeb-2024", version_id="v1"))
+        conn.execute(entities.insert().values(
+            version_id="v1", ibge=2111300, position=0, uf="MA", name="SAO LUIS", network="rede municipal",
+        ))
+    dataset = type("Base", (), {})()
+    dataset.cenario_atual = pd.DataFrame([{
+        "ibge": 2111300,
+        "matriculas_vaaf": 119544.70,
+        "vaaf_final": 5361.43,
+        "recursos_vaaf_final": 640930514.76,
+    }])
+    saida = consultar_municipio(
+        {"nome": "São Luís", "ano": 2024},
+        _usuario(),
+        engine=motor,
+        dataset=dataset,
+    )
+    assert saida["encontrado"] is True
+    assert saida["ente"]["ibge"] == 2111300
+    assert saida["resultado_tela"]["indicadores"]["matriculas_vaaf"]["exibicao"] == "119.544,70"
+
+
+def test_pergunta_de_matriculas_responde_com_a_tela():
+    pergunta = "qual o valor de Matrículas VAAF (ponderadas) na cidade de Juazeiro do Norte no ano de 2024?"
+    assert pergunta_de_indicador(pergunta) == ("Juazeiro do Norte", 2024)
+    assert pergunta_de_indicador("se eu transferir 100 alunos de Fortaleza do médio para o técnico em 2025") is None
+    texto = texto_da_consulta_municipal({
+        "encontrado": True,
+        "ano_exercicio": 2024,
+        "base_id": "fundeb-2024",
+        "homologada": False,
+        "ente": {"name": "Juazeiro do Norte", "uf": "CE", "network": "municipal", "ibge": 2307304},
+        "resultado_tela": {
+            "indicadores": {
+                "matriculas_vaaf": {"rotulo": "Matrículas VAAF (ponderadas)", "exibicao": "40.297,27"},
+                "vaaf_final": {"rotulo": "VAAF por aluno", "exibicao": "5.361,43"},
+                "recursos_vaaf_final": {"rotulo": "Recursos VAAF totais", "exibicao": "R$ 216.050.956"},
+            }
+        },
+    })
+    assert "40.297,27" in texto
+    assert "5.361,43" in texto
+    assert "R$ 216.050.956" in texto
+    assert "36.107" not in texto
+    assert "|" not in texto
+
+
+def test_medio_sem_adjetivo_nao_escolhe_o_integral():
+    opcoes = [
+        {"codigo": "integral", "nome": "Ensino Médio Integral", "alunos": 127324},
+        {"codigo": "parcial", "nome": "Ensino Médio Parcial", "alunos": 98483},
+        {"codigo": "eja", "nome": "Eja Médio", "alunos": 8345},
+    ]
+    assert escolher_etapa("médio", opcoes)["codigo"] == "parcial"
+
+
+def test_transferencia_de_fortaleza_usa_a_rede_estadual_quando_o_municipio_nao_tem_a_etapa():
+    class Base:
+        simulacao_habilitada = True
+        modo_ponderador = "drec"
+        defaults_complementacao = {"vaaf": 1, "vaat": 1, "vaar": 0}
+        etapas = ["parcial", "tecnico"]
+        etapas_nomes = {
+            "parcial": "Ensino Médio Parcial",
+            "tecnico": "Ensino Médio Integrado À Ed. Profissional",
+        }
+        pesos = pd.DataFrame([
+            {"etapa": "parcial", "nome": "Ensino Médio Parcial", "peso_vaaf": 1.25, "peso_vaat": 1.25},
+            {"etapa": "tecnico", "nome": "Ensino Médio Integrado À Ed. Profissional", "peso_vaaf": 1.35, "peso_vaat": 1.35},
+        ])
+        complementar = pd.DataFrame([
+            {"ibge": 2304400, "uf": "CE", "nome": "Fortaleza"},
+            {"ibge": 23, "uf": "CE", "nome": "Ceará"},
+        ])
+        matriculas = pd.DataFrame([
+            {"ibge": 2304400, "parcial": 0, "tecnico": 0},
+            {"ibge": 23, "parcial": 1000, "tecnico": 500},
+        ])
+
+    def motor(matriculas, **_kwargs):
+        linha = matriculas.loc[matriculas["ibge"] == 23].iloc[0]
+        ponderado = float(linha["parcial"]) * 1.25 + float(linha["tecnico"]) * 1.35
+        return pd.DataFrame([{
+            "ibge": 23,
+            "vaaf_final": 10.0,
+            "matriculas_vaaf": ponderado,
+            "recursos_vaaf": ponderado * 10,
+            "recursos_vaaf_final": ponderado * 10,
+            "complemento_vaaf": 0.0,
+            "recursos_fundeb": ponderado * 10,
+        }])
+
+    saida = simular_transferencia(
+        {"nome": "Fortaleza", "ano": 2025, "origem": "médio", "destino": "técnico", "alunos": 100},
+        _usuario(),
+        dataset=Base(),
+        simulador=motor,
+    )
+    assert saida["encontrado"] is True
+    assert saida["ente"]["ibge"] == 23
+    assert saida["aviso"]
+    assert saida["origem"]["codigo"] == "parcial"
+    assert saida["destino"]["codigo"] == "tecnico"
+    assert saida["alunos_movidos"] == 100
+    assert saida["variacao"]["matriculas_vaaf"] == 10
+    assert saida["variacao"]["recursos_vaaf"] == 100
+    assert saida["causa_demonstravel"] is True
 
 
 def test_limpar_remove_credenciais():
