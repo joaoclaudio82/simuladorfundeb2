@@ -34,6 +34,30 @@ def test_no_non_postgresql_backend(url, monkeypatch):
         engine_for(url)
 
 
+def test_producao_exige_a_revisao_mais_recente(monkeypatch):
+    from sqlalchemy import create_engine
+    from app.db import session
+
+    revisoes = [
+        p.read_text(encoding="utf-8").split('revision = "', 1)[1].split('"', 1)[0]
+        for p in (Path(session.ROOT) / "migrations" / "versions").glob("*.py")
+    ]
+    assert session.head_revision() == max(revisoes)
+
+    monkeypatch.setenv("FUNDEB_ENV", "production")
+    for revisao, aceita in (("0001", False), (session.head_revision(), True)):
+        banco = create_engine("sqlite://")
+        with banco.begin() as conn:
+            conn.execute(text("CREATE TABLE alembic_version(version_num TEXT)"))
+            conn.execute(text("INSERT INTO alembic_version VALUES (:v)"), {"v": revisao})
+        monkeypatch.setattr(session, "engine_for", lambda _url, banco=banco: banco)
+        if aceita:
+            assert session.get_engine("postgresql+psycopg://x/y") is banco
+        else:
+            with pytest.raises(RuntimeError, match="migrate"):
+                session.get_engine("postgresql+psycopg://x/y")
+
+
 def test_missing_connection_does_not_create_sqlite(monkeypatch):
     monkeypatch.delenv("FUNDEB_DATABASE_URL", raising=False)
     monkeypatch.delenv("FUNDEB_DB_HOST", raising=False)

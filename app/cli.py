@@ -30,11 +30,11 @@ def main():
     sub.add_parser("verify-data", help="Conferir fontes, bases e quantidades no PostgreSQL")
     sub.add_parser("create-admin", help="Criar administrador sem senha em argumento de shell")
     args = parser.parse_args()
-    from app.db.session import migrate
+    from app.db.session import head_revision, migrate
 
     if args.command == "migrate":
         migrate()
-        result = {"revision": "0001"}
+        result = {"revision": head_revision()}
     elif args.command == "import-data":
         from app.ingestion.migrate import import_data
 

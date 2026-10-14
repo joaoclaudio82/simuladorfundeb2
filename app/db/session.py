@@ -15,13 +15,26 @@ def engine_for(url):
     return create_engine(url, pool_pre_ping=True, hide_parameters=True)
 
 
-def migrate(engine=None):
+def _alembic_config():
     from alembic.config import Config
+
+    config = Config(str(ROOT / "alembic.ini"))
+    config.set_main_option("script_location", str(ROOT / "migrations"))
+    return config
+
+
+@lru_cache(maxsize=1)
+def head_revision():
+    from alembic.script import ScriptDirectory
+
+    return ScriptDirectory.from_config(_alembic_config()).get_current_head()
+
+
+def migrate(engine=None):
     from alembic import command
 
     engine = engine or engine_for(database_url())
-    config = Config(str(ROOT / "alembic.ini"))
-    config.set_main_option("script_location", str(ROOT / "migrations"))
+    config = _alembic_config()
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
@@ -37,7 +50,7 @@ def get_engine(url=None):
                     revision = conn.execute(
                         text("SELECT version_num FROM alembic_version")
                     ).scalar()
-                if revision != "0001":
+                if revision != head_revision():
                     raise RuntimeError(
                         "Execute python -m app.cli migrate antes de iniciar a aplicação."
                     )
