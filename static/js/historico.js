@@ -17,7 +17,14 @@ async function showSavedScenario(id) {
   try {
     const data = await apiFetch(`/api/cenarios/${encodeURIComponent(id)}`);
     historyEl('history-result').hidden = false;
-    historyEl('result-info').textContent = `${data.metadados.base.base_id} · ${new Date(data.metadados.criado_em).toLocaleString('pt-BR')} · ${data.comparacao.recorte.descricao}`;
+    const ehLegadoReceita = data.metadados.modo_cenarios === 'legado_receita' || data.metadados.receita?.tipo === 'crescimento';
+    const rotuloModo = ehLegadoReceita
+      ? 'Modelo histórico (matrículas + hipótese de receita)'
+      : 'Cenários independentes de matrículas (receita constante)';
+    const cenariosResumo = data.metadados.cenarios
+      ? Object.entries(data.metadados.cenarios).map(([k, v]) => `${k}: ${v}`).join(' | ')
+      : '';
+    historyEl('result-info').textContent = `${data.metadados.base.base_id} · ${new Date(data.metadados.criado_em).toLocaleString('pt-BR')} · ${data.comparacao.recorte.descricao} · ${rotuloModo}${cenariosResumo ? ' · ' + cenariosResumo : ''}`;
     historyEl('result-warning').textContent = data.metadados.aviso;
     const exports = historyEl('result-exports'); exports.replaceChildren();
     for (const format of ['csv', 'xlsx', 'pdf']) {

@@ -348,6 +348,48 @@ def test_pergunta_de_matriculas_responde_com_a_tela():
     assert "|" not in texto
 
 
+def test_pergunta_de_vaat_com_nome_digitado_diferente():
+    pergunta = "municipio alto florestadoeste, qual foi o vaat por aluno do ano de 2026"
+    assert pergunta_de_indicador(pergunta) == ("alto florestadoeste", 2026)
+    motor = _banco()
+    with motor.begin() as conn:
+        conn.execute(base_versions.insert().values(
+            version_id="v1",
+            base_id="fundeb-2026",
+            year=2026,
+            created_at="2026-01-01",
+            manifest=json.dumps({"homologada": False, "base_id": "fundeb-2026", "ano_exercicio": 2026}),
+            snapshot=b"x",
+            snapshot_sha256="d" * 64,
+            etl_sha256="e" * 64,
+            source_commit="abc",
+        ))
+        conn.execute(base_aliases.insert().values(base_id="fundeb-2026", version_id="v1"))
+        for ibge, nome in ((1100015, "ALTA FLORESTA DOESTE"), (5100250, "ALTA FLORESTA")):
+            conn.execute(entities.insert().values(
+                version_id="v1", ibge=ibge, position=0, uf="RO", name=nome, network="rede municipal",
+            ))
+    dataset = type("Base", (), {})()
+    dataset.cenario_atual = pd.DataFrame([{
+        "ibge": 1100015,
+        "vaaf_final": 8254.65,
+        "vaat_final": 10447.26,
+        "recursos_vaat_final": 38565731.95,
+        "complemento_vaat": 0.0,
+    }])
+    saida = consultar_municipio({"nome": "alto florestadoeste", "ano": 2026}, _usuario(), engine=motor, dataset=dataset)
+    assert saida["encontrado"] is True
+    assert saida["ente"]["ibge"] == 1100015
+    assert saida["periodo_exibicao"] == "1 a 8/2026"
+    tela = saida["resultado_tela"]["indicadores"]
+    assert tela["vaat_final"] == {"rotulo": "VAAT por aluno", "valor": 10447.26, "exibicao": "10.447,26"}
+    assert tela["recursos_vaat_final"]["exibicao"] == "R$ 38.565.732"
+    texto = texto_da_consulta_municipal(saida)
+    assert "- VAAT por aluno: 10.447,26" in texto
+    assert "período 1 a 8/2026" in texto
+    assert "não está homologada" not in texto
+
+
 def test_medio_sem_adjetivo_nao_escolhe_o_integral():
     opcoes = [
         {"codigo": "integral", "nome": "Ensino Médio Integral", "alunos": 127324},
@@ -412,3 +454,75 @@ def test_transferencia_de_fortaleza_usa_a_rede_estadual_quando_o_municipio_nao_t
 
 def test_limpar_remove_credenciais():
     assert "cpf" not in limpar({"cpf": "1", "vaaf_final": 2})
+
+
+def test_consultar_simulacao_distingue_cenarios_independentes_e_historico():
+    from app.db.schema import scenario_results, scenarios
+    from app.services.chat_tools import comparar_simulacoes, consultar_simulacao
+
+    motor = _banco()
+    with motor.begin() as conn:
+        conn.execute(scenarios.insert().values(
+            id="sim_legado",
+            created_at="2024-01-01",
+            owner_cpf="11111111111",
+            base_id="fundeb-2026",
+            base_version=None,
+            engine_version="teste",
+            request_json=json.dumps({
+                "receita": {"tipo": "percentual", "valor": 10.0},
+                "ajustes": [{"ibge": 2304400, "categoria": "fundamental", "operacao": "acrescentar", "valor": 100}],
+            }),
+            snapshot=b"x",
+            snapshot_sha256="3" * 64,
+        ))
+        conn.execute(scenarios.insert().values(
+            id="sim_novo",
+            created_at="2024-01-02",
+            owner_cpf="11111111111",
+            base_id="fundeb-2026",
+            base_version=None,
+            engine_version="teste",
+            request_json=json.dumps({
+                "modo_cenarios": "matriculas_independentes",
+                "receita": {"tipo": "constante", "valor": 0.0},
+                "ajustes_por_cenario": {
+                    "B": [{"cenario": "B", "ibge": 2304400, "categoria": "fundamental", "operacao": "acrescentar", "valor": 100}],
+                    "C": [{"cenario": "C", "ibge": 2304400, "categoria": "fundamental", "operacao": "acrescentar", "valor": 200}],
+                },
+            }),
+            snapshot=b"x",
+            snapshot_sha256="6" * 64,
+        ))
+        for sid in ("sim_legado", "sim_novo"):
+            for variante, valor in (("A", 10), ("B", 12), ("C", 15)):
+                conn.execute(scenario_results.insert().values(
+                    scenario_id=sid,
+                    variant=variante,
+                    ibge=2304400,
+                    position=0,
+                    values_json=json.dumps({"vaaf_final": valor}),
+                ))
+
+    legado = consultar_simulacao({"cenario_id": "sim_legado", "ibge": 2304400}, _usuario(), engine=motor)
+    novo = consultar_simulacao({"cenario_id": "sim_novo", "ibge": 2304400}, _usuario(), engine=motor)
+    assert legado["modo_cenarios"] == "legado_receita"
+    assert "receita ampliada" in legado["cenarios_descricao"]["C"].lower()
+    assert novo["modo_cenarios"] == "matriculas_independentes"
+    assert "mesma receita da referência" in novo["cenarios_descricao"]["C"].lower()
+
+    comp_legado = comparar_simulacoes(
+        {"cenario_id": "sim_legado", "ibge": 2304400, "variante_a": "A", "variante_b": "C"},
+        _usuario(),
+        engine=motor,
+    )
+    comp_novo = comparar_simulacoes(
+        {"cenario_id": "sim_novo", "ibge": 2304400, "variante_a": "B", "variante_b": "C"},
+        _usuario(),
+        engine=motor,
+    )
+    assert comp_legado["modo_cenarios"] == "legado_receita"
+    assert "receita ampliada" in comp_legado["cenarios_comparados"]["C"].lower()
+    assert comp_novo["modo_cenarios"] == "matriculas_independentes"
+    assert "simulação 1" in comp_novo["cenarios_comparados"]["B"].lower()
+    assert "simulação 2" in comp_novo["cenarios_comparados"]["C"].lower()

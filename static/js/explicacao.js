@@ -81,19 +81,14 @@ html += '<div class="explicacao-mecanismo"><strong>Mecanismo VAAF:</strong> A co
   var difRVT = aRVT - oRVT, pctRVT = oRVT ? (difRVT / oRVT * 100) : 0;
   var difCVaat = ajust.complemento_vaat - orig.complemento_vaat;
   var pctCVaat = orig.complemento_vaat ? (difCVaat / orig.complemento_vaat * 100) : 0;
+  var oVP = orig.vaat_pre || 0, aVP = ajust.vaat_pre || 0;
+  var difVP = aVP - oVP, pctVP = oVP ? (difVP / oVP * 100) : 0;
   html += '<div class="explicacao-section"><h6><i class="fas fa-chart-line"></i> Impacto no VAAT (Valor Aluno Ano Total)</h6>';
+  html += _resultRow('VAAT antes da complementação', oVP, aVP, difVP, pctVP, false);
   html += _resultRow('VAAT por aluno', orig.vaat_final, ajust.vaat_final, difVaatFin, pctVaatFin, false);
   html += _resultRow('Recursos VAAT totais', oRVT, aRVT, difRVT, pctRVT, true);
   html += _resultRow('Complementação VAAT', orig.complemento_vaat, ajust.complemento_vaat, difCVaat, pctCVaat, true);
-html += '<div class="explicacao-mecanismo"><strong>Mecanismo VAAT:</strong> A complementação VAAT equaliza os <strong>entes individuais</strong> (~5.570) em âmbito nacional. ';
-    if (Math.abs(pctMatVaat) > 0.01) {
-    if (difMatVaat > 0) {
-      html += 'Com mais matrículas, o VAAT pré-complementação ';
-      html += (ajust.vaat_pre || 0) < (orig.vaat_pre || 0) ? '<strong>diminui</strong> (mais alunos dividindo mesmos recursos). ' : 'permanece estável. ';
-      html += 'O aumento pode resultar em <strong>mais recursos da União</strong>.';
-    } else html += 'Com menos matrículas, o VAAT pré-complementação tende a <strong>aumentar</strong>, mas o ente federado pode receber <strong>menos recursos totais</strong>.';
-  } else html += 'Sem alteração significativa, o VAAT permanece praticamente inalterado.';
-  html += '</div></div>';
+  html += '<div class="explicacao-mecanismo">' + _textoMecanismoVaat(orig, ajust, opts.ano, Math.abs(pctMatVaat) > 0.01) + '</div></div>';
 
   var difCVaar = ajust.complemento_vaar - orig.complemento_vaar;
   var pctCVaar = orig.complemento_vaar ? (difCVaar / orig.complemento_vaar * 100) : 0;
@@ -116,11 +111,32 @@ html += '<div class="explicacao-mecanismo"><strong>Mecanismo VAAR:</strong> Dist
   container.innerHTML = html;
 }
 
+function _textoMecanismoVaat(orig, ajust, ano, matriculasMudaram) {
+  var ente = Number(orig.ibge) < 100 ? 'o estado' : 'o município';
+  var periodo = ano ? 'o VAAT de ' + ano + ' usa a receita vinculada à educação que ' + ente + ' realizou em ' + (ano - 2)
+    : 'o VAAT usa a receita vinculada à educação que ' + ente + ' realizou dois anos antes';
+  var t = '<strong>Mecanismo VAAT:</strong> por lei, ' + periodo + ', corrigida monetariamente (' +
+    fmt.moeda(orig.recursos_vaat || 0) + '). Essa receita não muda na simulação; só as matrículas mudam. ';
+  if (!matriculasMudaram) return t + 'Sem alteração significativa nas matrículas, o VAAT permanece praticamente inalterado.';
+  if (ajust.inabilitados_vaat) return t + 'Este ente está inabilitado ao VAAT e não recebe complementação VAAT.';
+  var duasCasas = function(v) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var pre = duasCasas(ajust.vaat_pre || 0);
+  var minimo = 'mínimo nacional' + (ajust.vaat_minimo != null ? ' de ' + duasCasas(ajust.vaat_minimo) : '');
+  if ((ajust.complemento_vaat || 0) > 0.5) {
+    return t + 'Com as novas matrículas, o VAAT antes da complementação ficou em ' + pre + ', abaixo do ' + minimo +
+      ', e a União complementa até esse mínimo: ' + fmt.moeda(ajust.complemento_vaat) + '.';
+  }
+  return t + 'Com as novas matrículas, o VAAT antes da complementação ficou em ' + pre + ', acima do ' + minimo +
+    ', e não há complementação VAAT.';
+}
+
 function _resultRow(label, valorOrig, valorNovo, diff, pct, isMoeda) {
   var classe = Math.abs(diff) < 0.01 ? 'neutro' : (diff > 0 ? 'positivo' : 'negativo');
   var sn = diff > 0 ? '+' : '';
   var fn = isMoeda ? fmt.moeda : fmt.numero;
-  return '<div class="explicacao-resultado ' + classe + '"><span class="resultado-label">' + label + '</span><span class="resultado-original">' + fn(valorOrig) + '</span><span class="resultado-seta"><i class="fas fa-arrow-right"></i></span><span class="resultado-novo">' + fn(valorNovo) + '</span><span class="resultado-dif">' + sn + pct.toFixed(2) + '%</span></div>';
+  var semBase = Math.abs(valorOrig || 0) < 0.005 && Math.abs(diff) >= 0.01;
+  var variacao = semBase ? 'novo' : sn + pct.toFixed(2) + '%';
+  return '<div class="explicacao-resultado ' + classe + '"><span class="resultado-label">' + label + '</span><span class="resultado-original">' + fn(valorOrig) + '</span><span class="resultado-seta"><i class="fas fa-arrow-right"></i></span><span class="resultado-novo">' + fn(valorNovo) + '</span><span class="resultado-dif">' + variacao + '</span></div>';
 }
 
 function _resumoNarrativo(orig, ajust, alteracoes) {

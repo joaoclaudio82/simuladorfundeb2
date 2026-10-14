@@ -84,3 +84,55 @@ def test_universo_mostra_efeito_em_redes_sem_ajuste(resultado):
     comp = montar_comparacao(resultado)
     assert comp["universo"]["redes_sem_ajuste_afetadas"] > 0
     assert comp["recorte"]["quantidade_redes"] == 3
+
+
+def test_comparacao_mostra_apenas_cenarios_executados(base_sintetica):
+    res = executar_cenario(
+        CenarioRequest(
+            modo_cenarios="matriculas_independentes",
+            cenarios_ativos=["C"],
+            ajustes_por_cenario={
+                "C": [{"ibge": 23, "categoria": "fundamental", "operacao": "acrescentar", "valor": 80}],
+            },
+        ),
+        base_sintetica,
+    )
+    assert res.cenarios == ["A", "C"]
+    comp = montar_comparacao(res, recorte="selecionadas")
+    assert set(comp["efeitos"]) == {"C_A"}
+    assert set(comp["totais"]["por_cenario"]) == {"A", "C"}
+    linha = comp["linhas"][0]
+    assert "recursos_fundeb_C" in linha
+    assert "recursos_fundeb_B" not in linha and "recursos_fundeb_D" not in linha
+    assert set(comp["universo"]["por_cenario"]) == {"C"}
+
+
+def test_comparacao_cenarios_independentes_entre_si_e_com_referencia(base_sintetica):
+    res = executar_cenario(
+        CenarioRequest(
+            modo_cenarios="matriculas_independentes",
+            ajustes_por_cenario={
+                "B": [{"ibge": 22, "categoria": "medio_integral", "operacao": "acrescentar", "valor": 40}],
+                "C": [{"ibge": 23, "categoria": "fundamental", "operacao": "acrescentar", "valor": 80}],
+                "D": [{"ibge": 2200001, "categoria": "fundamental", "operacao": "acrescentar", "valor": 50}],
+            },
+        ),
+        base_sintetica,
+    )
+    comp = montar_comparacao(res, recorte="selecionadas")
+    assert set(comp["efeitos"]) == {"B_A", "C_A", "D_A", "C_B", "D_B", "D_C"}
+    # As três redes com ajustes em B, C e D aparecem no recorte 'selecionadas' e têm valores em A, B, C e D
+    ibges = {linha["ibge"] for linha in comp["linhas"]}
+    assert ibges == {22, 23, 2200001}
+    for linha in comp["linhas"]:
+        for c in ("A", "B", "C", "D"):
+            assert f"recursos_fundeb_{c}" in linha
+        assert linha["recursos_fundeb_dif_C_B"] == pytest.approx(
+            linha["recursos_fundeb_C"] - linha["recursos_fundeb_B"]
+        )
+        assert linha["recursos_fundeb_dif_D_B"] == pytest.approx(
+            linha["recursos_fundeb_D"] - linha["recursos_fundeb_B"]
+        )
+        assert linha["recursos_fundeb_dif_D_C"] == pytest.approx(
+            linha["recursos_fundeb_D"] - linha["recursos_fundeb_C"]
+        )

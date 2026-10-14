@@ -33,12 +33,48 @@ def _versao_motor() -> str:
 
 VERSAO_MOTOR = _versao_motor()
 
-DESCRICAO_CENARIOS = {
+NOMES_CENARIOS = {
+    "A": "Cenário A — Referência",
+    "B": "Cenário B — Simulação 1",
+    "C": "Cenário C — Simulação 2",
+    "D": "Cenário D — Simulação 3",
+}
+
+EXPLICACAO_CENARIO_REFERENCIA = "Matrículas originais da base selecionada."
+EXPLICACAO_CENARIO_SIMULACAO = "Ajustes próprios de matrículas, mantendo a mesma receita da referência."
+
+DESCRICAO_CENARIOS_INDEPENDENTES = {
+    "A": f"{NOMES_CENARIOS['A']} — {EXPLICACAO_CENARIO_REFERENCIA}",
+    "B": f"{NOMES_CENARIOS['B']} — {EXPLICACAO_CENARIO_SIMULACAO}",
+    "C": f"{NOMES_CENARIOS['C']} — {EXPLICACAO_CENARIO_SIMULACAO}",
+    "D": f"{NOMES_CENARIOS['D']} — {EXPLICACAO_CENARIO_SIMULACAO}",
+}
+
+DESCRICAO_CENARIOS_LEGADO = {
     "A": "Matrículas originais, receita original",
     "B": "Matrículas alteradas, receita original",
     "C": "Matrículas originais, receita ampliada",
     "D": "Matrículas alteradas, receita ampliada",
 }
+
+DESCRICAO_CENARIOS = DESCRICAO_CENARIOS_INDEPENDENTES
+
+
+def eh_requisicao_legado_receita(requisicao: dict | None, receita: dict | None = None) -> bool:
+    """Identifica se o cenário pertence ao modelo histórico de crescimento de receita."""
+    req = requisicao or {}
+    modo = req.get("modo_cenarios")
+    if modo == "legado_receita":
+        return True
+    if modo == "matriculas_independentes":
+        return False
+    rec = receita if receita is not None else (req.get("receita") or {})
+    tipo = rec.get("tipo")
+    if tipo is not None and tipo != "constante":
+        return True
+    if float(rec.get("taxa_percentual") or 0.0) != 0.0:
+        return True
+    return False
 
 
 class ErroCenario(ValueError):
@@ -67,15 +103,34 @@ class ResultadoCenario:
     def cenarios(self) -> list[str]:
         return list(self.resultados.keys())
 
+    @property
+    def eh_legado_receita(self) -> bool:
+        return eh_requisicao_legado_receita(self.requisicao, self.receita)
+
+    @property
+    def modo_cenarios(self) -> str:
+        return "legado_receita" if self.eh_legado_receita else "matriculas_independentes"
+
+    def descricoes_cenarios(self) -> dict[str, str]:
+        mapa = DESCRICAO_CENARIOS_LEGADO if self.eh_legado_receita else DESCRICAO_CENARIOS_INDEPENDENTES
+        return {k: mapa.get(k, f"Cenário {k}") for k in self.cenarios}
+
+    def nomes_cenarios(self) -> dict[str, str]:
+        if self.eh_legado_receita:
+            return {k: f"Cenário {k} ({DESCRICAO_CENARIOS_LEGADO.get(k, k)})" for k in self.cenarios}
+        return {k: NOMES_CENARIOS.get(k, f"Cenário {k}") for k in self.cenarios}
+
     def metadados(self) -> dict:
         return {
             "cenario_id": self.cenario_id,
             "criado_em": self.criado_em,
             "base": self.base,
             "versao_motor": self.versao_motor,
+            "modo_cenarios": self.modo_cenarios,
             "parametros": self.parametros_efetivos,
             "receita": self.receita,
-            "cenarios": {k: DESCRICAO_CENARIOS[k] for k in self.cenarios},
+            "cenarios": self.descricoes_cenarios(),
+            "nomes_cenarios": self.nomes_cenarios(),
             "resumo_ajustes": self.resumo_ajustes,
             "validacoes": self.validacoes,
             "aviso": self.aviso,
@@ -87,32 +142,37 @@ class ResultadoCenario:
 # ---------------------------------------------------------------------------
 
 _ORDEM_OPERACAO = {"definir": 0, "acrescentar": 1, "converter": 2}
+_COLUNAS_TABELA_AJUSTES = [
+    "cenario", "ibge", "operacao", "categoria", "categoria_destino",
+    "valor_informado", "valor_original", "variacao_total", "convertidas",
+]
 
 
 def validar_ajustes(ajustes: list[Ajuste], base: Base) -> None:
     etapas = set(base.etapas)
     ids = set(base.matriculas["ibge"])
     erros = []
-    definidos: dict[tuple[int, str], float] = {}
-    outras_ops: set[tuple[int, str]] = set()
+    definidos: dict[tuple[str, int, str], float] = {}
+    outras_ops: set[tuple[str, int, str]] = set()
     for i, a in enumerate(ajustes):
+        cenario = getattr(a, "cenario", "B") or "B"
         if a.ibge not in ids:
             erros.append(f"ajuste {i}: ente {a.ibge} não existe na base")
         for cat in [a.categoria, a.categoria_destino]:
             if cat is not None and cat not in etapas:
                 erros.append(f"ajuste {i}: categoria inexistente '{cat}'")
-        chave = (a.ibge, a.categoria)
+        chave = (cenario, a.ibge, a.categoria)
         if a.operacao == "definir":
             if chave in definidos and definidos[chave] != a.valor:
-                erros.append(f"ajuste {i}: valores conflitantes para {a.ibge}/{a.categoria}")
+                erros.append(f"ajuste {i}: valores conflitantes para {a.ibge}/{a.categoria} no cenário {cenario}")
             definidos[chave] = a.valor
         else:
             outras_ops.add(chave)
             if a.operacao == "converter":
-                outras_ops.add((a.ibge, a.categoria_destino))
-    # 'definir' combinado com outra operação na mesma célula dependeria da ordem de entrada.
+                outras_ops.add((cenario, a.ibge, a.categoria_destino))
+    # 'definir' combinado com outra operação na mesma célula do mesmo cenário dependeria da ordem de entrada.
     for chave in sorted(set(definidos) & outras_ops):
-        erros.append(f"{chave[0]}/{chave[1]}: 'definir' não pode ser combinado com outras operações na mesma categoria")
+        erros.append(f"cenário {chave[0]} ({chave[1]}/{chave[2]}): 'definir' não pode ser combinado com outras operações na mesma categoria")
     if erros:
         raise ErroCenario("; ".join(erros))
 
@@ -126,10 +186,20 @@ def aplicar_ajustes(matriculas: pd.DataFrame, ajustes: list[Ajuste], base: Base)
     validar_ajustes(ajustes, base)
     mat = matriculas.copy()
     pos = pd.Series(mat.index, index=mat["ibge"].values)
-    ordenados = sorted(ajustes, key=lambda a: (_ORDEM_OPERACAO[a.operacao], a.ibge, a.categoria,
-                                                a.categoria_destino or "", a.valor))
+    ordenados = sorted(
+        ajustes,
+        key=lambda a: (
+            getattr(a, "cenario", "B") or "B",
+            _ORDEM_OPERACAO[a.operacao],
+            a.ibge,
+            a.categoria,
+            a.categoria_destino or "",
+            a.valor,
+        ),
+    )
     registros = []
     for a in ordenados:
+        cenario = getattr(a, "cenario", "B") or "B"
         linha = pos[a.ibge]
         antes = float(matriculas.at[linha, a.categoria])
         if a.operacao == "definir":
@@ -143,7 +213,7 @@ def aplicar_ajustes(matriculas: pd.DataFrame, ajustes: list[Ajuste], base: Base)
             mat.at[linha, a.categoria_destino] = mat.at[linha, a.categoria_destino] + a.valor
             delta_novas, convertidas = 0.0, a.valor
         registros.append({
-            "ibge": a.ibge, "operacao": a.operacao, "categoria": a.categoria,
+            "cenario": cenario, "ibge": a.ibge, "operacao": a.operacao, "categoria": a.categoria,
             "categoria_destino": a.categoria_destino, "valor_informado": a.valor,
             "valor_original": antes, "variacao_total": delta_novas, "convertidas": convertidas,
         })
@@ -156,9 +226,7 @@ def aplicar_ajustes(matriculas: pd.DataFrame, ajustes: list[Ajuste], base: Base)
     if negativos:
         raise ErroCenario("ajustes resultariam em matrículas negativas: " + "; ".join(sorted(negativos)))
 
-    tabela = pd.DataFrame(registros, columns=[
-        "ibge", "operacao", "categoria", "categoria_destino", "valor_informado",
-        "valor_original", "variacao_total", "convertidas"])
+    tabela = pd.DataFrame(registros, columns=_COLUNAS_TABELA_AJUSTES)
     if len(tabela):
         tabela = tabela.merge(base.entes[["ibge", "uf", "nome", "tipo_rede"]], on="ibge", how="left")
         final = [mat.at[pos[r.ibge], r.categoria] for r in tabela.itertuples()]
@@ -166,7 +234,7 @@ def aplicar_ajustes(matriculas: pd.DataFrame, ajustes: list[Ajuste], base: Base)
     return mat, tabela
 
 
-def resumir_ajustes(tabela: pd.DataFrame) -> dict:
+def _resumo_simples(tabela: pd.DataFrame) -> dict:
     if len(tabela) == 0:
         return {"quantidade": 0, "redes_alteradas": 0, "matriculas_acrescidas": 0.0,
                 "matriculas_reduzidas": 0.0, "variacao_liquida": 0.0, "matriculas_convertidas": 0.0}
@@ -179,6 +247,16 @@ def resumir_ajustes(tabela: pd.DataFrame) -> dict:
         "variacao_liquida": float(var.sum()),
         "matriculas_convertidas": float(tabela["convertidas"].sum()),
     }
+
+
+def resumir_ajustes(tabela: pd.DataFrame) -> dict:
+    resumo = _resumo_simples(tabela)
+    if "cenario" in tabela.columns and len(tabela) > 0:
+        resumo["por_cenario"] = {
+            cen: _resumo_simples(tabela.loc[tabela["cenario"] == cen])
+            for cen in sorted(tabela["cenario"].unique())
+        }
+    return resumo
 
 
 # ---------------------------------------------------------------------------
@@ -267,30 +345,71 @@ def executar_cenario(req: CenarioRequest, base: Base) -> ResultadoCenario:
     efetivos = resolver_parametros(req.parametros, base)
     modo = base.modo_ponderador
     pesos = _pesos(base, efetivos)
-    mat_b, tabela_ajustes = aplicar_ajustes(base.matriculas, req.ajustes, base)
-
-    matriculas = {"A": _total_matriculas(base.matriculas, base), "B": _total_matriculas(mat_b, base)}
-    resultados = {
-        "A": _executar(base.matriculas, base.complementar, pesos, efetivos, modo),
-        "B": _executar(mat_b, base.complementar, pesos, efetivos, modo),
-    }
-    validacoes = {k: _validacao_dict(v, base.complementar) for k, v in resultados.items()}
-
     receita = req.receita
-    if receita.tipo == "crescimento":
-        comp_c, par_c = aplicar_receita(base.complementar, efetivos, receita)
-        matriculas.update({"C": matriculas["A"], "D": matriculas["B"]})
-        resultados["C"] = _executar(base.matriculas, comp_c, pesos, par_c, modo)
-        resultados["D"] = _executar(mat_b, comp_c, pesos, par_c, modo)
-        validacoes["C"] = _validacao_dict(resultados["C"], comp_c)
-        validacoes["D"] = _validacao_dict(resultados["D"], comp_c)
+    req_dump = req.model_dump()
+
+    if eh_requisicao_legado_receita(req_dump, receita.model_dump()):
+        mat_b, tabela_ajustes = aplicar_ajustes(base.matriculas, req.ajustes, base)
+        matriculas = {
+            "A": _total_matriculas(base.matriculas, base),
+            "B": _total_matriculas(mat_b, base),
+        }
+        resultados = {
+            "A": _executar(base.matriculas, base.complementar, pesos, efetivos, modo),
+            "B": _executar(mat_b, base.complementar, pesos, efetivos, modo),
+        }
+        validacoes = {k: _validacao_dict(v, base.complementar) for k, v in resultados.items()}
+
+        if receita.tipo == "crescimento":
+            comp_c, par_c = aplicar_receita(base.complementar, efetivos, receita)
+            matriculas.update({"C": matriculas["A"], "D": matriculas["B"]})
+            resultados["C"] = _executar(base.matriculas, comp_c, pesos, par_c, modo)
+            resultados["D"] = _executar(mat_b, comp_c, pesos, par_c, modo)
+            validacoes["C"] = _validacao_dict(resultados["C"], comp_c)
+            validacoes["D"] = _validacao_dict(resultados["D"], comp_c)
+        req_dump["modo_cenarios"] = "legado_receita"
+    else:
+        cenarios_sim = req.cenarios_simulacao()
+        mapa_ajustes = req.mapa_ajustes_por_cenario()
+        if req.cenarios_ativos is not None:
+            for cen, lista in mapa_ajustes.items():
+                if lista and cen not in cenarios_sim:
+                    raise ErroCenario(
+                        f"não é possível aplicar ajustes ao cenário {cen} porque ele foi excluído"
+                    )
+
+        matriculas = {"A": _total_matriculas(base.matriculas, base)}
+        resultados = {"A": _executar(base.matriculas, base.complementar, pesos, efetivos, modo)}
+        validacoes = {"A": _validacao_dict(resultados["A"], base.complementar)}
+        tabelas_ajustes = []
+
+        for cen in cenarios_sim:
+            ajustes_cen = [
+                aj.model_copy(update={"cenario": cen}) for aj in mapa_ajustes.get(cen, [])
+            ]
+            # Cada simulação usa uma cópia das matrículas originais e aplica somente seus ajustes.
+            mat_cen, tab_cen = aplicar_ajustes(base.matriculas, ajustes_cen, base)
+            matriculas[cen] = _total_matriculas(mat_cen, base)
+            resultados[cen] = _executar(mat_cen, base.complementar, pesos, efetivos, modo)
+            validacoes[cen] = _validacao_dict(resultados[cen], base.complementar)
+            if len(tab_cen):
+                tabelas_ajustes.append(tab_cen)
+
+        tabela_ajustes = (
+            pd.concat(tabelas_ajustes, ignore_index=True)
+            if tabelas_ajustes
+            else pd.DataFrame(columns=_COLUNAS_TABELA_AJUSTES)
+        )
+        if req.usa_cenarios_independentes():
+            req_dump["modo_cenarios"] = "matriculas_independentes"
+            req_dump["cenarios_ativos"] = cenarios_sim
 
     return ResultadoCenario(
         cenario_id=uuid.uuid4().hex,
         criado_em=datetime.now(timezone.utc).isoformat(timespec="seconds"),
         base=base.identificacao(),
         versao_motor=VERSAO_MOTOR,
-        requisicao=req.model_dump(),
+        requisicao=req_dump,
         parametros_efetivos=efetivos,
         receita=receita.model_dump(),
         ajustes=tabela_ajustes,

@@ -874,6 +874,7 @@ function renderResultadosMunicipio(data, opts) {
     etapasNomes: opts.etapasNomes,
     getAjustadas: opts.getAjustadas,
     ponderadorLabel: opts.ponderadorLabel || 'NF',
+    ano: ano || 2024,
   });
 
   // Card original

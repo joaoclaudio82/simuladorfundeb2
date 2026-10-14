@@ -23,6 +23,8 @@
   --warning: #E6B366;
   --error: #C4785C;
   --info: #A0956B;
+  --destaque-exercicio: #F2B33D;
+  --destaque-exercicio-escuro: #8A5A00;
 
   /* Layout */
   --sidebar-width: 270px;
@@ -100,30 +102,36 @@ body {
   margin-top: 2px;
 }
 .sidebar-exercicio {
-  padding: 14px 20px 12px;
+  padding: 14px 20px 14px;
   border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(242,179,61,.10);
+  border-left: 4px solid var(--destaque-exercicio);
 }
 .sidebar-exercicio label {
   display: block;
   margin-bottom: 6px;
-  font-size: .7rem;
-  font-weight: 700;
+  font-size: .72rem;
+  font-weight: 800;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--warm-sand);
+  color: var(--destaque-exercicio);
 }
 .sidebar-exercicio select {
   width: 100%;
   padding: 8px 10px;
-  font-size: .85rem;
-  color: #fff;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.18);
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  background-color: var(--destaque-exercicio);
+  border: 2px solid #FFE1A6;
   border-radius: 6px;
+  box-shadow: 0 0 0 3px rgba(242,179,61,.25);
+  cursor: pointer;
 }
+.sidebar-exercicio select:hover { background-color: #F7C565; }
 .sidebar-exercicio select:focus {
-  outline: 2px solid var(--warm-sand);
-  outline-offset: 1px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 .sidebar-exercicio option {
   color: var(--charcoal);
@@ -1000,6 +1008,61 @@ button:focus-visible,
 .cen-editado input { border-color: var(--warning); background: #fff8ec; }
 .cen-tabela td, .cen-tabela th { white-space: nowrap; font-size: .8rem; }
 #tab-cenario .d-none { display: none !important; }
+.cen-badge {
+  display: inline-block;
+  font-weight: 600;
+  font-size: .75rem;
+  padding: .25em .55em;
+  border-radius: 6px;
+  letter-spacing: .01em;
+}
+.cen-badge-A { background: #e9ecef; color: #343a40; border: 1px solid #ced4da; }
+.cen-badge-B { background: #e7f1ff; color: #0a58ca; border: 1px solid #b6d4fe; }
+.cen-badge-C { background: #e8f8f0; color: #0f5132; border: 1px solid #badbcc; }
+.cen-badge-D { background: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
+.cen-badge-periodo {
+  background: var(--destaque-exercicio);
+  color: var(--charcoal);
+  border: 1px solid var(--destaque-exercicio-escuro);
+  font-weight: 700;
+}
+.campo-exercicio-label {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--destaque-exercicio-escuro);
+}
+.form-select.campo-exercicio {
+  font-weight: 700;
+  color: var(--charcoal);
+  background-color: #FFF1D0;
+  border: 2px solid var(--destaque-exercicio);
+  box-shadow: 0 0 0 3px rgba(242,179,61,.18);
+}
+.form-select.campo-exercicio:focus {
+  border-color: var(--destaque-exercicio-escuro);
+  box-shadow: 0 0 0 .25rem rgba(242,179,61,.45);
+}
+.cen-cenario-item {
+  border: 1px solid var(--warm-sand, #e2ddd3);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+.cen-cenario-item.cen-cenario-em-edicao {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, .12);
+}
+.cen-edicao-banner {
+  border-left: 4px solid #0d6efd;
+  background: #f8faff;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+@media (max-width: 767.98px) {
+  .cen-acoes-form { flex-direction: column; }
+  .cen-acoes-form .btn { width: 100%; }
+}
 
 /* ---- Assistente ---- */
 #chat-abrir {

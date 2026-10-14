@@ -11,6 +11,9 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 Operacao = Literal["definir", "acrescentar", "converter"]
 Recorte = Literal["estaduais_df", "selecionadas", "propag", "universo"]
 RubricaReceita = Literal["recursos_vaaf", "recursos_vaat"]
+CenarioSimulacaoId = Literal["B", "C", "D"]
+ModoCenarios = Literal["matriculas_independentes", "legado_receita"]
+CENARIOS_SIMULACAO_ORDEM: tuple[CenarioSimulacaoId, ...] = ("B", "C", "D")
 
 AVISO_METODOLOGICO = (
     "Os resultados representam cenários hipotéticos condicionados aos dados, parâmetros "
@@ -32,6 +35,7 @@ class Ajuste(BaseModel):
     - converter: move `valor` matrículas de `categoria` para `categoria_destino` (total preservado).
     Contagens são usadas como informadas, sem arredondamento.
     """
+    cenario: CenarioSimulacaoId = "B"
     ibge: int
     categoria: str
     operacao: Operacao = "definir"
@@ -107,9 +111,88 @@ class HipoteseReceita(BaseModel):
 class CenarioRequest(BaseModel):
     base_id: Optional[str] = None
     ano_exercicio: Optional[int] = None
+    modo_cenarios: Optional[ModoCenarios] = None
+    cenarios_ativos: Optional[list[CenarioSimulacaoId]] = None
     ajustes: list[Ajuste] = Field(default_factory=list)
+    ajustes_por_cenario: Optional[dict[CenarioSimulacaoId, list[Ajuste]]] = None
     parametros: ParametrosSimulacao = Field(default_factory=ParametrosSimulacao)
     receita: HipoteseReceita = Field(default_factory=HipoteseReceita)
     recorte: Recorte = "estaduais_df"
     selecionadas: list[int] = Field(default_factory=list)
     descricao: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _normalizar_cenarios(self):
+        if self.cenarios_ativos is not None:
+            vistos: list[CenarioSimulacaoId] = [
+                c for c in CENARIOS_SIMULACAO_ORDEM if c in self.cenarios_ativos
+            ]
+            self.cenarios_ativos = vistos
+
+        if self.ajustes_por_cenario is not None:
+            normalizado: dict[CenarioSimulacaoId, list[Ajuste]] = {}
+            for cen in CENARIOS_SIMULACAO_ORDEM:
+                if cen in self.ajustes_por_cenario:
+                    normalizado[cen] = [
+                        aj.model_copy(update={"cenario": cen})
+                        for aj in self.ajustes_por_cenario[cen]
+                    ]
+            self.ajustes_por_cenario = normalizado
+            if not self.ajustes:
+                self.ajustes = [
+                    aj for cen in CENARIOS_SIMULACAO_ORDEM for aj in normalizado.get(cen, [])
+                ]
+
+        tem_config_independente = (
+            self.modo_cenarios == "matriculas_independentes"
+            or self.ajustes_por_cenario is not None
+            or self.cenarios_ativos is not None
+            or any(a.cenario in ("C", "D") for a in self.ajustes)
+        )
+        if self.modo_cenarios == "legado_receita" and (
+            self.ajustes_por_cenario is not None
+            or self.cenarios_ativos is not None
+            or any(a.cenario in ("C", "D") for a in self.ajustes)
+        ):
+            raise ValueError(
+                "O modo legado de receita não aceita ajustes próprios para os cenários C ou D."
+            )
+        if tem_config_independente and self.receita.tipo != "constante":
+            raise ValueError(
+                "Cenários independentes (A–D) exigem receita constante em todos os cenários."
+            )
+        return self
+
+    def usa_cenarios_independentes(self) -> bool:
+        """Indica se a requisição executa os cenários independentes A–D com receita constante."""
+        if self.modo_cenarios == "matriculas_independentes":
+            return True
+        if self.modo_cenarios == "legado_receita":
+            return False
+        if self.receita.tipo == "crescimento":
+            return False
+        return (
+            self.ajustes_por_cenario is not None
+            or self.cenarios_ativos is not None
+            or any(a.cenario in ("C", "D") for a in self.ajustes)
+        )
+
+    def cenarios_simulacao(self) -> list[CenarioSimulacaoId]:
+        """Retorna a lista ordenada de cenários de simulação (B, C, D) a executar."""
+        if not self.usa_cenarios_independentes():
+            return ["B"]
+        if self.cenarios_ativos is not None:
+            return list(self.cenarios_ativos)
+        return list(CENARIOS_SIMULACAO_ORDEM)
+
+    def mapa_ajustes_por_cenario(self) -> dict[CenarioSimulacaoId, list[Ajuste]]:
+        """Retorna os ajustes separados por cenário B, C e D."""
+        mapa: dict[CenarioSimulacaoId, list[Ajuste]] = {"B": [], "C": [], "D": []}
+        if self.ajustes_por_cenario is not None:
+            for cen in CENARIOS_SIMULACAO_ORDEM:
+                for aj in self.ajustes_por_cenario.get(cen, []):
+                    mapa[cen].append(aj.model_copy(update={"cenario": cen}))
+            return mapa
+        for aj in self.ajustes:
+            mapa[aj.cenario].append(aj)
+        return mapa

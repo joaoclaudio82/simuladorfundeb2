@@ -219,3 +219,165 @@ def test_resolver_base_por_exercicio():
     assert resolver_base_id(None, None) == "fundeb-2026"
     with pytest.raises(ErroBase):
         resolver_base_id(None, 2019)
+
+
+# ---------------------------------------------------------------------------
+# Cenários independentes A, B, C e D com receita constante
+# ---------------------------------------------------------------------------
+
+def test_caso1_mesma_rede_ajustes_diferentes_bcd_receita_constante(base_sintetica):
+    """
+    Caso 1 — Mesma rede, ajustes diferentes:
+    - A mantém as matrículas originais.
+    - Mesma rede em B recebe +100 matrículas em determinada etapa.
+    - Mesma rede em C recebe +200 na mesma etapa.
+    - D permanece original quando configurado sem ajustes.
+    - A tabela mostra as edições de B e C separadamente com 'cenario' na 1ª coluna.
+    - Receita, complementações e ponderadores são iguais em todos os cenários.
+    """
+    rede_id = 2300001
+    etapa = "fundamental"
+    orig_val = float(base_sintetica.matriculas.loc[base_sintetica.matriculas.ibge == rede_id, etapa].iloc[0])
+
+    req = CenarioRequest(
+        modo_cenarios="matriculas_independentes",
+        cenarios_ativos=["B", "C", "D"],
+        ajustes=[
+            {"cenario": "B", "ibge": rede_id, "categoria": etapa, "operacao": "definir", "valor": orig_val + 100},
+            {"cenario": "C", "ibge": rede_id, "categoria": etapa, "operacao": "definir", "valor": orig_val + 200},
+        ],
+    )
+    res = executar_cenario(req, base_sintetica)
+
+    assert res.cenarios == ["A", "B", "C", "D"]
+    assert not res.eh_legado_receita
+    assert res.modo_cenarios == "matriculas_independentes"
+
+    # D configurado sem ajustes reproduz exatamente A (referência)
+    pd.testing.assert_frame_equal(res.resultados["D"], res.resultados["A"])
+    pd.testing.assert_frame_equal(res.matriculas_total["D"], res.matriculas_total["A"])
+
+    # B aplica apenas +100 e C aplica apenas +200 (não acumula +100 de B em C)
+    tot_a = float(res.matriculas_total["A"].set_index("ibge").loc[rede_id, "matriculas_total"])
+    tot_b = float(res.matriculas_total["B"].set_index("ibge").loc[rede_id, "matriculas_total"])
+    tot_c = float(res.matriculas_total["C"].set_index("ibge").loc[rede_id, "matriculas_total"])
+    tot_d = float(res.matriculas_total["D"].set_index("ibge").loc[rede_id, "matriculas_total"])
+    assert tot_b - tot_a == pytest.approx(100.0)
+    assert tot_c - tot_a == pytest.approx(200.0)
+    assert tot_d - tot_a == pytest.approx(0.0)
+
+    # Tabela de ajustes tem 'cenario' como primeira coluna e linhas separadas para B e C
+    assert res.ajustes.columns[0] == "cenario"
+    assert list(res.ajustes["cenario"]) == ["B", "C"]
+    assert list(res.ajustes["variacao_total"]) == [100.0, 200.0]
+
+    # Parâmetros financeiros, ponderadores e contribuições (recursos_vaaf, recursos_vaat, complementações VAAF/VAAR) idênticos em A, B, C e D
+    assert res.receita["tipo"] == "constante"
+    assert res.receita["taxa"] == 0.0
+    for col in ["recursos_vaaf", "recursos_vaat", "complemento_vaaf", "complemento_vaar"]:
+        soma_a = float(res.resultados["A"][col].sum())
+        for c in ("B", "C", "D"):
+            assert float(res.resultados[c][col].sum()) == pytest.approx(soma_a, abs=0.05), (c, col)
+
+
+def test_caso2_redes_diferentes_por_cenario_na_base_real():
+    """
+    Caso 2 — Redes diferentes na base real (Fortaleza em B, Sobral em C, Maracanaú em D):
+    - B contém ajustes em Fortaleza (2304400).
+    - C contém ajustes em Sobral (2312908).
+    - D contém ajustes em Maracanaú (2307650).
+    - Cada simulação parte da base original e aplica somente seus ajustes.
+    """
+    from app.services.bases import carregar_base_arquivo
+    base = carregar_base_arquivo("fundeb-2026")
+    etapa = base.etapas[0]
+    fortaleza, sobral, maracanau = 2304400, 2312908, 2307650
+
+    res = executar_cenario(
+        CenarioRequest(
+            modo_cenarios="matriculas_independentes",
+            ajustes_por_cenario={
+                "B": [{"ibge": fortaleza, "categoria": etapa, "operacao": "acrescentar", "valor": 100}],
+                "C": [{"ibge": sobral, "categoria": etapa, "operacao": "acrescentar", "valor": 200}],
+                "D": [{"ibge": maracanau, "categoria": etapa, "operacao": "acrescentar", "valor": 300}],
+            },
+        ),
+        base,
+    )
+
+    assert res.cenarios == ["A", "B", "C", "D"]
+    mat_a = res.matriculas_total["A"].set_index("ibge")["matriculas_total"]
+    mat_b = res.matriculas_total["B"].set_index("ibge")["matriculas_total"]
+    mat_c = res.matriculas_total["C"].set_index("ibge")["matriculas_total"]
+    mat_d = res.matriculas_total["D"].set_index("ibge")["matriculas_total"]
+
+    # Em B, só Fortaleza tem matrículas alteradas
+    assert mat_b.loc[fortaleza] - mat_a.loc[fortaleza] == pytest.approx(100.0)
+    assert mat_b.loc[sobral] == pytest.approx(mat_a.loc[sobral])
+    assert mat_b.loc[maracanau] == pytest.approx(mat_a.loc[maracanau])
+
+    # Em C, só Sobral tem matrículas alteradas
+    assert mat_c.loc[fortaleza] == pytest.approx(mat_a.loc[fortaleza])
+    assert mat_c.loc[sobral] - mat_a.loc[sobral] == pytest.approx(200.0)
+    assert mat_c.loc[maracanau] == pytest.approx(mat_a.loc[maracanau])
+
+    # Em D, só Maracanaú tem matrículas alteradas
+    assert mat_d.loc[fortaleza] == pytest.approx(mat_a.loc[fortaleza])
+    assert mat_d.loc[sobral] == pytest.approx(mat_a.loc[sobral])
+    assert mat_d.loc[maracanau] - mat_a.loc[maracanau] == pytest.approx(300.0)
+
+
+def test_equivalencia_a_b_e_compatibilidade_historica(base_sintetica):
+    """
+    Caso 3 — Equivalência de A/B e compatibilidade com registros históricos:
+    - Resultados de A e B no novo fluxo são idênticos aos do fluxo anterior para as mesmas entradas.
+    - Registro histórico com crescimento de receita preserva C/D segundo a regra original.
+    """
+    ajuste_b = [{"ibge": 22, "categoria": "fundamental", "operacao": "acrescentar", "valor": 45}]
+    legado_ab = executar_cenario(CenarioRequest(ajustes=ajuste_b), base_sintetica)
+    novo_abcd = executar_cenario(
+        CenarioRequest(modo_cenarios="matriculas_independentes", ajustes=ajuste_b),
+        base_sintetica,
+    )
+    pd.testing.assert_frame_equal(novo_abcd.resultados["A"], legado_ab.resultados["A"])
+    pd.testing.assert_frame_equal(novo_abcd.resultados["B"], legado_ab.resultados["B"])
+
+    # Histórico com receita ampliada continua identificado como legado_receita
+    historico_cd = executar_cenario(
+        CenarioRequest(ajustes=ajuste_b, receita={"tipo": "crescimento", "taxa": 0.08}),
+        base_sintetica,
+    )
+    assert historico_cd.eh_legado_receita is True
+    assert historico_cd.modo_cenarios == "legado_receita"
+    assert "receita ampliada" in historico_cd.metadados()["cenarios"]["C"]
+    assert "receita ampliada" in historico_cd.metadados()["cenarios"]["D"]
+
+    # Novo fluxo identifica nomes oficiais e receita constante
+    meta_novo = novo_abcd.metadados()
+    assert meta_novo["modo_cenarios"] == "matriculas_independentes"
+    assert meta_novo["nomes_cenarios"] == {
+        "A": "Cenário A — Referência",
+        "B": "Cenário B — Simulação 1",
+        "C": "Cenário C — Simulação 2",
+        "D": "Cenário D — Simulação 3",
+    }
+    assert "Matrículas originais da base selecionada." in meta_novo["cenarios"]["A"]
+    assert "Ajustes próprios de matrículas, mantendo a mesma receita da referência." in meta_novo["cenarios"]["B"]
+
+
+def test_rejeita_crescimento_em_cenarios_independentes_e_ajuste_em_cenario_excluido(base_sintetica):
+    with pytest.raises(ValidationError, match="receita constante"):
+        CenarioRequest(
+            modo_cenarios="matriculas_independentes",
+            receita={"tipo": "crescimento", "taxa": 0.05},
+        )
+
+    with pytest.raises(ErroCenario, match="excluído"):
+        executar_cenario(
+            CenarioRequest(
+                modo_cenarios="matriculas_independentes",
+                cenarios_ativos=["B", "C"],
+                ajustes=[{"cenario": "D", "ibge": 22, "categoria": "fundamental", "valor": 150}],
+            ),
+            base_sintetica,
+        )

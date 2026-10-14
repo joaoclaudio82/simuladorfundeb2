@@ -19,8 +19,9 @@ Números só podem vir do resultado de uma ferramenta. Se a ferramenta não enco
 Não escolha ano, rede ou indicador quando a consulta vier ambígua. Se faltar o exercício ou a rede, pergunte em vez de repetir ferramentas.
 Separe três coisas: valor oficial importado, resultado simulado e a sua interpretação.
 Uma base não homologada não é repasse oficial. Simulação não é previsão de repasse.
+Se a ferramenta devolver periodo_exibicao, identifique a base por esse período (por exemplo, 1 a 8/2026) em vez de destacar "não homologada".
 Diferença observada não é causa. Se causa_demonstravel for falso, não invente o motivo da mudança.
-Quando a pergunta for o valor de matrículas VAAF ponderadas, VAAF por aluno ou recursos VAAF de um município, chame consultar_municipio uma vez e copie resultado_tela. Matrículas VAAF (ponderadas) é matriculas_vaaf. VAAF por aluno é vaaf_final. Recursos VAAF totais é recursos_vaaf_final. Use o campo exibicao. valores_oficiais são insumos importados e não substituem esses indicadores. Não calcule nem invente o número.
+Quando a pergunta for o valor de matrículas ponderadas, VAAF por aluno, VAAT por aluno, recursos VAAF ou VAAT, ou complementações de um município, chame consultar_municipio uma vez e copie resultado_tela. Matrículas VAAF (ponderadas) é matriculas_vaaf. VAAF por aluno é vaaf_final. Recursos VAAF totais é recursos_vaaf_final. VAAT por aluno é vaat_final. Recursos VAAT totais é recursos_vaat_final. Complementação VAAT é complemento_vaat. Use o campo exibicao. valores_oficiais são insumos importados e não substituem esses indicadores. Não calcule nem invente o número.
 Quando a pergunta for quanto muda o VAAF, o repasse ou os recursos se alunos passarem de uma etapa para outra, chame simular_transferencia uma única vez, com nome, ano, origem, destino e alunos. Responda só com os números dessa ferramenta: rede, etapas, pesos, alunos movidos, variação de vaaf_final, de recursos_vaaf e de recursos_fundeb. Se houver aviso, reproduza-o: a rede pedida pode não ter essas matrículas e o cálculo ter sido feito na rede estadual. Não troque a etapa escolhida pela ferramenta e não invente valor. Use consultar_ponderacoes apenas quando pedirem os pesos, sem quantidade de alunos.
 Se a ferramenta devolver ambiguo ou nao_encontrado, pare e pergunte. Não repita a mesma consulta.
 Cite exercício, versão da base, cenário e documento quando a ferramenta os devolver.
@@ -70,6 +71,10 @@ _CIDADE_ANO = re.compile(
     r"(?:cidade|munic[ií]pio)\s+de\s+(.+?)\s+(?:no\s+ano(?:\s+de)?|em)\s+(20\d{2})",
     re.IGNORECASE,
 )
+_CIDADE_VIRGULA_ANO = re.compile(
+    r"(?:cidade|munic[ií]pio)\s+(?:de\s+|do\s+|da\s+)?([^,;?]+?)\s*[,;].*?\b(20\d{2})\b",
+    re.IGNORECASE,
+)
 _INDICADOR = re.compile(r"valor|quanto|matr[ií]cula|vaaf|vaat|recursos", re.IGNORECASE)
 _ORDEM_TELA = (
     "matriculas_vaaf",
@@ -77,6 +82,11 @@ _ORDEM_TELA = (
     "vaaf_final",
     "recursos_vaaf_final",
     "complemento_vaaf",
+    "vaat_final",
+    "recursos_vaat_final",
+    "complemento_vaat",
+    "complemento_vaar",
+    "complemento_uniao",
 )
 
 
@@ -84,7 +94,7 @@ def pergunta_de_indicador(mensagem: str) -> tuple[str, int] | None:
     """Pergunta pelo número atual de uma rede. Transferência de alunos fica com o modelo."""
     if not mensagem or _MOVIMENTO.search(mensagem) or not _INDICADOR.search(mensagem):
         return None
-    achado = _CIDADE_ANO.search(mensagem)
+    achado = _CIDADE_ANO.search(mensagem) or _CIDADE_VIRGULA_ANO.search(mensagem)
     if not achado:
         return None
     nome = achado.group(1).strip(" .?")
@@ -123,7 +133,14 @@ def texto_da_consulta_municipal(resultado: dict) -> str | None:
         if not item:
             continue
         linhas.append(f"- {item['rotulo']}: {item['exibicao']}")
-    if resultado.get("homologada") is False:
+    periodo = resultado.get("periodo_exibicao")
+    if periodo:
+        linhas.append("")
+        linhas.append(
+            f"Base {resultado.get('base_id')}, período {periodo}. "
+            "Estes números são o resultado do simulador, não o repasse oficial publicado."
+        )
+    elif resultado.get("homologada") is False:
         linhas.append("")
         linhas.append(
             f"A base {resultado.get('base_id')} não está homologada. "

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import difflib
 import json
 import unicodedata
 
@@ -20,6 +21,7 @@ from app.db.schema import (
 )
 from app.db.session import get_engine
 from app.repositories.chat import buscar_trechos
+from app.services.bases import PERIODOS_EXIBICAO
 
 CHAVES = (
     "matriculas_total",
@@ -91,6 +93,7 @@ def _bases_ativas(engine=None) -> list[dict]:
             "ano_exercicio": manifesto.get("ano_exercicio", row["year"]),
             "situacao": manifesto.get("situacao"),
             "homologada": bool(manifesto.get("homologada")),
+            "periodo_exibicao": PERIODOS_EXIBICAO.get(manifesto.get("base_id") or row["base_id"]),
             "version_id": row["version_id"],
         })
     return saida
@@ -143,6 +146,7 @@ def consultar_base(argumentos: dict, _usuario: UserRecord, *, engine=None) -> di
         "ano_exercicio": base.get("ano_exercicio"),
         "situacao": base.get("situacao"),
         "homologada": base.get("homologada"),
+        "periodo_exibicao": base.get("periodo_exibicao"),
         "version_id": versao,
         "snapshot_sha256": meta["snapshot_sha256"] if meta else None,
         "source_commit": meta["source_commit"] if meta else None,
@@ -161,6 +165,11 @@ _ROTULOS_TELA = (
     ("vaaf_final", "VAAF por aluno", False),
     ("recursos_vaaf_final", "Recursos VAAF totais", True),
     ("complemento_vaaf", "Complementação VAAF", True),
+    ("vaat_final", "VAAT por aluno", False),
+    ("recursos_vaat_final", "Recursos VAAT totais", True),
+    ("complemento_vaat", "Complementação VAAT", True),
+    ("complemento_vaar", "Complementação VAAR", True),
+    ("complemento_uniao", "Total Complementação da União", True),
     ("recursos_vaaf", "Receita da contribuição de estados e municípios ao Fundeb", True),
     ("recursos_fundeb", "Receita Total do Fundeb", True),
 )
@@ -212,6 +221,8 @@ def _resultado_da_tela(ano, ibge: int, dataset) -> dict | None:
             "Matrículas VAAF (ponderadas) é matriculas_vaaf. "
             "VAAF por aluno é vaaf_final. "
             "Recursos VAAF totais é recursos_vaaf_final. "
+            "VAAT por aluno é vaat_final. Recursos VAAT totais é recursos_vaat_final. "
+            "Complementação VAAT é complemento_vaat. "
             "valores_oficiais.recursos_vaaf é a receita de contribuição do ente e não é esse total."
         ),
     }
@@ -276,6 +287,7 @@ def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None, 
         "base_id": base["base_id"],
         "homologada": base.get("homologada"),
         "situacao": base.get("situacao"),
+        "periodo_exibicao": base.get("periodo_exibicao"),
         "ente": ente,
         "valores_oficiais": _numeros(valores),
     }
@@ -291,6 +303,18 @@ def _cenario_visivel(conn, cenario_id: str, usuario: UserRecord):
     if usuario.role != Role.admin and row["owner_cpf"] != usuario.cpf:
         return None
     return row
+
+
+def _interpretar_cenarios_pedido(pedido: dict) -> tuple[str, dict[str, str]]:
+    from app.services.cenarios import (
+        DESCRICAO_CENARIOS_INDEPENDENTES,
+        DESCRICAO_CENARIOS_LEGADO,
+        eh_requisicao_legado_receita,
+    )
+
+    if eh_requisicao_legado_receita(pedido):
+        return "legado_receita", dict(DESCRICAO_CENARIOS_LEGADO)
+    return "matriculas_independentes", dict(DESCRICAO_CENARIOS_INDEPENDENTES)
 
 
 def consultar_simulacao(argumentos: dict, usuario: UserRecord, *, engine=None) -> dict:
@@ -309,6 +333,8 @@ def consultar_simulacao(argumentos: dict, usuario: UserRecord, *, engine=None) -
             consulta = consulta.where(scenario_results.c.ibge == int(argumentos["ibge"]))
         linhas = list(conn.execute(consulta.limit(12)).mappings())
     pedido = json.loads(row["request_json"]) if row["request_json"] else {}
+    modo_cenarios, descricoes = _interpretar_cenarios_pedido(pedido)
+    variantes_presentes = sorted({l["variant"] for l in linhas})
     return limpar({
         "encontrado": True,
         "tipo_dado": "resultado_simulado",
@@ -316,9 +342,19 @@ def consultar_simulacao(argumentos: dict, usuario: UserRecord, *, engine=None) -
         "base_id": row["base_id"],
         "base_version": row["base_version"],
         "criado_em": row["created_at"],
+        "modo_cenarios": modo_cenarios,
+        "cenarios_descricao": {
+            k: descricoes.get(k, f"Cenário {k}")
+            for k in (variantes_presentes or list(descricoes.keys()))
+        },
         "parametros": pedido,
         "resultados": [
-            {"variante": l["variant"], "ibge": l["ibge"], "valores": _numeros(json.loads(l["values_json"]))}
+            {
+                "variante": l["variant"],
+                "descricao_cenario": descricoes.get(l["variant"], f"Cenário {l['variant']}"),
+                "ibge": l["ibge"],
+                "valores": _numeros(json.loads(l["values_json"])),
+            }
             for l in linhas
         ],
         "causa_demonstravel": False,
@@ -353,6 +389,8 @@ def comparar_simulacoes(argumentos: dict, usuario: UserRecord, *, engine=None) -
                 pares[variante] = _numeros(json.loads(bruto))
     if len(pares) < 2:
         return {"encontrado": False, "motivo": "Uma das variantes não está gravada para essa rede."}
+    pedido = json.loads(row["request_json"]) if row["request_json"] else {}
+    modo_cenarios, descricoes = _interpretar_cenarios_pedido(pedido)
     diferencas = {}
     for chave in CHAVES:
         if chave in pares[variante_a] and chave in pares[variante_b]:
@@ -367,6 +405,11 @@ def comparar_simulacoes(argumentos: dict, usuario: UserRecord, *, engine=None) -
         "cenario_id": cenario_id,
         "base_id": row["base_id"],
         "base_version": row["base_version"],
+        "modo_cenarios": modo_cenarios,
+        "cenarios_comparados": {
+            variante_a: descricoes.get(variante_a, f"Cenário {variante_a}"),
+            variante_b: descricoes.get(variante_b, f"Cenário {variante_b}"),
+        },
         "ibge": int(ibge),
         "diferencas": diferencas,
         "causa_demonstravel": False,
@@ -382,13 +425,31 @@ def _candidatos_sem_acento(conn, consulta, nome: str) -> list:
     exatas = [linha for linha in linhas if _sem_acento(linha["name"]) == alvo]
     if exatas:
         return exatas[:8]
-    return [linha for linha in linhas if alvo in _sem_acento(linha["name"])][:8]
+    contidas = [linha for linha in linhas if alvo in _sem_acento(linha["name"])]
+    if contidas:
+        return contidas[:8]
+    compacto = _compacto(nome)
+    if len(compacto) < 6:
+        return []
+    juntas = [linha for linha in linhas if _compacto(linha["name"]) == compacto]
+    if juntas:
+        return juntas[:8]
+    por_nome = {}
+    for linha in linhas:
+        por_nome.setdefault(_compacto(linha["name"]), []).append(linha)
+    parecidos = difflib.get_close_matches(compacto, list(por_nome), n=3, cutoff=0.88)
+    return [linha for chave in parecidos for linha in por_nome[chave]][:8]
 
 
 def _sem_acento(texto: str) -> str:
     return "".join(
         c for c in unicodedata.normalize("NFD", texto.lower()) if unicodedata.category(c) != "Mn"
     )
+
+
+def _compacto(texto: str) -> str:
+    """Sem acento, espaço nem pontuação: 'Alta Floresta D'Oeste' vira 'altaflorestadoeste'."""
+    return "".join(c for c in _sem_acento(texto) if c.isalnum())
 
 
 def consultar_ponderacoes(argumentos: dict, _usuario: UserRecord, *, engine=None) -> dict:
@@ -750,7 +811,8 @@ FERRAMENTAS = [
             "name": "consultar_municipio",
             "description": (
                 "Ente e rede numa base. resultado_tela traz os mesmos números do botão Simular "
-                "sem alterar matrículas: matrículas VAAF ponderadas, VAAF por aluno e recursos VAAF totais. "
+                "sem alterar matrículas: matrículas VAAF e VAAT ponderadas, VAAF por aluno, recursos VAAF totais, "
+                "VAAT por aluno, recursos VAAT totais e complementações VAAF, VAAT e VAAR. "
                 "valores_oficiais são insumos importados e não substituem resultado_tela. "
                 "Não escolhe sozinho se houver mais de uma rede."
             ),

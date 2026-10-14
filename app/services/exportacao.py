@@ -65,7 +65,9 @@ def linhas_metadados(res: ResultadoCenario, recorte: str, n_linhas: int) -> list
          f"crescimento de {rec['taxa'] * 100:.4g}% em {', '.join(rec['rubricas'])}; "
          f"complementações {rec['complementacoes'].replace('_', ' ')}"
          + (f"; fonte: {rec['fonte_taxa']}" if rec.get("fonte_taxa") else "")),
-        ("Cenários", "; ".join(f"{k}: {v}" for k, v in DESCRICAO_CENARIOS.items() if k in res.cenarios)),
+        ("Modelo de cenários", "Legado (matrículas e crescimento de receita)" if getattr(res, "eh_legado_receita", False)
+         else "Cenários independentes de matrículas com receita constante"),
+        ("Cenários", "; ".join(f"{k}: {v}" for k, v in res.descricoes_cenarios().items())),
         ("Ajustes", str(res.resumo_ajustes["quantidade"])),
         ("Validação interna", "; ".join(f"{k}: {'ok' if v['valido'] else 'com erros'}" for k, v in res.validacoes.items())),
         ("Hashes da base", json.dumps(b["hashes"], ensure_ascii=False)),
@@ -234,21 +236,33 @@ def exportar_pdf(res: ResultadoCenario, recorte: str = "estaduais_df", seleciona
     t.setStyle(_estilo_tabela(colors))
     story += [t, Spacer(1, 6 * mm)]
 
-    # Tabela comparativa paginada (A × B)
-    story.append(Paragraph("Comparativo por rede — referência (A) × simulado (B)", estilos["Heading3"]))
-    cab = ["UF", "Rede", "Matrículas A", "Matrículas B", "Recursos Fundeb A (R$)", "Recursos Fundeb B (R$)",
-           "Variação (R$)", "Variação (%)", "Compl. VAAF B−A (R$)", "Compl. VAAT B−A (R$)",
-           "VAAF/aluno A→B", "VAAT/aluno A→B"]
+    # Tabela comparativa paginada (referência A × primeira simulação ativa)
+    simulacoes = [c for c in res.cenarios if c != "A"]
+    sim_alvo = "B" if "B" in simulacoes else (simulacoes[0] if simulacoes else "A")
+    ef_alvo = f"{sim_alvo}_A"
+    nomes = res.nomes_cenarios()
+    story.append(Paragraph(
+        f"Comparativo por rede — {nomes.get('A', 'Referência (A)')} × {nomes.get(sim_alvo, f'Simulado ({sim_alvo})')}",
+        estilos["Heading3"],
+    ))
+    cab = [
+        "UF", "Rede", "Matrículas A", f"Matrículas {sim_alvo}",
+        "Recursos Fundeb A (R$)", f"Recursos Fundeb {sim_alvo} (R$)",
+        "Variação (R$)", "Variação (%)", f"Compl. VAAF {sim_alvo}−A (R$)", f"Compl. VAAT {sim_alvo}−A (R$)",
+        f"VAAF/aluno A→{sim_alvo}", f"VAAT/aluno A→{sim_alvo}",
+    ]
     linhas = [cab_(cab)]
     for r in tab.itertuples():
         linhas.append([
             r.uf, Paragraph(str(r.nome), pequeno),
-            _fmt_num(r.matriculas_total_A), _fmt_num(r.matriculas_total_B),
-            _fmt_num(r.recursos_fundeb_A), _fmt_num(r.recursos_fundeb_B),
-            _fmt_num(r.recursos_fundeb_dif_B_A), _fmt_num(r.recursos_fundeb_pct_B_A, 2),
-            _fmt_num(r.complemento_vaaf_dif_B_A), _fmt_num(r.complemento_vaat_dif_B_A),
-            f"{_fmt_num(r.vaaf_final_A, 2)} → {_fmt_num(r.vaaf_final_B, 2)}",
-            f"{_fmt_num(r.vaat_final_A, 2)} → {_fmt_num(r.vaat_final_B, 2)}",
+            _fmt_num(r.matriculas_total_A), _fmt_num(getattr(r, f"matriculas_total_{sim_alvo}", None)),
+            _fmt_num(r.recursos_fundeb_A), _fmt_num(getattr(r, f"recursos_fundeb_{sim_alvo}", None)),
+            _fmt_num(getattr(r, f"recursos_fundeb_dif_{ef_alvo}", 0.0)),
+            _fmt_num(getattr(r, f"recursos_fundeb_pct_{ef_alvo}", None), 2),
+            _fmt_num(getattr(r, f"complemento_vaaf_dif_{ef_alvo}", 0.0)),
+            _fmt_num(getattr(r, f"complemento_vaat_dif_{ef_alvo}", 0.0)),
+            f"{_fmt_num(r.vaaf_final_A, 2)} → {_fmt_num(getattr(r, f'vaaf_final_{sim_alvo}', None), 2)}",
+            f"{_fmt_num(r.vaat_final_A, 2)} → {_fmt_num(getattr(r, f'vaat_final_{sim_alvo}', None), 2)}",
         ])
     larguras = [10, 38, 20, 20, 28, 28, 24, 16, 24, 24, 28, 28]
     t = Table(linhas, repeatRows=1, colWidths=[w * mm for w in larguras])

@@ -34,11 +34,25 @@ RAZOES = {
 ROTULOS = {c: r for c, r, _, _ in INDICADORES}
 UNIDADES = {c: u for c, _, u, _ in INDICADORES}
 
-EFEITOS = {
+EFEITOS_LEGADO = {
     "B_A": ("B", "A", "Efeito das matrículas com a receita original"),
     "C_A": ("C", "A", "Efeito da receita com as matrículas originais"),
     "D_A": ("D", "A", "Efeito combinado"),
     "D_C": ("D", "C", "Efeito das matrículas com a receita ampliada"),
+}
+
+EFEITOS_INDEPENDENTES = {
+    "B_A": ("B", "A", "Cenário B — Simulação 1 vs. Cenário A — Referência"),
+    "C_A": ("C", "A", "Cenário C — Simulação 2 vs. Cenário A — Referência"),
+    "D_A": ("D", "A", "Cenário D — Simulação 3 vs. Cenário A — Referência"),
+    "C_B": ("C", "B", "Cenário C — Simulação 2 vs. Cenário B — Simulação 1"),
+    "D_B": ("D", "B", "Cenário D — Simulação 3 vs. Cenário B — Simulação 1"),
+    "D_C": ("D", "C", "Cenário D — Simulação 3 vs. Cenário C — Simulação 2"),
+}
+
+EFEITOS = {
+    **EFEITOS_INDEPENDENTES,
+    **EFEITOS_LEGADO,
 }
 
 DESCRICAO_RECORTES = {
@@ -63,8 +77,13 @@ def variacao_pct(novo, antigo):
     return pct
 
 
+def catalogo_efeitos(res: ResultadoCenario) -> dict[str, tuple[str, str, str]]:
+    return EFEITOS_LEGADO if getattr(res, "eh_legado_receita", False) else EFEITOS_INDEPENDENTES
+
+
 def efeitos_disponiveis(res: ResultadoCenario) -> list[str]:
-    return [k for k, (x, y, _) in EFEITOS.items() if x in res.resultados and y in res.resultados]
+    catalogo = catalogo_efeitos(res)
+    return [k for k, (x, y, _) in catalogo.items() if x in res.resultados and y in res.resultados]
 
 
 def ibges_recorte(res: ResultadoCenario, recorte: str, selecionadas: list[int] | None = None) -> list[int]:
@@ -110,9 +129,10 @@ def tabela_comparativa(res: ResultadoCenario, recorte: str = "estaduais_df",
     for col, _, _, _ in INDICADORES:
         for c, df in por_cenario.items():
             colunas[f"{col}_{c}"] = df[col].values
+    catalogo = catalogo_efeitos(res)
     efeitos = efeitos_disponiveis(res)
     for ef in efeitos:
-        x, y, _ = EFEITOS[ef]
+        x, y, _ = catalogo[ef]
         for col, _, _, _ in INDICADORES:
             colunas[f"{col}_dif_{ef}"] = colunas[f"{col}_{x}"] - colunas[f"{col}_{y}"]
             colunas[f"{col}_pct_{ef}"] = variacao_pct(colunas[f"{col}_{x}"], colunas[f"{col}_{y}"])
@@ -125,7 +145,7 @@ def tabela_comparativa(res: ResultadoCenario, recorte: str = "estaduais_df",
             if total_nacional else np.full(len(ids), np.nan)
         )
     for ef in efeitos:
-        x, y, _ = EFEITOS[ef]
+        x, y, _ = catalogo[ef]
         colunas[f"participacao_nacional_pp_{ef}"] = (
             colunas[f"participacao_nacional_pct_{x}"] - colunas[f"participacao_nacional_pct_{y}"]
         )
@@ -150,9 +170,10 @@ def totais_recorte(res: ResultadoCenario, ids: list[int]) -> dict:
                 d = df[den].sum()
                 t[col] = float(df[num].sum() / d) if d else None
         totais[c] = t
+    catalogo = catalogo_efeitos(res)
     efeitos = {}
     for ef in efeitos_disponiveis(res):
-        x, y, desc = EFEITOS[ef]
+        x, y, desc = catalogo[ef]
         efeitos[ef] = {"descricao": desc, "indicadores": {}}
         for col, _, _, _ in INDICADORES:
             vx, vy = totais[x][col], totais[y][col]
@@ -170,9 +191,10 @@ def participacao_recorte(res: ResultadoCenario, ids: list[int]) -> dict:
         nacional = df["recursos_fundeb"].sum()
         parte = df.loc[df["ibge"].isin(ids), "recursos_fundeb"].sum()
         out[c] = float(parte / nacional * 100) if nacional else None
+    catalogo = catalogo_efeitos(res)
     variacoes = {}
     for ef in efeitos_disponiveis(res):
-        x, y, _ = EFEITOS[ef]
+        x, y, _ = catalogo[ef]
         variacoes[ef] = None if out[x] is None or out[y] is None else out[x] - out[y]
     return {
         "denominador": "Recursos totais do Fundeb de todas as redes (universo nacional) em cada cenário",
@@ -181,22 +203,58 @@ def participacao_recorte(res: ResultadoCenario, ids: list[int]) -> dict:
     }
 
 
-def efeitos_fora_do_recorte(res: ResultadoCenario, ids: list[int]) -> dict:
-    """Inspeção do universo: impacto sobre redes fora do recorte e redes sem alteração direta."""
-    a, b = res.resultados["A"].set_index("ibge"), res.resultados["B"].set_index("ibge")
-    dif = b["recursos_fundeb"] - a["recursos_fundeb"]
-    alteradas = set(res.ajustes["ibge"]) if len(res.ajustes) else set()
+def _efeitos_fora_do_recorte_cenario(
+    res: ResultadoCenario, a: pd.DataFrame, cenario: str, ids: list[int], alteradas: set[int]
+) -> dict:
+    sim = res.resultados[cenario].set_index("ibge")
+    dif = sim["recursos_fundeb"] - a["recursos_fundeb"]
     fora = ~dif.index.isin(ids)
     sem_ajuste = ~dif.index.isin(list(alteradas))
     tipos = res.entes.set_index("ibge")["tipo_rede"].reindex(dif.index)
     municipal = (tipos == "rede municipal").values
     return {
+        "cenario_comparado": cenario,
         "redes_fora_do_recorte_afetadas": int(((dif.abs() > 0.5) & fora).sum()),
         "variacao_fora_do_recorte": float(dif[fora].sum()),
         "redes_sem_ajuste_afetadas": int(((dif.abs() > 0.5) & sem_ajuste).sum()),
         "variacao_redes_municipais": float(dif[municipal].sum()),
         "variacao_total_nacional": float(dif.sum()),
     }
+
+
+def efeitos_fora_do_recorte(res: ResultadoCenario, ids: list[int]) -> dict:
+    """Inspeção do universo: impacto sobre redes fora do recorte e redes sem alteração direta."""
+    a = res.resultados["A"].set_index("ibge")
+    simulacoes = [c for c in res.cenarios if c != "A"]
+    if not simulacoes:
+        return {
+            "redes_fora_do_recorte_afetadas": 0,
+            "variacao_fora_do_recorte": 0.0,
+            "redes_sem_ajuste_afetadas": 0,
+            "variacao_redes_municipais": 0.0,
+            "variacao_total_nacional": 0.0,
+            "por_cenario": {},
+        }
+    tem_col_cenario = "cenario" in res.ajustes.columns and len(res.ajustes) > 0
+    por_cenario = {}
+    for c in simulacoes:
+        if tem_col_cenario and not getattr(res, "eh_legado_receita", False):
+            alt_c = set(res.ajustes.loc[res.ajustes["cenario"] == c, "ibge"])
+        else:
+            alt_c = set(res.ajustes["ibge"]) if len(res.ajustes) else set()
+        por_cenario[c] = _efeitos_fora_do_recorte_cenario(res, a, c, ids, alt_c)
+
+    principal = "B" if "B" in por_cenario else simulacoes[0]
+    if tem_col_cenario and not getattr(res, "eh_legado_receita", False):
+        com_ajustes = [
+            c for c in simulacoes if len(res.ajustes.loc[res.ajustes["cenario"] == c]) > 0
+        ]
+        if com_ajustes and principal not in com_ajustes:
+            principal = com_ajustes[0]
+
+    resumo = dict(por_cenario[principal])
+    resumo["por_cenario"] = por_cenario
+    return resumo
 
 
 def _limpar(v):
@@ -217,6 +275,7 @@ def montar_comparacao(res: ResultadoCenario, recorte: str = "estaduais_df",
                       selecionadas: list[int] | None = None) -> dict:
     ids = ibges_recorte(res, recorte, selecionadas)
     tab = tabela_comparativa(res, recorte, selecionadas)
+    catalogo = catalogo_efeitos(res)
     return _limpar({
         "recorte": {
             "id": recorte,
@@ -224,7 +283,7 @@ def montar_comparacao(res: ResultadoCenario, recorte: str = "estaduais_df",
             "quantidade_redes": len(ids),
         },
         "indicadores": [{"coluna": c, "rotulo": r, "unidade": u, "agregacao": t} for c, r, u, t in INDICADORES],
-        "efeitos": {k: EFEITOS[k][2] for k in efeitos_disponiveis(res)},
+        "efeitos": {k: catalogo[k][2] for k in efeitos_disponiveis(res)},
         "linhas": tab.to_dict(orient="records"),
         "totais": totais_recorte(res, ids),
         "participacao": participacao_recorte(res, ids),

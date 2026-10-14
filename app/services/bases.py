@@ -23,6 +23,9 @@ COLUNAS_COMPLEMENTAR = [
 ]
 COLUNAS_PESOS = ["etapa", "nome", "peso_vaaf", "peso_vaat"]
 
+# Rótulo de período exibido na interface no lugar da situação de homologação.
+PERIODOS_EXIBICAO = {"fundeb-2026": "1 a 8/2026"}
+
 # Códigos IBGE de UF (dois dígitos). Usados para identificar a rede estadual.
 CODIGOS_UF = {
     "RO": 11, "AC": 12, "AM": 13, "RR": 14, "PA": 15, "AP": 16, "TO": 17,
@@ -73,6 +76,7 @@ class Base:
             "data_publicacao": m.get("data_publicacao"),
             "situacao": m.get("situacao"),
             "homologada": bool(m.get("homologada")),
+            "periodo_exibicao": PERIODOS_EXIBICAO.get(self.base_id),
             "modo_ponderador": self.modo_ponderador,
             "hashes": {a["caminho"]: a["sha256"] for a in m.get("arquivos", [])},
         }
@@ -126,6 +130,7 @@ def listar_bases(caminho: str = CATALOGO_PATH) -> list[dict]:
             "periodo_receita": b.get("periodo_receita"),
             "situacao": b.get("situacao"),
             "homologada": bool(b.get("homologada")),
+            "periodo_exibicao": PERIODOS_EXIBICAO.get(b["base_id"]),
             "padrao": b["base_id"] == cat.get("base_padrao"),
             "pendencias": b.get("pendencias", []),
         }
