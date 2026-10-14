@@ -285,12 +285,14 @@ def consultar_municipio(argumentos: dict, _usuario: UserRecord, *, engine=None, 
         "tipo_dado": "oficial_importado",
         "ano_exercicio": ano,
         "base_id": base["base_id"],
-        "homologada": base.get("homologada"),
-        "situacao": base.get("situacao"),
-        "periodo_exibicao": base.get("periodo_exibicao"),
         "ente": ente,
         "valores_oficiais": _numeros(valores),
     }
+    if base.get("periodo_exibicao"):
+        resposta["periodo_exibicao"] = base["periodo_exibicao"]
+    else:
+        resposta["homologada"] = base.get("homologada")
+        resposta["situacao"] = base.get("situacao")
     if tela:
         resposta["resultado_tela"] = tela
     return limpar(resposta)
