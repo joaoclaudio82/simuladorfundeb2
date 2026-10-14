@@ -22,7 +22,12 @@ from app.db.schema import (
 )
 from app.integrations.openrouter import completar
 from app.services import chat as servico
-from app.services.chat import extrair_chamadas_texto, pergunta_de_indicador, texto_da_consulta_municipal
+from app.services.chat import (
+    extrair_chamadas_texto,
+    pergunta_com_uf,
+    pergunta_de_indicador,
+    texto_da_consulta_municipal,
+)
 import pandas as pd
 
 from app.services.chat_tools import (
@@ -346,6 +351,20 @@ def test_pergunta_de_matriculas_responde_com_a_tela():
     assert "R$ 216.050.956" in texto
     assert "36.107" not in texto
     assert "|" not in texto
+
+
+def test_pergunta_com_uf_separa_nome_e_estado():
+    assert pergunta_com_uf(
+        "Em 2026, qual foi o VAAT por aluno de Missao Velha/CE e quanto de complementação VAAT a União repassou?"
+    ) == (["qual foi o VAAT por aluno de Missao Velha", "Missao Velha"], "CE", 2026)
+    assert pergunta_com_uf(
+        "Gloria - BA: quais foram os recursos VAAF totais e a complementação VAAR em 2026?"
+    ) == (["Gloria"], "BA", 2026)
+    assert pergunta_com_uf("Qual o VAAF por aluno de Teresina de Goiás (GO) em 2026?") == (
+        ["Qual o VAAF por aluno de Teresina de Goiás", "Teresina de Goiás", "Goiás"], "GO", 2026
+    )
+    assert pergunta_com_uf("Qual o VAAF/VAAT de Fortaleza em 2026?") is None
+    assert pergunta_com_uf("se eu transferir 100 alunos de Rodeio/SC em 2026") is None
 
 
 def test_pergunta_de_vaat_com_nome_digitado_diferente():

@@ -16,12 +16,13 @@ from app.services.chat_tools import FERRAMENTAS, executar
 
 SISTEMA = """Você responde em português sobre o FUNDEB e sobre este simulador.
 Números só podem vir do resultado de uma ferramenta. Se a ferramenta não encontrou o dado, diga o que faltou.
-Não escolha ano, rede ou indicador quando a consulta vier ambígua. Se faltar o exercício ou a rede, pergunte em vez de repetir ferramentas.
-Separe três coisas: valor oficial importado, resultado simulado e a sua interpretação.
-Uma base não homologada não é repasse oficial. Simulação não é previsão de repasse.
-Se a ferramenta devolver periodo_exibicao, identifique a base por esse período (por exemplo, 1 a 8/2026) em vez de destacar "não homologada".
+Se a pergunta citar um município, chame consultar_municipio antes de perguntar qualquer coisa. Nome de município já é a rede municipal; rede estadual é quando citam o estado. Só pergunte a rede se a ferramenta devolver ambiguo. Se faltar o exercício, pergunte.
+O usuário não vê as ferramentas. Nunca escreva nomes de ferramentas, de campos ou chaves internas (consultar_municipio, resultado_tela, vaaf_final, complemento_vaar, valores_oficiais e semelhantes). Use o rótulo da tela, que vem no campo rotulo.
+Responda curto: os números pedidos, com o rótulo e a exibicao da tela, e uma linha dizendo que é o resultado do simulador e não o repasse oficial publicado. Não liste insumos importados nem indicadores que não foram pedidos, a menos que o usuário peça. Não use títulos.
+Simulação não é previsão de repasse.
+Se a ferramenta devolver periodo_exibicao, identifique a base só por esse período (por exemplo, base de 2026, período 1 a 8/2026). Não escreva "não homologada" nem "preliminar" nesse caso.
 Diferença observada não é causa. Se causa_demonstravel for falso, não invente o motivo da mudança.
-Quando a pergunta for o valor de matrículas ponderadas, VAAF por aluno, VAAT por aluno, recursos VAAF ou VAAT, ou complementações de um município, chame consultar_municipio uma vez e copie resultado_tela. Matrículas VAAF (ponderadas) é matriculas_vaaf. VAAF por aluno é vaaf_final. Recursos VAAF totais é recursos_vaaf_final. VAAT por aluno é vaat_final. Recursos VAAT totais é recursos_vaat_final. Complementação VAAT é complemento_vaat. Use o campo exibicao. valores_oficiais são insumos importados e não substituem esses indicadores. Não calcule nem invente o número.
+Quando a pergunta for o valor de matrículas ponderadas, VAAF por aluno, VAAT por aluno, recursos VAAF ou VAAT, ou complementações de um município, chame consultar_municipio uma vez e copie resultado_tela. Matrículas VAAF (ponderadas) é matriculas_vaaf. VAAF por aluno é vaaf_final. Recursos VAAF totais é recursos_vaaf_final. VAAT por aluno é vaat_final. Recursos VAAT totais é recursos_vaat_final. Complementação VAAT é complemento_vaat. Use o campo exibicao. Os insumos importados não substituem esses indicadores. Não calcule nem invente o número.
 Quando a pergunta for quanto muda o VAAF, o repasse ou os recursos se alunos passarem de uma etapa para outra, chame simular_transferencia uma única vez, com nome, ano, origem, destino e alunos. Responda só com os números dessa ferramenta: rede, etapas, pesos, alunos movidos, variação de vaaf_final, de recursos_vaaf e de recursos_fundeb. Se houver aviso, reproduza-o: a rede pedida pode não ter essas matrículas e o cálculo ter sido feito na rede estadual. Não troque a etapa escolhida pela ferramenta e não invente valor. Use consultar_ponderacoes apenas quando pedirem os pesos, sem quantidade de alunos.
 Se a ferramenta devolver ambiguo ou nao_encontrado, pare e pergunte. Não repita a mesma consulta.
 Cite exercício, versão da base, cenário e documento quando a ferramenta os devolver.
@@ -101,6 +102,39 @@ def pergunta_de_indicador(mensagem: str) -> tuple[str, int] | None:
     if len(nome) < 3:
         return None
     return nome, int(achado.group(2))
+
+
+_UFS = frozenset(
+    "AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO".split()
+)
+_MARCA_UF = re.compile(
+    r"\s*(?:/\s*([A-Za-z]{2})|\(\s*([A-Za-z]{2})\s*\)|\s[-–]\s*([A-Z]{2}))(?![A-Za-zÀ-ÿ])"
+)
+_ANO = re.compile(r"\b(20\d{2})\b")
+_LIGACAO = {"de", "do", "da", "em", "para", "sobre", "município", "municipio", "cidade"}
+
+
+def pergunta_com_uf(mensagem: str) -> tuple[list[str], str, int] | None:
+    """Pergunta como "Rodeio/SC", "Rodeio - SC" ou "Rodeio (SC)". Devolve nomes possíveis, do mais longo ao mais curto."""
+    if not mensagem or _MOVIMENTO.search(mensagem) or not _INDICADOR.search(mensagem):
+        return None
+    ano = _ANO.search(mensagem)
+    if not ano:
+        return None
+    for marca in _MARCA_UF.finditer(mensagem):
+        uf = next(grupo for grupo in marca.groups() if grupo).upper()
+        if uf not in _UFS:
+            continue
+        palavras = re.split(r"[,:;?!.]", mensagem[:marca.start()])[-1].split()
+        inicios = [0] + [i + 1 for i, palavra in enumerate(palavras) if palavra.lower() in _LIGACAO]
+        nomes = []
+        for inicio in inicios:
+            nome = " ".join(palavras[inicio:])
+            if len(nome) >= 3 and nome not in nomes:
+                nomes.append(nome)
+        if nomes:
+            return nomes, uf, int(ano.group(1))
+    return None
 
 
 def texto_da_consulta_municipal(resultado: dict) -> str | None:
@@ -221,7 +255,18 @@ def responder(usuario: UserRecord, pedido: PedidoChat) -> dict:
     ]
     repositorio.acrescentar_mensagem(conversa_id, "user", pedido.mensagem)
     inicio = time.perf_counter()
-    consulta = pergunta_de_indicador(pedido.mensagem)
+    com_uf = pergunta_com_uf(pedido.mensagem)
+    if com_uf:
+        nomes, uf, ano = com_uf
+        for nome in nomes:
+            resultado = executar("consultar_municipio", {"nome": nome, "ano": ano, "uf": uf}, usuario)
+            if not resultado.get("encontrado"):
+                continue
+            texto = texto_da_consulta_municipal(resultado)
+            if texto:
+                return _entregar(conversa_id, texto, _referencias([resultado]), modelo, {}, inicio)
+            break
+    consulta = None if com_uf else pergunta_de_indicador(pedido.mensagem)
     if consulta:
         nome, ano = consulta
         argumentos = {"nome": nome, "ano": ano}

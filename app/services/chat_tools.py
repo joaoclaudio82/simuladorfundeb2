@@ -814,7 +814,8 @@ FERRAMENTAS = [
                 "sem alterar matrículas: matrículas VAAF e VAAT ponderadas, VAAF por aluno, recursos VAAF totais, "
                 "VAAT por aluno, recursos VAAT totais e complementações VAAF, VAAT e VAAR. "
                 "valores_oficiais são insumos importados e não substituem resultado_tela. "
-                "Não escolhe sozinho se houver mais de uma rede."
+                "Chame com o nome do município e, se souber, a UF, antes de perguntar a rede: "
+                "nome de município já é a rede municipal. Se houver mais de uma rede, devolve ambiguo."
             ),
             "parameters": {
                 "type": "object",
